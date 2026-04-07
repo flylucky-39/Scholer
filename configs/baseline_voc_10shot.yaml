@@ -1,0 +1,38 @@
+seed: 3407
+
+voc_root: D:/datasets/VOCdevkit
+output_root: ./data/voc_fsod_split1_10shot
+
+novel_classes:
+  - bird
+  - bus
+  - cow
+  - motorbike
+  - sofa
+
+shot: 10
+
+model: yolov8n.pt
+image_size: 640
+device: 0
+workers: 4
+runs_dir: ./runs/fsod_baseline
+
+epochs:
+  base: 100
+  finetune: 50
+
+batch_size:
+  base: 16
+  finetune: 8
+
+lr0:
+  base: 0.01
+  finetune: 0.001
+
+freeze:
+  backbone: 10
+
+replay:
+  enabled: true
+  base_images: 200
