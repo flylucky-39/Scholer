@@ -15,7 +15,7 @@ shot: 10
 model: yolov8n.pt
 image_size: 640
 device: 0
-workers: 4
+workers: 8
 runs_dir: ./runs/fsod_baseline
 
 epochs:
