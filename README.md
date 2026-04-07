@@ -58,6 +58,12 @@ VOCdevkit/
 3. `novel_classes`
 4. `shot`
 
+当前默认配置已经按你的服务器目录做了适配：
+
+1. 项目目录：`~/epfs/07_FSOD_LLM/fsod`
+2. VOC 数据目录：`~/epfs/07_FSOD_LLM/datasets/VOCdevkit`
+3. 脚本现在支持 `~` 路径展开，并且相对路径统一按仓库根目录解析。
+
 然后运行：
 
 ```bash
@@ -133,5 +139,13 @@ python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml
 3. 本地添加 `origin` 并 push 到 GitLab。
 4. 服务器配置 SSH key 后从 GitLab clone。
 5. 后续开发统一走 `git add -> git commit -> git push`，服务器用 `git pull` 同步。
+
+如果服务器分支历史被覆盖过，不要用 `git pull`，改用：
+
+```bash
+git fetch origin
+git checkout FSOD_LLM
+git reset --hard origin/FSOD_LLM
+```
 
 更具体的命令说明见 [docs/gitlab_server_workflow.md](docs/gitlab_server_workflow.md)。

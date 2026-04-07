@@ -8,6 +8,9 @@ import yaml
 from ultralytics import YOLO
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate YOLO FSOD baseline.")
     parser.add_argument("--config", type=str, required=True, help="Path to experiment config yaml.")
@@ -25,17 +28,24 @@ def load_config(config_path: Path) -> dict:
         return yaml.safe_load(file)
 
 
+def resolve_repo_path(raw_path: str) -> Path:
+    path = Path(raw_path).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+    return (PROJECT_ROOT / path).resolve()
+
+
 def main() -> None:
     args = parse_args()
-    config = load_config(Path(args.config))
-    output_root = Path(config["output_root"]).resolve()
+    config = load_config(resolve_repo_path(args.config))
+    output_root = resolve_repo_path(config["output_root"])
     data_yaml = output_root / "voc_fsod_finetune.yaml"
 
     if not data_yaml.exists():
         raise FileNotFoundError(f"Dataset yaml not found: {data_yaml}")
 
-    default_weights = Path(config["runs_dir"]) / "novel_finetune" / "weights" / "best.pt"
-    weights_path = Path(args.weights) if args.weights else default_weights
+    default_weights = resolve_repo_path(config["runs_dir"]) / "novel_finetune" / "weights" / "best.pt"
+    weights_path = resolve_repo_path(args.weights) if args.weights else default_weights
     if not weights_path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {weights_path}")
 
@@ -45,7 +55,7 @@ def main() -> None:
         split="test",
         imgsz=int(config["image_size"]),
         device=config["device"],
-        project=str(Path(config["runs_dir"])),
+        project=str(resolve_repo_path(config["runs_dir"])),
         name="eval",
         exist_ok=True,
         plots=False,
@@ -58,7 +68,7 @@ def main() -> None:
         "map75": float(metrics.box.map75),
     }
 
-    summary_path = Path(config["runs_dir"]) / "eval_summary.json"
+    summary_path = resolve_repo_path(config["runs_dir"]) / "eval_summary.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 

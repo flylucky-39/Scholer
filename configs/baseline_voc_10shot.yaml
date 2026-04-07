@@ -1,6 +1,6 @@
 seed: 3407
 
-voc_root: D:/datasets/VOCdevkit
+voc_root: ~/epfs/07_FSOD_LLM/datasets/VOCdevkit
 output_root: ./data/voc_fsod_split1_10shot
 
 novel_classes:

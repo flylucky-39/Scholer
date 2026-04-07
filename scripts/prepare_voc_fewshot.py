@@ -9,6 +9,9 @@ import yaml
 from fsod.voc import VOC_CLASSES, build_fewshot_records, collect_records, deduplicate_records, export_records, sample_base_replay_records
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Prepare VOC few-shot dataset for YOLO baseline.")
     parser.add_argument("--config", type=str, required=True, help="Path to experiment config yaml.")
@@ -18,6 +21,13 @@ def parse_args() -> argparse.Namespace:
 def load_config(config_path: Path) -> dict:
     with config_path.open("r", encoding="utf-8") as file:
         return yaml.safe_load(file)
+
+
+def resolve_repo_path(raw_path: str) -> Path:
+    path = Path(raw_path).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+    return (PROJECT_ROOT / path).resolve()
 
 
 def write_dataset_yaml(dataset_yaml_path: Path, train_manifest: Path, val_manifest: Path, test_manifest: Path) -> None:
@@ -33,14 +43,19 @@ def write_dataset_yaml(dataset_yaml_path: Path, train_manifest: Path, val_manife
 
 def main() -> None:
     args = parse_args()
-    config_path = Path(args.config)
+    config_path = resolve_repo_path(args.config)
     config = load_config(config_path)
 
-    voc_root = Path(config["voc_root"])
-    output_root = Path(config["output_root"])
+    voc_root = resolve_repo_path(config["voc_root"])
+    output_root = resolve_repo_path(config["output_root"])
     shot = int(config["shot"])
     seed = int(config["seed"])
     novel_classes = config["novel_classes"]
+
+    if not (voc_root / "VOC2007").exists() or not (voc_root / "VOC2012").exists():
+        raise FileNotFoundError(
+            f"VOC root is invalid: {voc_root}. Expected VOC2007/ and VOC2012/ under this directory."
+        )
 
     unknown_classes = [class_name for class_name in novel_classes if class_name not in VOC_CLASSES]
     if unknown_classes:

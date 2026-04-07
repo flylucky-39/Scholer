@@ -11,7 +11,7 @@
 统一采用这一条链路：
 
 ```text
-本地开发机 -> git push -> GitLab -> 服务器 git pull
+本地开发机 -> git push -> GitLab -> 服务器 git fetch/reset
 ```
 
 不要直接用手工拷贝代码到服务器，这样版本容易乱。
@@ -93,15 +93,19 @@ cd ~/projects
 然后 clone：
 
 ```bash
-git clone <你的 GitLab 仓库地址>
-cd fsod-llm-baseline
+git clone -b FSOD_LLM <你的 GitLab 仓库地址>
+cd fsod
 ```
 
 后续同步更新：
 
 ```bash
-git pull origin main
+git fetch origin
+git checkout FSOD_LLM
+git reset --hard origin/FSOD_LLM
 ```
+
+如果你的服务器目录固定是 `~/epfs/07_FSOD_LLM/fsod`，也可以直接在那个目录里做同步。
 
 ## 第五步：服务器环境准备
 
@@ -132,6 +136,7 @@ pip install -r requirements.txt
 准备数据后可按下面流程运行：
 
 ```bash
+cd ~/epfs/07_FSOD_LLM/fsod
 python scripts/prepare_voc_fewshot.py --config configs/baseline_voc_10shot.yaml
 python scripts/train_baseline.py --config configs/baseline_voc_10shot.yaml --stage all
 python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml

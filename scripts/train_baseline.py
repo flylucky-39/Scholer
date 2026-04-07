@@ -7,6 +7,9 @@ import yaml
 from ultralytics import YOLO
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train YOLO FSOD baseline.")
     parser.add_argument("--config", type=str, required=True, help="Path to experiment config yaml.")
@@ -31,17 +34,21 @@ def load_config(config_path: Path) -> dict:
         return yaml.safe_load(file)
 
 
-def resolve_output_root(raw_path: str) -> Path:
-    return Path(raw_path).resolve()
+def resolve_repo_path(raw_path: str) -> Path:
+    path = Path(raw_path).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+    return (PROJECT_ROOT / path).resolve()
 
 
 def run_base_stage(config: dict, output_root: Path) -> Path:
-    runs_dir = Path(config["runs_dir"])
+    runs_dir = resolve_repo_path(config["runs_dir"])
     data_yaml = output_root / "voc_fsod_base.yaml"
     project = runs_dir
     name = "base_pretrain"
 
-    model = YOLO(config["model"])
+    model_source = str(resolve_repo_path(config["model"])) if str(config["model"]).endswith((".pt", ".yaml", ".yml")) and "/" in str(config["model"]) else config["model"]
+    model = YOLO(model_source)
     model.train(
         data=str(data_yaml),
         epochs=int(config["epochs"]["base"]),
@@ -63,7 +70,7 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 
 
 def run_finetune_stage(config: dict, output_root: Path, weights_path: Path) -> Path:
-    runs_dir = Path(config["runs_dir"])
+    runs_dir = resolve_repo_path(config["runs_dir"])
     data_yaml = output_root / "voc_fsod_finetune.yaml"
     project = runs_dir
     name = "novel_finetune"
@@ -92,8 +99,8 @@ def run_finetune_stage(config: dict, output_root: Path, weights_path: Path) -> P
 
 def main() -> None:
     args = parse_args()
-    config = load_config(Path(args.config))
-    output_root = resolve_output_root(config["output_root"])
+    config = load_config(resolve_repo_path(args.config))
+    output_root = resolve_repo_path(config["output_root"])
 
     if not output_root.exists():
         raise FileNotFoundError(
@@ -106,7 +113,7 @@ def main() -> None:
         return
 
     if args.stage == "finetune":
-        weights_path = Path(args.weights) if args.weights else Path(config["runs_dir"]) / "base_pretrain" / "weights" / "best.pt"
+        weights_path = resolve_repo_path(args.weights) if args.weights else resolve_repo_path(config["runs_dir"]) / "base_pretrain" / "weights" / "best.pt"
         best_path = run_finetune_stage(config, output_root, weights_path)
         print(f"Finetune stage checkpoint: {best_path}")
         return
