@@ -15,7 +15,7 @@ shot: 10
 model: yolov8n.pt
 image_size: 640
 device: 0
-workers: 8
+workers: 16
 runs_dir: ./runs/fsod_baseline
 
 epochs:
@@ -23,8 +23,8 @@ epochs:
   finetune: 50
 
 batch_size:
-  base: 16
-  finetune: 8
+  base: 64
+  finetune: 16
 
 lr0:
   base: 0.01
