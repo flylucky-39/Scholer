@@ -12,7 +12,7 @@ novel_classes:
 
 shot: 10
 
-model: yolov8n.pt
+model: yolo11s.pt
 image_size: 640
 device: 0
 workers: 16

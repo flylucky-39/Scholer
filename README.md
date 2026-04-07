@@ -4,7 +4,7 @@
 
 当前 baseline 定义如下：
 
-1. 使用 Ultralytics YOLOv8n 作为轻量检测器。
+1. 使用 Ultralytics YOLO11s 作为 baseline 检测器。
 2. 用 VOC2007 trainval + VOC2012 trainval 做 base 训练。
 3. 用自定义 novel 类别的 10-shot 样本做第二阶段微调。
 4. 用 VOC2007 test 做统一评估，指标先看 mAP@0.5。
