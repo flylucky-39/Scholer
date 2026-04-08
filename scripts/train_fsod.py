@@ -1,19 +1,17 @@
-"""Train YOLO-FSOD with Cosine Classifier.
+"""Train YOLO-FSOD with Cosine Classifier (± Prototype Initialization).
 
-This script handles the cosine-classifier ablation experiments:
+This script handles cosine-classifier ablation experiments:
 - Base pretrain: standard YOLO11s (same as baseline)
-- Finetune: loads base weights into FSODDetect (cosine head) architecture,
-  mismatched classification layers are randomly initialized.
+- Finetune (Exp 1): cosine head with random init
+- Finetune + Prototype (Exp 2): cosine head initialized with class prototypes
+  extracted from support set using the base-pretrained backbone
 
 Usage:
-  # Base pretrain (same as baseline, only run if not already done)
-  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage base
-
-  # Finetune with cosine classifier
+  # Exp 1: Cosine classifier (random init)
   python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune
 
-  # Both stages
-  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage all
+  # Exp 2: Cosine classifier + Prototype init
+  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --prototype
 """
 
 from __future__ import annotations
@@ -55,6 +53,11 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="configs/yolo11s-fsod.yaml",
         help="Model architecture YAML with FSODDetect head.",
+    )
+    parser.add_argument(
+        "--prototype",
+        action="store_true",
+        help="Initialize cosine head with class prototypes from support set (Exp 2).",
     )
     return parser.parse_args()
 
@@ -102,22 +105,48 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 
 
 def run_finetune_stage(
-    config: dict, output_root: Path, base_weights: Path, model_arch: Path
+    config: dict, output_root: Path, base_weights: Path, model_arch: Path,
+    use_prototype: bool = False,
 ) -> Path:
     """Finetune with FSODDetect (cosine classifier) architecture.
 
     1. Creates model from model_arch YAML (has FSODDetect head)
     2. Loads base_weights — matching layers transfer, cosine head stays random init
-    3. Trains on novel-only data
+    3. (Optional) Initialize cosine head with class prototypes from support set
+    4. Trains on novel-only data
     """
     runs_dir = resolve_repo_path(config["runs_dir"])
     data_yaml = output_root / "voc_fsod_finetune.yaml"
+    novel_classes = config["novel_classes"]
+
+    run_name = "novel_finetune_cosine_proto" if use_prototype else "novel_finetune_cosine"
 
     print(f"Creating model from architecture: {model_arch}")
     model = YOLO(str(model_arch))
 
     print(f"Loading base pretrain weights: {base_weights}")
     model.load(str(base_weights))
+
+    if use_prototype:
+        from fsod.voc import VOC_CLASSES
+        from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
+
+        print("Extracting class prototypes from support set...")
+        prototypes = extract_prototypes(
+            base_weights=base_weights,
+            data_root=output_root,
+            novel_classes=novel_classes,
+            all_classes=VOC_CLASSES,
+            imgsz=int(config["image_size"]),
+            device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
+        )
+        print("Initializing cosine head with prototypes...")
+        init_cosine_head_with_prototypes(
+            model=model,
+            prototypes=prototypes,
+            novel_classes=novel_classes,
+            all_classes=VOC_CLASSES,
+        )
 
     model.train(
         data=str(data_yaml),
@@ -129,12 +158,12 @@ def run_finetune_stage(
         lr0=float(config["lr0"]["finetune"]),
         freeze=int(config.get("freeze", {}).get("backbone", 0)),
         project=str(runs_dir),
-        name="novel_finetune_cosine",
+        name=run_name,
         seed=int(config["seed"]),
         exist_ok=True,
     )
 
-    best_path = runs_dir / "novel_finetune_cosine" / "weights" / "best.pt"
+    best_path = runs_dir / run_name / "weights" / "best.pt"
     if not best_path.exists():
         raise FileNotFoundError(f"Finetune stage finished but checkpoint not found: {best_path}")
     return best_path
@@ -168,15 +197,19 @@ def main() -> None:
             raise FileNotFoundError(
                 f"Base pretrain weights not found: {base_weights}. Run --stage base first."
             )
-        best_path = run_finetune_stage(config, output_root, base_weights, model_arch)
+        best_path = run_finetune_stage(
+            config, output_root, base_weights, model_arch, use_prototype=args.prototype
+        )
         print(f"Finetune stage checkpoint: {best_path}")
         return
 
     # stage == "all"
     base_best = run_base_stage(config, output_root)
-    finetune_best = run_finetune_stage(config, output_root, base_best, model_arch)
+    finetune_best = run_finetune_stage(
+        config, output_root, base_best, model_arch, use_prototype=args.prototype
+    )
     print(f"Base stage checkpoint: {base_best}")
-    print(f"Finetune stage checkpoint (cosine): {finetune_best}")
+    print(f"Finetune stage checkpoint: {finetune_best}")
 
 
 if __name__ == "__main__":
