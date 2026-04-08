@@ -46,6 +46,30 @@ def normalize_bbox(bbox: list[float], width: int, height: int) -> list[float]:
     return [x1 / width, y1 / height, x2 / width, y2 / height]
 
 
+def resolve_local_model_dir(model_path: str | Path) -> Path:
+    path = Path(model_path).expanduser().resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"Florence-2 model path does not exist: {path}")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Florence-2 model path is not a directory: {path}")
+
+    if (path / "config.json").exists():
+        return path
+
+    snapshots_dir = path / "snapshots"
+    if snapshots_dir.is_dir():
+        snapshot_candidates = sorted(
+            [candidate for candidate in snapshots_dir.iterdir() if candidate.is_dir() and (candidate / "config.json").exists()]
+        )
+        if snapshot_candidates:
+            return snapshot_candidates[-1]
+
+    raise FileNotFoundError(
+        "Florence-2 model directory does not contain config.json and no usable snapshots/* subdirectory was found: "
+        f"{path}"
+    )
+
+
 def extract_detections(parsed_answer: dict[str, Any], task_token: str, width: int, height: int) -> list[dict[str, Any]]:
     task_result = parsed_answer.get(task_token, {})
     bboxes = task_result.get("bboxes", [])
@@ -71,7 +95,8 @@ def extract_detections(parsed_answer: dict[str, Any], task_token: str, width: in
 
 class Florence2Runner:
     def __init__(self, model_path: str | Path, device: str = "cuda:0", dtype_name: str = "bf16") -> None:
-        self.model_path = str(Path(model_path).expanduser().resolve())
+        resolved_model_dir = resolve_local_model_dir(model_path)
+        self.model_path = str(resolved_model_dir)
         self.device = device if torch.cuda.is_available() else "cpu"
         self.dtype = resolve_torch_dtype(dtype_name)
 
@@ -82,8 +107,13 @@ class Florence2Runner:
             self.model_path,
             torch_dtype=self.dtype,
             trust_remote_code=True,
+            local_files_only=True,
         ).to(self.device)
-        self.processor = AutoProcessor.from_pretrained(self.model_path, trust_remote_code=True)
+        self.processor = AutoProcessor.from_pretrained(
+            self.model_path,
+            trust_remote_code=True,
+            local_files_only=True,
+        )
 
     def run(self, image_path: str | Path, task: str, text_input: str = "", max_new_tokens: int = 256, num_beams: int = 3) -> Florence2Prediction:
         if task not in TASK_TOKENS:

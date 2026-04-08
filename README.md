@@ -151,6 +151,9 @@ python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml --scop
 python scripts/export_florence2_outputs.py --model-path /path/to/Florence-2-base --input-manifest data/voc_fsod_split1_10shot/manifests/novel_finetune.txt --task caption_to_phrase_grounding --output-dir data/florence2_outputs/support
 ```
 
+`--model-path` 必须指向本地 Florence-2 模型目录本身，并且该目录下需要能找到 `config.json`。
+如果你给的是 Hugging Face 缓存根目录，脚本也会自动尝试使用其中的 `snapshots/*` 子目录。
+
 默认行为：
 
 1. 读取 `configs/baseline_voc_10shot.yaml` 中的 `novel_classes`
