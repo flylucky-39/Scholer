@@ -25,6 +25,8 @@ LABEL_SYNONYMS: dict[str, str] = {
     "motor bike": "motorbike",
     "couch": "sofa",
     "settee": "sofa",
+    "studio couch": "sofa",
+    "cattle": "cow",
     "aeroplane": "aeroplane",
     "airplane": "aeroplane",
     "bicycle": "bicycle",
@@ -33,7 +35,9 @@ LABEL_SYNONYMS: dict[str, str] = {
     "television": "tvmonitor",
     "tv monitor": "tvmonitor",
     "dining table": "diningtable",
+    "kitchen & dining room table": "diningtable",
     "potted plant": "pottedplant",
+    "houseplant": "pottedplant",
 }
 
 
