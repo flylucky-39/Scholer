@@ -20,15 +20,15 @@ runs_dir: ./runs/fsod_baseline
 
 epochs:
   base: 100
-  finetune: 50
+  finetune: 200
 
 batch_size:
   base: 64
-  finetune: 16
+  finetune: 4
 
 lr0:
   base: 0.01
-  finetune: 0.001
+  finetune: 0.0005
 
 freeze:
   backbone: 10
