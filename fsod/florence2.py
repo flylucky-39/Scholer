@@ -136,6 +136,7 @@ class Florence2Runner:
             max_new_tokens=max_new_tokens,
             do_sample=False,
             num_beams=num_beams,
+            use_cache=False,
         )
         generated_text = self.processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
         parsed_answer = self.processor.post_process_generation(
