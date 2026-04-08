@@ -34,6 +34,7 @@ class CosineConv2d(nn.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.weight = nn.Parameter(torch.empty(out_channels, in_channels))
+        self.bias = nn.Parameter(torch.zeros(out_channels))
         # Learnable temperature (log-space for positivity)
         self.scale = nn.Parameter(torch.tensor(math.log(temperature)))
         nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
@@ -43,7 +44,7 @@ class CosineConv2d(nn.Module):
         Args:
             x: (B, C_in, H, W)
         Returns:
-            (B, C_out, H, W) cosine similarity scores scaled by temperature
+            (B, C_out, H, W) cosine similarity scores scaled by temperature + bias
         """
         # Normalize weight: (C_out, C_in)
         w_norm = F.normalize(self.weight, dim=1)
@@ -51,8 +52,8 @@ class CosineConv2d(nn.Module):
         x_norm = F.normalize(x, dim=1)
         # 1x1 conv with normalized weight → cosine similarity
         cos_sim = F.conv2d(x_norm, w_norm.unsqueeze(-1).unsqueeze(-1))
-        # Scale by temperature
-        return cos_sim * self.scale.exp()
+        # Scale by temperature and add bias
+        return cos_sim * self.scale.exp() + self.bias.view(1, -1, 1, 1)
 
 
 class FSODDetect(Detect):
@@ -83,7 +84,14 @@ class FSODDetect(Detect):
         raise TypeError(f"Expected last layer to be Conv2d, got {type(last)}")
 
     def bias_init(self) -> None:
-        """Initialize biases. Box branch uses parent logic; cls branch has no bias (cosine)."""
-        for a, s in zip(self.cv2, self.stride):
+        """Initialize biases.
+
+        Box branch: same as parent (bias → 1.0).
+        Cls branch: CosineConv2d bias is set to a large negative value so that
+        initial sigmoid(score) ≈ 0, matching the standard Detect initialization
+        and preventing cls_loss explosion from millions of negative anchors.
+        """
+        for a, b, s in zip(self.cv2, self.cv3, self.stride):
             a[-1].bias.data[:] = 1.0  # box
-        # CosineConv2d has no bias; skip cv3 bias init
+            # Same formula as standard Detect: log(5 / nc / (640/stride)^2)
+            b[-1].bias.data[:] = math.log(5 / self.nc / (640 / s) ** 2)
