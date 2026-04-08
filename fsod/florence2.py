@@ -105,9 +105,10 @@ class Florence2Runner:
 
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_path,
-            dtype=self.dtype,
+            torch_dtype=self.dtype,
             trust_remote_code=True,
             local_files_only=True,
+            attn_implementation="eager",
         ).to(self.device)
         self.processor = AutoProcessor.from_pretrained(
             self.model_path,
