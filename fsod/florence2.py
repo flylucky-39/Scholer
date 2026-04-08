@@ -18,6 +18,47 @@ TASK_TOKENS = {
     "caption_to_phrase_grounding": "<CAPTION_TO_PHRASE_GROUNDING>",
 }
 
+# Florence-2 OD labels often differ from VOC class names.
+# Map common Florence labels → VOC canonical names.
+LABEL_SYNONYMS: dict[str, str] = {
+    "motorcycle": "motorbike",
+    "motor bike": "motorbike",
+    "couch": "sofa",
+    "settee": "sofa",
+    "aeroplane": "aeroplane",
+    "airplane": "aeroplane",
+    "bicycle": "bicycle",
+    "bike": "bicycle",
+    "tv": "tvmonitor",
+    "television": "tvmonitor",
+    "tv monitor": "tvmonitor",
+    "dining table": "diningtable",
+    "potted plant": "pottedplant",
+}
+
+
+def canonicalize_label(label: str, synonyms: dict[str, str] | None = None) -> str:
+    """Lowercase + strip, then apply synonym mapping."""
+    label = label.lower().strip()
+    if synonyms is None:
+        synonyms = LABEL_SYNONYMS
+    return synonyms.get(label, label)
+
+
+def filter_detections_by_classes(
+    detections: list[dict[str, Any]],
+    target_classes: list[str],
+    synonyms: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
+    """Keep only detections whose label matches one of target_classes (after synonym mapping)."""
+    target_set = {c.lower().strip() for c in target_classes}
+    filtered = []
+    for det in detections:
+        canonical = canonicalize_label(det["label"], synonyms)
+        if canonical in target_set:
+            filtered.append({**det, "matched_class": canonical})
+    return filtered
+
 
 @dataclass
 class Florence2Prediction:

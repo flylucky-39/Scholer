@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from fsod.florence2 import Florence2Runner
+from fsod.florence2 import Florence2Runner, filter_detections_by_classes
 
 
 def parse_args() -> argparse.Namespace:
@@ -27,11 +27,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--task",
         type=str,
-        default="caption_to_phrase_grounding",
-        choices=["caption_to_phrase_grounding", "region_proposal", "od", "caption", "detailed_caption", "more_detailed_caption"],
-        help="Florence-2 task to run.",
+        default="od",
+        choices=["od", "region_proposal", "caption_to_phrase_grounding", "caption", "detailed_caption", "more_detailed_caption"],
+        help="Florence-2 task to run. Default: od (object detection with post-filter).",
     )
-    parser.add_argument("--class-names", type=str, default="", help="Comma-separated class names for class-guided grounding.")
+    parser.add_argument("--class-names", type=str, default="", help="Comma-separated class names to filter OD results.")
     parser.add_argument("--device", type=str, default="cuda:0", help="Execution device, e.g. cuda:0 or cpu.")
     parser.add_argument("--dtype", type=str, default="bf16", choices=["bf16", "fp16", "fp32"], help="Model dtype.")
     parser.add_argument("--max-new-tokens", type=int, default=256, help="Maximum generated tokens.")
@@ -79,7 +79,7 @@ def main() -> None:
         image_paths = image_paths[: args.limit]
 
     class_names = [name.strip() for name in args.class_names.split(",") if name.strip()]
-    if not class_names and args.task == "caption_to_phrase_grounding":
+    if not class_names:
         class_names = list(config.get("novel_classes", []))
 
     runner = Florence2Runner(
@@ -102,25 +102,54 @@ def main() -> None:
             "predictions": [],
         }
 
-        if args.task == "caption_to_phrase_grounding":
-            for class_name in class_names:
-                prediction = runner.run(
-                    image_path=image_path,
-                    task=args.task,
-                    text_input=class_name,
-                    max_new_tokens=args.max_new_tokens,
-                    num_beams=args.num_beams,
-                )
-                image_result["predictions"].append(
-                    {
-                        "query": class_name,
-                        "task": prediction.task,
-                        "task_token": prediction.task_token,
-                        "raw_text": prediction.raw_text,
-                        "detections": prediction.detections,
-                    }
-                )
+        if args.task in ("od", "region_proposal"):
+            # Run once per image, then filter by class names
+            prediction = runner.run(
+                image_path=image_path,
+                task=args.task,
+                text_input="",
+                max_new_tokens=args.max_new_tokens,
+                num_beams=args.num_beams,
+            )
+            all_detections = prediction.detections
+            if class_names and args.task == "od":
+                matched = filter_detections_by_classes(all_detections, class_names)
+            else:
+                matched = all_detections
+
+            image_result["predictions"].append(
+                {
+                    "query": "",
+                    "task": prediction.task,
+                    "task_token": prediction.task_token,
+                    "raw_text": prediction.raw_text,
+                    "all_detections": all_detections,
+                    "filtered_detections": matched,
+                    "num_all": len(all_detections),
+                    "num_filtered": len(matched),
+                }
+            )
+        elif args.task == "caption_to_phrase_grounding":
+            # Build a single sentence prompt containing all class names
+            prompt_text = ", ".join(class_names) if class_names else ""
+            prediction = runner.run(
+                image_path=image_path,
+                task=args.task,
+                text_input=prompt_text,
+                max_new_tokens=args.max_new_tokens,
+                num_beams=args.num_beams,
+            )
+            image_result["predictions"].append(
+                {
+                    "query": prompt_text,
+                    "task": prediction.task,
+                    "task_token": prediction.task_token,
+                    "raw_text": prediction.raw_text,
+                    "detections": prediction.detections,
+                }
+            )
         else:
+            # Caption tasks
             prediction = runner.run(
                 image_path=image_path,
                 task=args.task,
