@@ -112,9 +112,17 @@ def main() -> None:
         class_names=VOC_CLASSES,
         allowed_classes=set(VOC_CLASSES),
     )
+    test_novel_manifest = export_records(
+        records=test_records,
+        output_root=output_root,
+        split_name="test_novel",
+        class_names=VOC_CLASSES,
+        allowed_classes=set(novel_classes),
+    )
 
     write_dataset_yaml(output_root / "voc_fsod_base.yaml", base_manifest, test_manifest, test_manifest)
-    write_dataset_yaml(output_root / "voc_fsod_finetune.yaml", finetune_manifest, test_manifest, test_manifest)
+    write_dataset_yaml(output_root / "voc_fsod_finetune.yaml", finetune_manifest, test_novel_manifest, test_novel_manifest)
+    write_dataset_yaml(output_root / "voc_fsod_eval_all.yaml", finetune_manifest, test_manifest, test_manifest)
 
     metadata = {
         "seed": seed,
@@ -127,6 +135,8 @@ def main() -> None:
         "support_records": len(support_records),
         "replay_records": len(replay_records),
         "finetune_records": len(finetune_records),
+        "test_label_scope": "all",
+        "finetune_val_scope": "novel_only",
         "selected_novel_instances": support_stats,
     }
     metadata_path = output_root / "metadata.json"

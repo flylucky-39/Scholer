@@ -15,6 +15,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate YOLO FSOD baseline.")
     parser.add_argument("--config", type=str, required=True, help="Path to experiment config yaml.")
     parser.add_argument(
+        "--scope",
+        type=str,
+        default="all",
+        choices=["all", "novel"],
+        help="Evaluation scope. 'all' uses the full 20-class test labels, 'novel' uses only novel-class test labels.",
+    )
+    parser.add_argument(
         "--weights",
         type=str,
         default="",
@@ -39,7 +46,8 @@ def main() -> None:
     args = parse_args()
     config = load_config(resolve_repo_path(args.config))
     output_root = resolve_repo_path(config["output_root"])
-    data_yaml = output_root / "voc_fsod_finetune.yaml"
+    data_yaml_name = "voc_fsod_eval_all.yaml" if args.scope == "all" else "voc_fsod_finetune.yaml"
+    data_yaml = output_root / data_yaml_name
 
     if not data_yaml.exists():
         raise FileNotFoundError(f"Dataset yaml not found: {data_yaml}")
@@ -63,12 +71,14 @@ def main() -> None:
 
     summary = {
         "weights": str(weights_path),
+        "scope": args.scope,
+        "data_yaml": str(data_yaml),
         "map50": float(metrics.box.map50),
         "map": float(metrics.box.map),
         "map75": float(metrics.box.map75),
     }
 
-    summary_path = resolve_repo_path(config["runs_dir"]) / "eval_summary.json"
+    summary_path = resolve_repo_path(config["runs_dir"]) / f"eval_summary_{args.scope}.json"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 

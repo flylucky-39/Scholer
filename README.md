@@ -102,7 +102,18 @@ python scripts/train_baseline.py --config configs/baseline_voc_10shot.yaml --sta
 python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml
 ```
 
-默认会读取第二阶段微调后的权重进行评估。
+默认会读取第二阶段微调后的权重，并使用全 20 类 test 标签评估。
+
+如果只看 novel 类评估：
+
+```bash
+python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml --scope novel
+```
+
+当前 few-shot 协议下：
+
+1. `voc_fsod_finetune.yaml` 用于 novel-only 微调，并在训练时用 novel-only test 标签做验证。
+2. `voc_fsod_eval_all.yaml` 用于训练后查看全 20 类 test 指标。
 
 ## Baseline 边界
 
