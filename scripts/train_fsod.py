@@ -1,10 +1,12 @@
-"""Train YOLO-FSOD with Cosine Classifier (± Prototype Initialization).
+"""Train YOLO-FSOD with Cosine Classifier (± Prototype / Florence-2 Adaptation).
 
 This script handles cosine-classifier ablation experiments:
 - Base pretrain: standard YOLO11s (same as baseline)
 - Finetune (Exp 1): cosine head with random init
 - Finetune + Prototype (Exp 2): cosine head initialized with class prototypes
   extracted from support set using the base-pretrained backbone
+- Finetune + Florence-2 (Exp 3): cosine head initialized via Florence-2 text
+  encoder → adaptation MLP trained on base class pairs
 
 Usage:
   # Exp 1: Cosine classifier (random init)
@@ -12,6 +14,9 @@ Usage:
 
   # Exp 2: Cosine classifier + Prototype init
   python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --prototype
+
+  # Exp 3: Cosine classifier + Florence-2 adaptation init
+  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --florence2 ~/epfs/07_FSOD_LLM/models/Florence-2-base/
 """
 
 from __future__ import annotations
@@ -58,6 +63,12 @@ def parse_args() -> argparse.Namespace:
         "--prototype",
         action="store_true",
         help="Initialize cosine head with class prototypes from support set (Exp 2).",
+    )
+    parser.add_argument(
+        "--florence2",
+        type=str,
+        default="",
+        help="Path to Florence-2 model for adaptation init (Exp 3). Empty = disabled.",
     )
     return parser.parse_args()
 
@@ -106,20 +117,26 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 
 def run_finetune_stage(
     config: dict, output_root: Path, base_weights: Path, model_arch: Path,
-    use_prototype: bool = False,
+    use_prototype: bool = False, florence2_model: str = "",
 ) -> Path:
     """Finetune with FSODDetect (cosine classifier) architecture.
 
     1. Creates model from model_arch YAML (has FSODDetect head)
     2. Loads base_weights — matching layers transfer, cosine head stays random init
     3. (Optional) Initialize cosine head with class prototypes from support set
-    4. Trains on novel-only data
+    4. (Optional) Initialize cosine head via Florence-2 adaptation MLP
+    5. Trains on novel-only data
     """
     runs_dir = resolve_repo_path(config["runs_dir"])
     data_yaml = output_root / "voc_fsod_finetune.yaml"
     novel_classes = config["novel_classes"]
 
-    run_name = "novel_finetune_cosine_proto" if use_prototype else "novel_finetune_cosine"
+    if florence2_model:
+        run_name = "novel_finetune_cosine_florence2"
+    elif use_prototype:
+        run_name = "novel_finetune_cosine_proto"
+    else:
+        run_name = "novel_finetune_cosine"
 
     print(f"Creating model from architecture: {model_arch}")
     model = YOLO(str(model_arch))
@@ -144,6 +161,52 @@ def run_finetune_stage(
         init_cosine_head_with_prototypes(
             model=model,
             prototypes=prototypes,
+            novel_classes=novel_classes,
+            all_classes=VOC_CLASSES,
+        )
+
+    if florence2_model:
+        from fsod.voc import VOC_CLASSES
+        from fsod.modules.adaptation import (
+            extract_florence2_text_embeddings,
+            extract_base_prototypes,
+            train_adaptation_mlp,
+            init_cosine_head_with_florence2,
+        )
+
+        device_str = f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"]
+        base_classes = [c for c in VOC_CLASSES if c not in novel_classes]
+
+        print("Step 1/4: Extracting Florence-2 text embeddings for all classes...")
+        text_embeddings = extract_florence2_text_embeddings(
+            model_path=florence2_model,
+            class_names=VOC_CLASSES,
+            device=device_str,
+        )
+
+        print("Step 2/4: Extracting base class visual prototypes from base_train...")
+        base_prototypes = extract_base_prototypes(
+            base_weights=base_weights,
+            data_root=output_root,
+            base_classes=base_classes,
+            all_classes=VOC_CLASSES,
+            imgsz=int(config["image_size"]),
+            device=device_str,
+        )
+
+        print("Step 3/4: Training adaptation MLP on base class pairs...")
+        mlp = train_adaptation_mlp(
+            text_embeddings=text_embeddings,
+            visual_prototypes=base_prototypes,
+            base_classes=base_classes,
+            device=device_str,
+        )
+
+        print("Step 4/4: Initializing novel class weights via adaptation MLP...")
+        init_cosine_head_with_florence2(
+            model=model,
+            mlp=mlp,
+            text_embeddings=text_embeddings,
             novel_classes=novel_classes,
             all_classes=VOC_CLASSES,
         )
@@ -198,7 +261,8 @@ def main() -> None:
                 f"Base pretrain weights not found: {base_weights}. Run --stage base first."
             )
         best_path = run_finetune_stage(
-            config, output_root, base_weights, model_arch, use_prototype=args.prototype
+            config, output_root, base_weights, model_arch,
+            use_prototype=args.prototype, florence2_model=args.florence2,
         )
         print(f"Finetune stage checkpoint: {best_path}")
         return
@@ -206,7 +270,8 @@ def main() -> None:
     # stage == "all"
     base_best = run_base_stage(config, output_root)
     finetune_best = run_finetune_stage(
-        config, output_root, base_best, model_arch, use_prototype=args.prototype
+        config, output_root, base_best, model_arch,
+        use_prototype=args.prototype, florence2_model=args.florence2,
     )
     print(f"Base stage checkpoint: {base_best}")
     print(f"Finetune stage checkpoint: {finetune_best}")
