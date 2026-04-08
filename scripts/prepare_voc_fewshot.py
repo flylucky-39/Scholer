@@ -3,13 +3,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 
 import yaml
 
-from fsod.voc import VOC_CLASSES, build_fewshot_records, collect_records, deduplicate_records, export_records, sample_base_replay_records
-
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from fsod.voc import VOC_CLASSES, build_fewshot_records, collect_records, deduplicate_records, export_records, sample_base_replay_records
 
 
 def parse_args() -> argparse.Namespace:
@@ -100,7 +103,7 @@ def main() -> None:
         output_root=output_root,
         split_name="novel_finetune",
         class_names=VOC_CLASSES,
-        allowed_classes=set(VOC_CLASSES),
+        allowed_classes=set(novel_classes),
     )
     test_manifest = export_records(
         records=test_records,
@@ -118,6 +121,7 @@ def main() -> None:
         "shot": shot,
         "novel_classes": novel_classes,
         "base_classes": base_classes,
+        "finetune_label_scope": "novel_only",
         "train_records": len(train_records),
         "test_records": len(test_records),
         "support_records": len(support_records),

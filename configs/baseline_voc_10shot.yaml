@@ -34,5 +34,5 @@ freeze:
   backbone: 10
 
 replay:
-  enabled: true
+  enabled: false
   base_images: 200
