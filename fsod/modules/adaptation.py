@@ -60,7 +60,7 @@ def extract_florence2_text_embeddings(
 
     model = AutoModelForCausalLM.from_pretrained(
         resolved_path,
-        torch_dtype=torch.float32,
+        dtype=torch.float32,
         trust_remote_code=True,
         local_files_only=True,
         attn_implementation="eager",
@@ -224,9 +224,7 @@ def train_adaptation_mlp(
     text_embeddings: dict[str, torch.Tensor],
     visual_prototypes: dict[str, torch.Tensor],
     base_classes: list[str],
-    input_dim: int = 1024,
     hidden_dim: int = 256,
-    output_dim: int = 128,
     lr: float = 1e-3,
     weight_decay: float = 1e-2,
     epochs: int = 1000,
@@ -235,14 +233,13 @@ def train_adaptation_mlp(
     """Train adaptation MLP on base class (text_embedding, visual_prototype) pairs.
 
     Minimizes cosine distance: loss = mean(1 - cos_sim(MLP(text_emb), proto)).
+    Input/output dims are auto-detected from the actual embeddings.
 
     Args:
-        text_embeddings: class_name → Florence-2 embedding (1024-dim).
-        visual_prototypes: class_name → YOLO cv3 prototype (c3-dim).
+        text_embeddings: class_name → Florence-2 embedding.
+        visual_prototypes: class_name → YOLO cv3 prototype.
         base_classes: Base class names to train on.
-        input_dim: Florence-2 embedding dim (1024).
         hidden_dim: MLP hidden layer dim.
-        output_dim: YOLO cv3 feature dim (128 for yolo11s).
         lr: Learning rate.
         weight_decay: L2 regularization (important — only 15 training pairs).
         epochs: Training epochs.
@@ -254,6 +251,9 @@ def train_adaptation_mlp(
     # Build training tensors: (N_base, input_dim) and (N_base, output_dim)
     X = torch.stack([text_embeddings[c] for c in base_classes]).to(device)
     Y = torch.stack([visual_prototypes[c] for c in base_classes]).to(device)
+
+    input_dim = X.shape[1]
+    output_dim = Y.shape[1]
 
     # L2-normalize targets (consistent with CosineConv2d weight normalization)
     Y = F.normalize(Y, dim=1)
