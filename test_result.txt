@@ -1,0 +1,12 @@
+Head type: FSODDetect
+Total params: 9,458,515
+  Scale 0 cls layer: CosineConv2d
+    weight shape: (80, 128)
+    temperature: 20.0
+  Scale 1 cls layer: CosineConv2d
+    weight shape: (80, 128)
+    temperature: 20.0
+  Scale 2 cls layer: CosineConv2d
+    weight shape: (80, 128)
+    temperature: 20.0
+OK

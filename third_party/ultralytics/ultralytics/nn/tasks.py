@@ -62,6 +62,9 @@ from ultralytics.nn.modules import (
     WorldDetect,
     v10Detect,
 )
+
+FSODDetect = None  # FSOD: lazy-loaded in parse_model to avoid circular import
+
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
 from ultralytics.utils.loss import (
@@ -935,6 +938,15 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
     """Parse a YOLO model.yaml dictionary into a PyTorch model."""
     import ast
 
+    # FSOD: lazy import to avoid circular dependency
+    global FSODDetect
+    if FSODDetect is None:
+        try:
+            from fsod.modules.cosine_head import FSODDetect as _FSODDetect
+            FSODDetect = _FSODDetect
+        except ImportError:
+            pass
+
     # Args
     legacy = True  # backward compatibility for v3/v5/v8/v9 models
     max_channels = float("inf")
@@ -1044,11 +1056,13 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
             args = [ch[f]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
-        elif m in {Detect, WorldDetect, Segment, Pose, OBB, ImagePoolingAttn, v10Detect}:
+        elif m in {Detect, WorldDetect, Segment, Pose, OBB, ImagePoolingAttn, v10Detect} or (
+            FSODDetect is not None and m is FSODDetect
+        ):
             args.append([ch[x] for x in f])
             if m is Segment:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
-            if m in {Detect, Segment, Pose, OBB}:
+            if m in {Detect, Segment, Pose, OBB} or (FSODDetect is not None and m is FSODDetect):
                 m.legacy = legacy
         elif m is RTDETRDecoder:  # special case, channels arg must be passed in index 1
             args.insert(1, [ch[x] for x in f])

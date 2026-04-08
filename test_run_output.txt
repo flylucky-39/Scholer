@@ -1,0 +1,13 @@
+WARNING 鈿狅笍 no model scale passed. Assuming scale='n'.
+Head type: FSODDetect
+Total params: 2,623,843
+  Scale 0 cls layer: CosineConv2d
+    weight shape: torch.Size([80, 80])
+    temperature: 20.0
+  Scale 1 cls layer: CosineConv2d
+    weight shape: torch.Size([80, 80])
+    temperature: 20.0
+  Scale 2 cls layer: CosineConv2d
+    weight shape: torch.Size([80, 80])
+    temperature: 20.0
+OK
