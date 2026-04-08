@@ -1,3 +1,6 @@
 ultralytics>=8.2.0
 PyYAML>=6.0.1
 tqdm>=4.66.0
+transformers>=4.41.0
+safetensors>=0.4.3
+Pillow>=10.0.0

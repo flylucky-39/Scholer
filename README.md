@@ -141,6 +141,37 @@ python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml --scop
 
 这样实验逻辑是干净的，论文写作也更顺。
 
+## Florence-2 输出处理
+
+当 novel-only baseline 固定后，下一步建议不要直接改训练主线，而是先把 Florence-2 的输出稳定导出来。
+
+当前仓库新增了一个批量导出脚本：
+
+```bash
+python scripts/export_florence2_outputs.py --model-path /path/to/Florence-2-base --input-manifest data/voc_fsod_split1_10shot/manifests/novel_finetune.txt --task caption_to_phrase_grounding --output-dir data/florence2_outputs/support
+```
+
+默认行为：
+
+1. 读取 `configs/baseline_voc_10shot.yaml` 中的 `novel_classes`
+2. 对每张图分别以 `bird,bus,cow,motorbike,sofa` 做类引导 grounding
+3. 导出每张图的 JSON 结果
+4. 结果中包含原始文本、bbox、归一化 bbox 等信息
+
+如果只想做无提示区域提案：
+
+```bash
+python scripts/export_florence2_outputs.py --model-path /path/to/Florence-2-base --input-manifest data/voc_fsod_split1_10shot/manifests/novel_finetune.txt --task region_proposal --output-dir data/florence2_outputs/proposals
+```
+
+推荐先导出 support set 的结果，再检查：
+
+1. `bird`
+2. `cow`
+3. `sofa`
+
+这三个弱类最适合拿来验证 Florence-2 的 ROI 是否能改善 few-shot 表现。
+
 ## GitLab 到服务器工作流
 
 如果你准备把代码上传到 GitLab，再由服务器拉取运行，建议直接按这个顺序做：
