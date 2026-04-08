@@ -142,6 +142,7 @@ def export_records(
     class_names: list[str],
     allowed_classes: set[str] | None = None,
     include_difficult: bool = False,
+    skip_empty_labels: bool = False,
 ) -> Path:
     images_dir = output_root / "images" / split_name
     labels_dir = output_root / "labels" / split_name
@@ -157,15 +158,20 @@ def export_records(
         image_target = images_dir / f"{record.year}_{record.image_id}.jpg"
         label_target = labels_dir / f"{record.year}_{record.image_id}.txt"
 
-        if not image_target.exists():
-            shutil.copy2(record.image_path, image_target)
-
         label_lines = make_label_lines(
             record=record,
             class_to_idx=class_to_idx,
             allowed_classes=allowed_classes,
             include_difficult=include_difficult,
         )
+
+        # Skip images with no annotations after filtering
+        if skip_empty_labels and not label_lines:
+            continue
+
+        if not image_target.exists():
+            shutil.copy2(record.image_path, image_target)
+
         label_target.write_text("\n".join(label_lines), encoding="utf-8")
         manifest_lines.append(image_target.resolve().as_posix())
 

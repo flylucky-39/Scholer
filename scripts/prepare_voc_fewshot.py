@@ -118,6 +118,7 @@ def main() -> None:
         split_name="test_novel",
         class_names=VOC_CLASSES,
         allowed_classes=set(novel_classes),
+        skip_empty_labels=True,
     )
 
     write_dataset_yaml(output_root / "voc_fsod_base.yaml", base_manifest, test_manifest, test_manifest)

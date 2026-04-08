@@ -29,7 +29,7 @@ class CosineConv2d(nn.Module):
     before a standard 1x1 convolution, then scaling by temperature.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, temperature: float = 20.0) -> None:
+    def __init__(self, in_channels: int, out_channels: int, temperature: float = 5.0) -> None:
         super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -63,7 +63,7 @@ class FSODDetect(Detect):
     - Everything else (bbox regression, DFL, anchors, strides) is unchanged.
     """
 
-    def __init__(self, nc: int = 80, ch: tuple = (), temperature: float = 20.0) -> None:
+    def __init__(self, nc: int = 80, ch: tuple = (), temperature: float = 5.0) -> None:
         super().__init__(nc=nc, ch=ch)
         self.temperature = temperature
         # Replace the last layer of each cv3 branch with CosineConv2d
