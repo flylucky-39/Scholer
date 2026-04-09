@@ -33,12 +33,11 @@ lr0:
 freeze:
   backbone: 10
 
-# --- Few-shot finetune anti-overfitting ---
+# --- Few-shot finetune settings ---
 patience: 0            # disable early stopping; all runs train full epochs
-cos_lr: true          # cosine LR scheduler (smooth decay)
-lrf: 0.01             # final LR = lr0 * lrf = 5e-6
-warmup_epochs: 5      # longer warmup for few-shot stability
-close_mosaic: 15      # disable mosaic augmentation in last 15 epochs
+cos_lr: false         # use default linear LR decay (cos_lr hurts high-initial-loss heads)
+warmup_epochs: 3      # default warmup
+close_mosaic: 10      # default close mosaic
 
 replay:
   enabled: false
