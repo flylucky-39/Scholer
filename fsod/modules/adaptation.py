@@ -1,15 +1,18 @@
-"""Adaptation layer: Florence-2 text encoder → MLP → CosineConv2d weight initialization.
+"""Adaptation layer: Florence-2 → CosineConv2d weight initialization.
 
-Maps Florence-2 class name embeddings (1024-dim) to YOLO visual feature space (c3-dim)
-using a lightweight MLP trained on base class (text_embedding, visual_prototype) pairs.
+Two approaches implemented:
 
-Pipeline:
-  1. Extract Florence-2 text encoder embeddings for all 20 VOC class names (1024-dim)
-  2. Extract visual prototypes for 15 base classes from base pretrain model (c3-dim)
-  3. Train MLP on base class pairs: MLP(text_emb) ≈ visual_proto
-  4. Apply trained MLP to novel class text embeddings → CosineConv2d weight init
+A) Simple MLP (original Exp 3):
+   Florence-2 text encoder encodes class names → MLP maps to visual space
+   → CosineConv2d weight init.
 
-At inference time: zero extra cost — Florence-2 is only used during weight initialization.
+B) Textual Inversion + FiLM modulation (revised Exp 3):
+   Florence-2 captions cropped objects → text encoder → description embeddings.
+   FiLM network modulates visual prototypes with description embeddings.
+   Trained on base classes where target = base-pretrained Conv2d weights.
+   Applied to novel classes → CosineConv2d weight init.
+
+At inference time: zero extra cost — Florence-2 is only used during initialization.
 """
 
 from __future__ import annotations
@@ -337,3 +340,387 @@ def init_cosine_head_with_florence2(
 
         print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
               f"via Florence-2 adaptation")
+
+
+@torch.no_grad()
+def init_cosine_head_fused(
+    model: YOLO,
+    mlp: AdaptationMLP,
+    text_embeddings: dict[str, torch.Tensor],
+    visual_prototypes: dict[str, torch.Tensor],
+    novel_classes: list[str],
+    all_classes: list[str],
+    alpha: float = 0.5,
+) -> None:
+    """Initialize CosineConv2d with fused Florence-2 + visual prototype weights.
+
+    For each novel class:
+      w_final = normalize( alpha * w_florence + (1 - alpha) * w_proto )
+
+    Args:
+        model: YOLO model with FSODDetect head.
+        mlp: Trained AdaptationMLP.
+        text_embeddings: class_name → Florence-2 text embedding.
+        visual_prototypes: class_name → visual prototype from support set (c3-dim).
+        novel_classes: Novel class names.
+        all_classes: All class names.
+        alpha: Blend weight (1.0 = pure Florence-2, 0.0 = pure prototype).
+    """
+    cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
+    detect = model.model.model[-1]
+    device = next(mlp.parameters()).device
+
+    # Generate Florence-2 adapted weights
+    florence_weights: dict[str, torch.Tensor] = {}
+    for cls_name in novel_classes:
+        emb = text_embeddings[cls_name].unsqueeze(0).to(device)
+        w = mlp(emb).squeeze(0)
+        florence_weights[cls_name] = F.normalize(w.unsqueeze(0), dim=1).squeeze(0)
+
+    for i in range(detect.nl):
+        cosine_layer = detect.cv3[i][-1]
+        weight = cosine_layer.weight.data
+
+        for cls_name in novel_classes:
+            idx = cls_name_to_idx.get(cls_name)
+            if idx is None:
+                continue
+
+            w_f = florence_weights[cls_name].to(weight.device)
+            proto = visual_prototypes.get(cls_name)
+            if proto is not None:
+                w_p = F.normalize(proto.unsqueeze(0).to(weight.device), dim=1).squeeze(0)
+                w_fused = alpha * w_f + (1 - alpha) * w_p
+                weight[idx] = F.normalize(w_fused.unsqueeze(0), dim=1).squeeze(0)
+            else:
+                weight[idx] = w_f
+
+        print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
+              f"(fused α={alpha})")
+
+
+# ===========================================================================
+# 5. Textual Inversion: Description-based Embeddings + FiLM Modulation
+# ===========================================================================
+
+@torch.no_grad()
+def generate_and_encode_descriptions(
+    model_path: str | Path,
+    data_root: str | Path,
+    split_name: str,
+    target_classes: list[str],
+    all_classes: list[str],
+    device: str = "cuda:0",
+    max_crops_per_class: int = 30,
+    min_crop_size: int = 32,
+) -> dict[str, torch.Tensor]:
+    """Generate Florence-2 captions for cropped objects, encode as text embeddings.
+
+    Textual Inversion inspired: instead of encoding bare class names, generate
+    rich visual descriptions from actual images. This captures fine-grained
+    visual attributes that a simple class name cannot convey.
+
+    Pipeline per class:
+      1. Crop GT bbox regions from training images
+      2. Caption each crop with Florence-2 <DETAILED_CAPTION>
+      3. Encode caption through Florence-2 BART text encoder (mean-pool)
+      4. Average all caption embeddings → class-level description embedding
+
+    Returns:
+        Dict class_name → description embedding (e.g., 768-dim for Florence-2-base).
+    """
+    from fsod.florence2 import resolve_local_model_dir
+    from fsod.modules.prototype import _load_labels
+    from transformers import AutoModelForCausalLM, AutoProcessor
+
+    resolved_path = str(resolve_local_model_dir(model_path))
+    processor = AutoProcessor.from_pretrained(
+        resolved_path, trust_remote_code=True, local_files_only=True,
+    )
+    fl_model = AutoModelForCausalLM.from_pretrained(
+        resolved_path, dtype=torch.float32,
+        trust_remote_code=True, local_files_only=True,
+        attn_implementation="eager",
+    ).to(device)
+    fl_model.eval()
+
+    encoder = fl_model.language_model.get_encoder()
+
+    data_root = Path(data_root)
+    manifest_path = data_root / "manifests" / f"{split_name}.txt"
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"Manifest not found: {manifest_path}")
+
+    image_paths = [
+        Path(line.strip())
+        for line in manifest_path.read_text(encoding="utf-8").strip().splitlines()
+    ]
+
+    cls_idx_to_name = {i: name for i, name in enumerate(all_classes)}
+    target_set = set(target_classes)
+
+    # --- Phase 1: Collect crops per class ---
+    class_crops: dict[str, list[Image.Image]] = {name: [] for name in target_classes}
+
+    for img_path in image_paths:
+        label_path = data_root / "labels" / split_name / (img_path.stem + ".txt")
+        labels = _load_labels(label_path)
+        if not labels:
+            continue
+
+        has_target = any(
+            cls_idx_to_name.get(cls_id) in target_set for cls_id, *_ in labels
+        )
+        if not has_target:
+            continue
+
+        img_pil = Image.open(img_path).convert("RGB")
+        orig_w, orig_h = img_pil.size
+
+        for cls_id, cx, cy, w, h in labels:
+            cls_name = cls_idx_to_name.get(cls_id)
+            if cls_name is None or cls_name not in target_set:
+                continue
+            if len(class_crops[cls_name]) >= max_crops_per_class:
+                continue
+
+            x1 = max(0, int((cx - w / 2) * orig_w))
+            y1 = max(0, int((cy - h / 2) * orig_h))
+            x2 = min(orig_w, int((cx + w / 2) * orig_w))
+            y2 = min(orig_h, int((cy + h / 2) * orig_h))
+
+            if (x2 - x1) < min_crop_size or (y2 - y1) < min_crop_size:
+                continue
+
+            class_crops[cls_name].append(img_pil.crop((x1, y1, x2, y2)))
+
+    # --- Phase 2: Caption each crop and encode ---
+    task_prompt = "<DETAILED_CAPTION>"
+    class_embeddings: dict[str, list[torch.Tensor]] = {name: [] for name in target_classes}
+    total_crops = sum(len(v) for v in class_crops.values())
+    processed = 0
+
+    for cls_name in target_classes:
+        crops = class_crops[cls_name]
+
+        if not crops:
+            # Fallback: encode bare class name
+            print(f"  WARNING: No crops for '{cls_name}', using class name embedding")
+            tokens = processor.tokenizer(
+                cls_name, return_tensors="pt", padding=False,
+            ).to(device)
+            enc_out = encoder(input_ids=tokens["input_ids"], return_dict=True)
+            class_embeddings[cls_name].append(
+                enc_out.last_hidden_state.mean(dim=1).squeeze(0).cpu()
+            )
+            continue
+
+        for crop in crops:
+            # Generate caption
+            inputs = processor(
+                text=task_prompt, images=crop, return_tensors="pt",
+            ).to(device)
+            generated_ids = fl_model.generate(
+                input_ids=inputs["input_ids"],
+                pixel_values=inputs["pixel_values"],
+                max_new_tokens=128,
+                num_beams=3,
+                do_sample=False,
+                use_cache=False,
+            )
+            generated_text = processor.batch_decode(
+                generated_ids, skip_special_tokens=False,
+            )[0]
+            parsed = processor.post_process_generation(
+                generated_text, task=task_prompt, image_size=crop.size,
+            )
+            caption = parsed.get(task_prompt, cls_name)
+
+            # Encode caption through text encoder
+            tokens = processor.tokenizer(
+                caption, return_tensors="pt", padding=False,
+            ).to(device)
+            enc_out = encoder(input_ids=tokens["input_ids"], return_dict=True)
+            emb = enc_out.last_hidden_state.mean(dim=1).squeeze(0)
+            class_embeddings[cls_name].append(emb.cpu())
+            processed += 1
+
+        print(f"  {cls_name}: {len(crops)} crops → {processed}/{total_crops} done")
+
+    # --- Phase 3: Average per class ---
+    result: dict[str, torch.Tensor] = {}
+    emb_dim = None
+    for cls_name in target_classes:
+        embs = class_embeddings[cls_name]
+        if embs:
+            result[cls_name] = torch.stack(embs).mean(dim=0)
+            emb_dim = result[cls_name].shape[0]
+    for cls_name in target_classes:
+        if cls_name not in result:
+            result[cls_name] = torch.zeros(emb_dim or 768)
+
+    del fl_model, encoder, processor
+    torch.cuda.empty_cache()
+
+    print(f"  Description embeddings: {len(result)} classes, dim={emb_dim}")
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 6. FiLM Modulation Network
+# ---------------------------------------------------------------------------
+
+class TextModulatedPrototype(nn.Module):
+    """FiLM-style modulation: text description conditions scale & shift of visual prototype.
+
+    output = proto * (1 + gamma(text)) + beta(text)
+    """
+
+    def __init__(self, text_dim: int = 768, proto_dim: int = 128, hidden_dim: int = 256):
+        super().__init__()
+        self.gamma_net = nn.Sequential(
+            nn.Linear(text_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, proto_dim),
+        )
+        self.beta_net = nn.Sequential(
+            nn.Linear(text_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, proto_dim),
+        )
+
+    def forward(self, proto: torch.Tensor, text_emb: torch.Tensor) -> torch.Tensor:
+        gamma = self.gamma_net(text_emb)
+        beta = self.beta_net(text_emb)
+        return proto * (1 + gamma) + beta
+
+
+@torch.no_grad()
+def extract_target_weights(
+    base_weights: str | Path,
+    target_classes: list[str],
+    all_classes: list[str],
+) -> dict[str, torch.Tensor]:
+    """Extract Conv2d classification weights from base-pretrained YOLO model.
+
+    These are the optimal classification directions learned during full base
+    pretraining, used as supervision targets for the FiLM modulation network.
+    """
+    model = YOLO(str(base_weights))
+    detect = model.model.model[-1]  # Standard Detect head
+
+    cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
+
+    # cv3[0][-1] is nn.Conv2d(c3, nc, 1) in standard Detect
+    last_conv = detect.cv3[0][-1]
+    w = last_conv.weight.data  # (nc, c3, 1, 1)
+    if w.dim() == 4:
+        w = w.squeeze(-1).squeeze(-1)  # → (nc, c3)
+
+    weights = {}
+    for cls_name in target_classes:
+        idx = cls_name_to_idx.get(cls_name)
+        if idx is not None:
+            weights[cls_name] = F.normalize(w[idx:idx + 1], dim=1).squeeze(0).cpu()
+
+    print(f"  Extracted {len(weights)} target weights (dim={w.shape[1]})")
+    del model
+    torch.cuda.empty_cache()
+    return weights
+
+
+def train_modulation_network(
+    desc_embeddings: dict[str, torch.Tensor],
+    visual_prototypes: dict[str, torch.Tensor],
+    target_weights: dict[str, torch.Tensor],
+    base_classes: list[str],
+    hidden_dim: int = 256,
+    lr: float = 1e-3,
+    weight_decay: float = 1e-2,
+    epochs: int = 1000,
+    device: str = "cuda:0",
+) -> TextModulatedPrototype:
+    """Train FiLM modulation network on base class data.
+
+    Learns: FiLM(base_proto, base_description_emb) ≈ base_pretrained_weight
+    Then for novel classes: FiLM(novel_proto, novel_desc_emb) → novel_weight
+    """
+    X_text = torch.stack([desc_embeddings[c] for c in base_classes]).to(device)
+    X_proto = torch.stack([visual_prototypes[c] for c in base_classes]).to(device)
+    X_proto = F.normalize(X_proto, dim=1)
+    Y = torch.stack([target_weights[c] for c in base_classes]).to(device)
+    # Y is already L2-normalized from extract_target_weights
+
+    text_dim = X_text.shape[1]
+    proto_dim = X_proto.shape[1]
+
+    film = TextModulatedPrototype(text_dim, proto_dim, hidden_dim).to(device)
+    optimizer = torch.optim.AdamW(film.parameters(), lr=lr, weight_decay=weight_decay)
+
+    print(f"  Training FiLM ({text_dim}+{proto_dim}→{proto_dim}) "
+          f"on {len(base_classes)} base classes for {epochs} epochs...")
+
+    film.train()
+    for epoch in range(epochs):
+        pred = film(X_proto, X_text)
+        pred_norm = F.normalize(pred, dim=1)
+
+        cos_sim = (pred_norm * Y).sum(dim=1)
+        loss = (1 - cos_sim).mean()
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        if (epoch + 1) % 200 == 0 or epoch == 0:
+            print(f"  Epoch {epoch + 1:4d}/{epochs}: loss={loss.item():.4f}, "
+                  f"mean_cos_sim={cos_sim.mean().item():.4f}")
+
+    film.eval()
+    return film
+
+
+# ---------------------------------------------------------------------------
+# 7. CosineConv2d Init via Text-Modulated Prototypes
+# ---------------------------------------------------------------------------
+
+@torch.no_grad()
+def init_cosine_head_modulated(
+    model: YOLO,
+    film: TextModulatedPrototype,
+    desc_embeddings: dict[str, torch.Tensor],
+    visual_prototypes: dict[str, torch.Tensor],
+    novel_classes: list[str],
+    all_classes: list[str],
+) -> None:
+    """Initialize CosineConv2d novel class weights via FiLM(prototype, description).
+
+    For each novel class:
+      w = normalize( FiLM(novel_proto, novel_desc_emb) )
+    """
+    cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
+    detect = model.model.model[-1]
+    device = next(film.parameters()).device
+
+    novel_weights: dict[str, torch.Tensor] = {}
+    for cls_name in novel_classes:
+        text_emb = desc_embeddings[cls_name].unsqueeze(0).to(device)
+        proto = visual_prototypes[cls_name].unsqueeze(0).to(device)
+        proto = F.normalize(proto, dim=1)
+
+        w = film(proto, text_emb).squeeze(0)
+        w = F.normalize(w.unsqueeze(0), dim=1).squeeze(0)
+        novel_weights[cls_name] = w
+
+    for i in range(detect.nl):
+        cosine_layer = detect.cv3[i][-1]
+        weight = cosine_layer.weight.data
+
+        for cls_name in novel_classes:
+            idx = cls_name_to_idx.get(cls_name)
+            if idx is None:
+                continue
+            weight[idx] = novel_weights[cls_name].to(weight.device)
+
+        print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
+              f"via text-modulated prototypes")

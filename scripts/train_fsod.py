@@ -70,6 +70,12 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Path to Florence-2 model for adaptation init (Exp 3). Empty = disabled.",
     )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=0,
+        help="Override finetune epochs (0 = use config value).",
+    )
     return parser.parse_args()
 
 
@@ -118,6 +124,7 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 def run_finetune_stage(
     config: dict, output_root: Path, base_weights: Path, model_arch: Path,
     use_prototype: bool = False, florence2_model: str = "",
+    epochs_override: int = 0,
 ) -> Path:
     """Finetune with FSODDetect (cosine classifier) architecture.
 
@@ -131,12 +138,19 @@ def run_finetune_stage(
     data_yaml = output_root / "voc_fsod_finetune.yaml"
     novel_classes = config["novel_classes"]
 
-    if florence2_model:
+    finetune_epochs = epochs_override if epochs_override > 0 else int(config["epochs"]["finetune"])
+
+    if florence2_model and use_prototype:
+        run_name = "novel_finetune_cosine_fused"
+    elif florence2_model:
         run_name = "novel_finetune_cosine_florence2"
     elif use_prototype:
         run_name = "novel_finetune_cosine_proto"
     else:
         run_name = "novel_finetune_cosine"
+
+    if epochs_override > 0:
+        run_name += f"_ep{epochs_override}"
 
     print(f"Creating model from architecture: {model_arch}")
     model = YOLO(str(model_arch))
@@ -144,7 +158,7 @@ def run_finetune_stage(
     print(f"Loading base pretrain weights: {base_weights}")
     model.load(str(base_weights))
 
-    if use_prototype:
+    if use_prototype and not florence2_model:
         from fsod.voc import VOC_CLASSES
         from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
 
@@ -168,24 +182,40 @@ def run_finetune_stage(
     if florence2_model:
         from fsod.voc import VOC_CLASSES
         from fsod.modules.adaptation import (
-            extract_florence2_text_embeddings,
+            generate_and_encode_descriptions,
             extract_base_prototypes,
-            train_adaptation_mlp,
-            init_cosine_head_with_florence2,
+            extract_target_weights,
+            train_modulation_network,
+            init_cosine_head_modulated,
         )
+        from fsod.modules.prototype import extract_prototypes
 
         device_str = f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"]
         base_classes = [c for c in VOC_CLASSES if c not in novel_classes]
 
-        print("Step 1/4: Extracting Florence-2 text embeddings for all classes...")
-        text_embeddings = extract_florence2_text_embeddings(
+        print("Step 1/6: Generating descriptions for base classes (base_train)...")
+        base_desc = generate_and_encode_descriptions(
             model_path=florence2_model,
-            class_names=VOC_CLASSES,
+            data_root=output_root,
+            split_name="base_train",
+            target_classes=base_classes,
+            all_classes=VOC_CLASSES,
             device=device_str,
         )
 
-        print("Step 2/4: Extracting base class visual prototypes from base_train...")
-        base_prototypes = extract_base_prototypes(
+        print("Step 2/6: Generating descriptions for novel classes (novel_finetune)...")
+        novel_desc = generate_and_encode_descriptions(
+            model_path=florence2_model,
+            data_root=output_root,
+            split_name="novel_finetune",
+            target_classes=novel_classes,
+            all_classes=VOC_CLASSES,
+            device=device_str,
+        )
+        desc_embs = {**base_desc, **novel_desc}
+
+        print("Step 3/6: Extracting base class visual prototypes...")
+        base_protos = extract_base_prototypes(
             base_weights=base_weights,
             data_root=output_root,
             base_classes=base_classes,
@@ -194,26 +224,43 @@ def run_finetune_stage(
             device=device_str,
         )
 
-        print("Step 3/4: Training adaptation MLP on base class pairs...")
-        mlp = train_adaptation_mlp(
-            text_embeddings=text_embeddings,
-            visual_prototypes=base_prototypes,
+        print("Step 4/6: Extracting novel class visual prototypes...")
+        novel_protos = extract_prototypes(
+            base_weights=base_weights,
+            data_root=output_root,
+            novel_classes=novel_classes,
+            all_classes=VOC_CLASSES,
+            imgsz=int(config["image_size"]),
+            device=device_str,
+        )
+
+        print("Step 5/6: Training FiLM modulation network on base classes...")
+        target_wts = extract_target_weights(
+            base_weights=base_weights,
+            target_classes=base_classes,
+            all_classes=VOC_CLASSES,
+        )
+        film = train_modulation_network(
+            desc_embeddings=desc_embs,
+            visual_prototypes=base_protos,
+            target_weights=target_wts,
             base_classes=base_classes,
             device=device_str,
         )
 
-        print("Step 4/4: Initializing novel class weights via adaptation MLP...")
-        init_cosine_head_with_florence2(
+        print("Step 6/6: Initializing novel class weights via text-modulated prototypes...")
+        init_cosine_head_modulated(
             model=model,
-            mlp=mlp,
-            text_embeddings=text_embeddings,
+            film=film,
+            desc_embeddings=desc_embs,
+            visual_prototypes=novel_protos,
             novel_classes=novel_classes,
             all_classes=VOC_CLASSES,
         )
 
     model.train(
         data=str(data_yaml),
-        epochs=int(config["epochs"]["finetune"]),
+        epochs=finetune_epochs,
         imgsz=int(config["image_size"]),
         batch=int(config["batch_size"]["finetune"]),
         workers=int(config["workers"]),
@@ -263,6 +310,7 @@ def main() -> None:
         best_path = run_finetune_stage(
             config, output_root, base_weights, model_arch,
             use_prototype=args.prototype, florence2_model=args.florence2,
+            epochs_override=args.epochs,
         )
         print(f"Finetune stage checkpoint: {best_path}")
         return
@@ -272,6 +320,7 @@ def main() -> None:
     finetune_best = run_finetune_stage(
         config, output_root, base_best, model_arch,
         use_prototype=args.prototype, florence2_model=args.florence2,
+        epochs_override=args.epochs,
     )
     print(f"Base stage checkpoint: {base_best}")
     print(f"Finetune stage checkpoint: {finetune_best}")
