@@ -20,7 +20,7 @@ runs_dir: ./runs/fsod_baseline
 
 epochs:
   base: 100
-  finetune: 200
+  finetune: 100
 
 batch_size:
   base: 64
@@ -32,6 +32,13 @@ lr0:
 
 freeze:
   backbone: 10
+
+# --- Few-shot finetune anti-overfitting ---
+patience: 20          # early stopping: stop if no improvement for 20 epochs
+cos_lr: true          # cosine LR scheduler (smooth decay)
+lrf: 0.01             # final LR = lr0 * lrf = 5e-6
+warmup_epochs: 5      # longer warmup for few-shot stability
+close_mosaic: 15      # disable mosaic augmentation in last 15 epochs
 
 replay:
   enabled: false
