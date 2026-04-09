@@ -20,7 +20,7 @@ runs_dir: ./runs/fsod_baseline
 
 epochs:
   base: 100
-  finetune: 100
+  finetune: 200
 
 batch_size:
   base: 64
@@ -32,12 +32,6 @@ lr0:
 
 freeze:
   backbone: 10
-
-# --- Few-shot finetune settings ---
-patience: 0            # disable early stopping; all runs train full epochs
-cos_lr: false         # use default linear LR decay (cos_lr hurts high-initial-loss heads)
-warmup_epochs: 3      # default warmup
-close_mosaic: 10      # default close mosaic
 
 replay:
   enabled: false
