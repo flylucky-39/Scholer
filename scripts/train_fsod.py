@@ -267,6 +267,7 @@ def run_finetune_stage(
         device=config["device"],
         lr0=float(config["lr0"]["finetune"]),
         freeze=int(config.get("freeze", {}).get("backbone", 0)),
+        patience=int(config.get("patience", {}).get("finetune", 30)),
         project=str(runs_dir),
         name=run_name,
         seed=int(config["seed"]),

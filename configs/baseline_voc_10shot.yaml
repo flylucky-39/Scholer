@@ -33,6 +33,9 @@ lr0:
 freeze:
   backbone: 10
 
+patience:
+  finetune: 30
+
 replay:
   enabled: false
   base_images: 200
