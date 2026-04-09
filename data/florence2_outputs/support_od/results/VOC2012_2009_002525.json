@@ -1,0 +1,54 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_002525.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>bird<loc_377><loc_393><loc_526><loc_839></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            188.75,
+            131.03550720214844,
+            263.25,
+            279.5534973144531
+          ],
+          "bbox_norm": [
+            0.3775,
+            0.3935000216280734,
+            0.5265,
+            0.8394999919352947
+          ],
+          "width": 74.5,
+          "height": 148.5179901123047
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            188.75,
+            131.03550720214844,
+            263.25,
+            279.5534973144531
+          ],
+          "bbox_norm": [
+            0.3775,
+            0.3935000216280734,
+            0.5265,
+            0.8394999919352947
+          ],
+          "width": 74.5,
+          "height": 148.5179901123047,
+          "matched_class": "bird"
+        }
+      ],
+      "num_all": 1,
+      "num_filtered": 1
+    }
+  ]
+}

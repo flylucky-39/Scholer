@@ -1,0 +1,90 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2011_001159.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>cattle<loc_145><loc_390><loc_943><loc_878>person<loc_48><loc_121><loc_377><loc_899>tag<loc_283><loc_541><loc_312><loc_576></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "cattle",
+          "bbox": [
+            72.75,
+            195.25,
+            471.75,
+            439.25
+          ],
+          "bbox_norm": [
+            0.1455,
+            0.3905,
+            0.9435,
+            0.8785
+          ],
+          "width": 399.0,
+          "height": 244.0
+        },
+        {
+          "index": 1,
+          "label": "person",
+          "bbox": [
+            24.25,
+            60.75,
+            188.75,
+            449.75
+          ],
+          "bbox_norm": [
+            0.0485,
+            0.1215,
+            0.3775,
+            0.8995
+          ],
+          "width": 164.5,
+          "height": 389.0
+        },
+        {
+          "index": 2,
+          "label": "tag",
+          "bbox": [
+            141.75,
+            270.75,
+            156.25,
+            288.25
+          ],
+          "bbox_norm": [
+            0.2835,
+            0.5415,
+            0.3125,
+            0.5765
+          ],
+          "width": 14.5,
+          "height": 17.5
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "cattle",
+          "bbox": [
+            72.75,
+            195.25,
+            471.75,
+            439.25
+          ],
+          "bbox_norm": [
+            0.1455,
+            0.3905,
+            0.9435,
+            0.8785
+          ],
+          "width": 399.0,
+          "height": 244.0,
+          "matched_class": "cow"
+        }
+      ],
+      "num_all": 3,
+      "num_filtered": 1
+    }
+  ]
+}

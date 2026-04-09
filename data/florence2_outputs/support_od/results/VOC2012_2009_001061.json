@@ -1,0 +1,54 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_001061.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>motorcycle<loc_0><loc_0><loc_998><loc_998></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "motorcycle",
+          "bbox": [
+            0.25,
+            0.1875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 374.25
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "motorcycle",
+          "bbox": [
+            0.25,
+            0.1875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 374.25,
+          "matched_class": "motorbike"
+        }
+      ],
+      "num_all": 1,
+      "num_filtered": 1
+    }
+  ]
+}

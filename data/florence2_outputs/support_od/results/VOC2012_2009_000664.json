@@ -1,0 +1,52 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000664.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>woodpecker<loc_80><loc_295><loc_465><loc_998><loc_447><loc_151><loc_787><loc_768></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "woodpecker",
+          "bbox": [
+            31.31450080871582,
+            147.75,
+            181.07949829101562,
+            499.25
+          ],
+          "bbox_norm": [
+            0.08050000207896098,
+            0.2955,
+            0.46549999560672395,
+            0.9985
+          ],
+          "width": 149.7649974822998,
+          "height": 351.5
+        },
+        {
+          "index": 1,
+          "label": "woodpecker",
+          "bbox": [
+            174.07749938964844,
+            75.75,
+            306.3374938964844,
+            384.25
+          ],
+          "bbox_norm": [
+            0.4474999984309728,
+            0.1515,
+            0.7874999843097285,
+            0.7685
+          ],
+          "width": 132.25999450683594,
+          "height": 308.5
+        }
+      ],
+      "filtered_detections": [],
+      "num_all": 2,
+      "num_filtered": 0
+    }
+  ]
+}

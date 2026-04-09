@@ -1,0 +1,108 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_001406.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>dog<loc_209><loc_324><loc_808><loc_998>human face<loc_590><loc_118><loc_744><loc_306>person<loc_0><loc_90><loc_835><loc_807>studio couch<loc_0><loc_0><loc_998><loc_998></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "dog",
+          "bbox": [
+            104.75,
+            121.6875,
+            404.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.2095,
+            0.3245,
+            0.8085,
+            0.9985
+          ],
+          "width": 299.5,
+          "height": 252.75
+        },
+        {
+          "index": 1,
+          "label": "human face",
+          "bbox": [
+            295.25,
+            44.4375,
+            372.25,
+            114.9375
+          ],
+          "bbox_norm": [
+            0.5905,
+            0.1185,
+            0.7445,
+            0.3065
+          ],
+          "width": 77.0,
+          "height": 70.5
+        },
+        {
+          "index": 2,
+          "label": "person",
+          "bbox": [
+            0.25,
+            33.9375,
+            417.75,
+            302.8125
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0905,
+            0.8355,
+            0.8075
+          ],
+          "width": 417.5,
+          "height": 268.875
+        },
+        {
+          "index": 3,
+          "label": "studio couch",
+          "bbox": [
+            0.25,
+            0.1875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 374.25
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 3,
+          "label": "studio couch",
+          "bbox": [
+            0.25,
+            0.1875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 374.25,
+          "matched_class": "sofa"
+        }
+      ],
+      "num_all": 4,
+      "num_filtered": 1
+    }
+  ]
+}

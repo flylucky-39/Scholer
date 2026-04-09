@@ -1,0 +1,255 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_002105.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>bus<loc_488><loc_388><loc_858><loc_715><loc_958><loc_511><loc_998><loc_794><loc_898><loc_551><loc_941><loc_599>car<loc_56><loc_598><loc_235><loc_678>motorcycle<loc_317><loc_609><loc_350><loc_641>person<loc_315><loc_586><loc_344><loc_620>taillight<loc_608><loc_516><loc_644><loc_545><loc_499><loc_524><loc_529><loc_551>vehicle registration plate<loc_555><loc_614><loc_583><loc_631></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            244.25,
+            145.6875,
+            429.25,
+            268.3125
+          ],
+          "bbox_norm": [
+            0.4885,
+            0.3885,
+            0.8585,
+            0.7155
+          ],
+          "width": 185.0,
+          "height": 122.625
+        },
+        {
+          "index": 1,
+          "label": "bus",
+          "bbox": [
+            479.25,
+            191.8125,
+            499.25,
+            297.9375
+          ],
+          "bbox_norm": [
+            0.9585,
+            0.5115,
+            0.9985,
+            0.7945
+          ],
+          "width": 20.0,
+          "height": 106.125
+        },
+        {
+          "index": 2,
+          "label": "bus",
+          "bbox": [
+            449.25,
+            206.8125,
+            470.75,
+            224.8125
+          ],
+          "bbox_norm": [
+            0.8985,
+            0.5515,
+            0.9415,
+            0.5995
+          ],
+          "width": 21.5,
+          "height": 18.0
+        },
+        {
+          "index": 3,
+          "label": "car",
+          "bbox": [
+            28.25,
+            224.4375,
+            117.75,
+            254.4375
+          ],
+          "bbox_norm": [
+            0.0565,
+            0.5985,
+            0.2355,
+            0.6785
+          ],
+          "width": 89.5,
+          "height": 30.0
+        },
+        {
+          "index": 4,
+          "label": "motorcycle",
+          "bbox": [
+            158.75,
+            228.5625,
+            175.25,
+            240.5625
+          ],
+          "bbox_norm": [
+            0.3175,
+            0.6095,
+            0.3505,
+            0.6415
+          ],
+          "width": 16.5,
+          "height": 12.0
+        },
+        {
+          "index": 5,
+          "label": "person",
+          "bbox": [
+            157.75,
+            219.9375,
+            172.25,
+            232.6875
+          ],
+          "bbox_norm": [
+            0.3155,
+            0.5865,
+            0.3445,
+            0.6205
+          ],
+          "width": 14.5,
+          "height": 12.75
+        },
+        {
+          "index": 6,
+          "label": "taillight",
+          "bbox": [
+            304.25,
+            193.6875,
+            322.25,
+            204.5625
+          ],
+          "bbox_norm": [
+            0.6085,
+            0.5165,
+            0.6445,
+            0.5455
+          ],
+          "width": 18.0,
+          "height": 10.875
+        },
+        {
+          "index": 7,
+          "label": "taillight",
+          "bbox": [
+            249.75,
+            196.6875,
+            264.75,
+            206.8125
+          ],
+          "bbox_norm": [
+            0.4995,
+            0.5245,
+            0.5295,
+            0.5515
+          ],
+          "width": 15.0,
+          "height": 10.125
+        },
+        {
+          "index": 8,
+          "label": "vehicle registration plate",
+          "bbox": [
+            277.75,
+            230.4375,
+            291.75,
+            236.8125
+          ],
+          "bbox_norm": [
+            0.5555,
+            0.6145,
+            0.5835,
+            0.6315
+          ],
+          "width": 14.0,
+          "height": 6.375
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            244.25,
+            145.6875,
+            429.25,
+            268.3125
+          ],
+          "bbox_norm": [
+            0.4885,
+            0.3885,
+            0.8585,
+            0.7155
+          ],
+          "width": 185.0,
+          "height": 122.625,
+          "matched_class": "bus"
+        },
+        {
+          "index": 1,
+          "label": "bus",
+          "bbox": [
+            479.25,
+            191.8125,
+            499.25,
+            297.9375
+          ],
+          "bbox_norm": [
+            0.9585,
+            0.5115,
+            0.9985,
+            0.7945
+          ],
+          "width": 20.0,
+          "height": 106.125,
+          "matched_class": "bus"
+        },
+        {
+          "index": 2,
+          "label": "bus",
+          "bbox": [
+            449.25,
+            206.8125,
+            470.75,
+            224.8125
+          ],
+          "bbox_norm": [
+            0.8985,
+            0.5515,
+            0.9415,
+            0.5995
+          ],
+          "width": 21.5,
+          "height": 18.0,
+          "matched_class": "bus"
+        },
+        {
+          "index": 4,
+          "label": "motorcycle",
+          "bbox": [
+            158.75,
+            228.5625,
+            175.25,
+            240.5625
+          ],
+          "bbox_norm": [
+            0.3175,
+            0.6095,
+            0.3505,
+            0.6415
+          ],
+          "width": 16.5,
+          "height": 12.0,
+          "matched_class": "motorbike"
+        }
+      ],
+      "num_all": 9,
+      "num_filtered": 4
+    }
+  ]
+}

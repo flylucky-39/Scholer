@@ -1,0 +1,214 @@
+{
+  "model_path": "/root/epfs/07_FSOD_LLM/models/Florence-2-base",
+  "task": "caption_to_phrase_grounding",
+  "class_names": [
+    "bird",
+    "bus",
+    "cow",
+    "motorbike",
+    "sofa"
+  ],
+  "images": 40,
+  "results": [
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_000682.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_000682.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_001406.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_001406.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_001512.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_001512.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_001818.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_001818.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002021.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_002021.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002278.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_002278.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002300.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_002300.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002419.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_002419.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_003524.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_003524.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_003585.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_003585.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_004727.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_004727.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_006290.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_006290.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_007193.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_007193.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_007876.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_007876.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_008312.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_008312.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_008475.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_008475.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_009939.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2007_009939.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_000545.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2008_000545.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_001896.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2008_001896.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_002383.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2008_002383.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_007336.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2008_007336.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_008682.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2008_008682.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000280.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_000280.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000617.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_000617.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000664.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_000664.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000674.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_000674.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_001061.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_001061.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_002105.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_002105.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_002525.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_002525.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_003234.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_003234.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_003646.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_003646.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_003785.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_003785.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_004375.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_004375.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_004419.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2009_004419.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_000376.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2010_000376.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_000465.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2010_000465.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_002461.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2010_002461.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_004138.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2010_004138.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_005532.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2010_005532.json",
+      "num_prediction_groups": 5
+    },
+    {
+      "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2011_001159.jpg",
+      "result_path": "/root/epfs/07_FSOD_LLM/fsod/data/florence2_outputs/support/results/VOC2012_2011_001159.json",
+      "num_prediction_groups": 5
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_008475.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_0><loc_318><loc_998><loc_995></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            0.25,
+            119.4375,
+            499.25,
+            373.3125
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3185,
+            0.9985,
+            0.9955
+          ],
+          "width": 499.0,
+          "height": 253.875
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_0><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            0.25,
+            0.1875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 374.25
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a close-up of a woman's face, with a white background and a black outline of a white text that reads, \"The image appears to be a representation of the word \"love\" written in a bold, white font. The woman is wearing a white, white, and black text, and she is looking directly at the camera with a black and white text. The background is a light blue color, and the text is in a dark blue color. The text is written in white and is in black, and it is in white. The word \"white\" in a white font, which is in the shape of a circle.<loc_0><loc_319><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "the image shows a close-up of a woman's face, with a white background and a black outline of a white text that reads, \"The image appears to be a representation of the word \"love\" written in a bold, white font. The woman is wearing a white, white, and black text, and she is looking directly at the camera with a black and white text. The background is a light blue color, and the text is in a dark blue color. The text is written in white and is in black, and it is in white. The word \"white\" in a white font, which is in the shape of a circle.",
+          "bbox": [
+            0.25,
+            119.8125,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3195,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 254.625
+        }
+      ]
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_0><loc_316><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            0.25,
+            118.6875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3165,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 255.75
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_0><loc_320><loc_998><loc_995></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            0.25,
+            120.1875,
+            499.25,
+            373.3125
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3205,
+            0.9985,
+            0.9955
+          ],
+          "width": 499.0,
+          "height": 253.125
+        }
+      ]
+    }
+  ]
+}

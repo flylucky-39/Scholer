@@ -1,0 +1,135 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_002383.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_244><loc_0><loc_774><loc_961></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            79.21800231933594,
+            0.2160000056028366,
+            250.93800354003906,
+            415.3680114746094
+          ],
+          "bbox_norm": [
+            0.24450000715844425,
+            0.0005000000129695292,
+            0.7745000109260465,
+            0.9615000265615957
+          ],
+          "width": 171.72000122070312,
+          "height": 415.15201146900654
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_246><loc_0><loc_772><loc_961></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            79.86599731445312,
+            0.2160000056028366,
+            250.2899932861328,
+            415.3680114746094
+          ],
+          "bbox_norm": [
+            0.24649999171127507,
+            0.0005000000129695292,
+            0.7724999792781877,
+            0.9615000265615957
+          ],
+          "width": 170.4239959716797,
+          "height": 415.15201146900654
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a white background with a black and white image of a man in a suit and tie<loc_242><loc_0><loc_775><loc_962></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "the image shows a white background with a black and white image of a man in a suit and tie",
+          "bbox": [
+            78.56999969482422,
+            0.2160000056028366,
+            251.26199340820312,
+            415.8000183105469
+          ],
+          "bbox_norm": [
+            0.24249999905809944,
+            0.0005000000129695292,
+            0.7754999796549479,
+            0.9625000423855252
+          ],
+          "width": 172.6919937133789,
+          "height": 415.58401830494404
+        }
+      ]
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_244><loc_0><loc_773><loc_961></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            79.21800231933594,
+            0.2160000056028366,
+            250.61399841308594,
+            415.3680114746094
+          ],
+          "bbox_norm": [
+            0.24450000715844425,
+            0.0005000000129695292,
+            0.7734999951021171,
+            0.9615000265615957
+          ],
+          "width": 171.39599609375,
+          "height": 415.15201146900654
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_246><loc_0><loc_772><loc_961></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            79.86599731445312,
+            0.2160000056028366,
+            250.2899932861328,
+            415.3680114746094
+          ],
+          "bbox_norm": [
+            0.24649999171127507,
+            0.0005000000129695292,
+            0.7724999792781877,
+            0.9615000265615957
+          ],
+          "width": 170.4239959716797,
+          "height": 415.15201146900654
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_001512.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_332><loc_381><loc_869><loc_678></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            166.25,
+            127.03950500488281,
+            434.75,
+            225.9405059814453
+          ],
+          "bbox_norm": [
+            0.3325,
+            0.3815000150296781,
+            0.8695,
+            0.6785000179622982
+          ],
+          "width": 268.5,
+          "height": 98.9010009765625
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_334><loc_381><loc_869><loc_676></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            167.25,
+            127.03950500488281,
+            434.75,
+            225.27450561523438
+          ],
+          "bbox_norm": [
+            0.3345,
+            0.3815000150296781,
+            0.8695,
+            0.6765000168625657
+          ],
+          "width": 267.5,
+          "height": 98.23500061035156
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a closeup of a person's face with a white background and a red, white, and blue design on it. The person is wearing a white shirt and blue jeans and is holding a red and white striped shirt. The shirt is white and has a white and blue striped pattern on the left side of the image. The white and red stripes on the right side of this image are white and white with a blue and red stripe on the bottom of the shirt and a white striped on the top of a white, white and yellow striped shirt<loc_333><loc_382><loc_869><loc_676></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "the image shows a closeup of a person's face with a white background and a red, white, and blue design on it. The person is wearing a white shirt and blue jeans and is holding a red and white striped shirt. The shirt is white and has a white and blue striped pattern on the left side of the image. The white and red stripes on the right side of this image are white and white with a blue and red stripe on the bottom of the shirt and a white striped on the top of a white, white and yellow striped shirt",
+          "bbox": [
+            166.75,
+            127.37250518798828,
+            434.75,
+            225.27450561523438
+          ],
+          "bbox_norm": [
+            0.3335,
+            0.3825000155795444,
+            0.8695,
+            0.6765000168625657
+          ],
+          "width": 268.0,
+          "height": 97.9020004272461
+        }
+      ]
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_332><loc_381><loc_870><loc_678></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            166.25,
+            127.03950500488281,
+            435.25,
+            225.9405059814453
+          ],
+          "bbox_norm": [
+            0.3325,
+            0.3815000150296781,
+            0.8705,
+            0.6785000179622982
+          ],
+          "width": 269.0,
+          "height": 98.9010009765625
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_334><loc_382><loc_869><loc_677></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            167.25,
+            127.37250518798828,
+            434.75,
+            225.6074981689453
+          ],
+          "bbox_norm": [
+            0.3345,
+            0.3825000155795444,
+            0.8695,
+            0.6774999945013372
+          ],
+          "width": 267.5,
+          "height": 98.23499298095703
+        }
+      ]
+    }
+  ]
+}

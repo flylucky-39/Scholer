@@ -1,0 +1,306 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_004419.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>blanket<loc_738><loc_481><loc_998><loc_583>candle<loc_323><loc_565><loc_357><loc_602>chair<loc_147><loc_616><loc_737><loc_998><loc_97><loc_506><loc_211><loc_882><loc_97><loc_506><loc_209><loc_768><loc_216><loc_450><loc_357><loc_571>coffee table<loc_848><loc_867><loc_998><loc_998>cushion<loc_672><loc_710><loc_998><loc_877><loc_652><loc_525><loc_848><loc_734><loc_381><loc_895><loc_705><loc_998>kitchen & dining room table<loc_169><loc_553><loc_495><loc_751>painting<loc_20><loc_135><loc_127><loc_364>pillow<loc_205><loc_616><loc_509><loc_957>studio couch<loc_624><loc_505><loc_998><loc_974>wine glass<loc_982><loc_823><loc_998><loc_974></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "blanket",
+          "bbox": [
+            369.25,
+            180.5625,
+            499.25,
+            218.8125
+          ],
+          "bbox_norm": [
+            0.7385,
+            0.4815,
+            0.9985,
+            0.5835
+          ],
+          "width": 130.0,
+          "height": 38.25
+        },
+        {
+          "index": 1,
+          "label": "candle",
+          "bbox": [
+            161.75,
+            212.0625,
+            178.75,
+            225.9375
+          ],
+          "bbox_norm": [
+            0.3235,
+            0.5655,
+            0.3575,
+            0.6025
+          ],
+          "width": 17.0,
+          "height": 13.875
+        },
+        {
+          "index": 2,
+          "label": "chair",
+          "bbox": [
+            73.75,
+            231.1875,
+            368.75,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.1475,
+            0.6165,
+            0.7375,
+            0.9985
+          ],
+          "width": 295.0,
+          "height": 143.25
+        },
+        {
+          "index": 3,
+          "label": "chair",
+          "bbox": [
+            48.75,
+            189.9375,
+            105.75,
+            330.9375
+          ],
+          "bbox_norm": [
+            0.0975,
+            0.5065,
+            0.2115,
+            0.8825
+          ],
+          "width": 57.0,
+          "height": 141.0
+        },
+        {
+          "index": 4,
+          "label": "chair",
+          "bbox": [
+            48.75,
+            189.9375,
+            104.75,
+            288.1875
+          ],
+          "bbox_norm": [
+            0.0975,
+            0.5065,
+            0.2095,
+            0.7685
+          ],
+          "width": 56.0,
+          "height": 98.25
+        },
+        {
+          "index": 5,
+          "label": "chair",
+          "bbox": [
+            108.25,
+            168.9375,
+            178.75,
+            214.3125
+          ],
+          "bbox_norm": [
+            0.2165,
+            0.4505,
+            0.3575,
+            0.5715
+          ],
+          "width": 70.5,
+          "height": 45.375
+        },
+        {
+          "index": 6,
+          "label": "coffee table",
+          "bbox": [
+            424.25,
+            325.3125,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.8485,
+            0.8675,
+            0.9985,
+            0.9985
+          ],
+          "width": 75.0,
+          "height": 49.125
+        },
+        {
+          "index": 7,
+          "label": "cushion",
+          "bbox": [
+            336.25,
+            266.4375,
+            499.25,
+            329.0625
+          ],
+          "bbox_norm": [
+            0.6725,
+            0.7105,
+            0.9985,
+            0.8775
+          ],
+          "width": 163.0,
+          "height": 62.625
+        },
+        {
+          "index": 8,
+          "label": "cushion",
+          "bbox": [
+            326.25,
+            197.0625,
+            424.25,
+            275.4375
+          ],
+          "bbox_norm": [
+            0.6525,
+            0.5255,
+            0.8485,
+            0.7345
+          ],
+          "width": 98.0,
+          "height": 78.375
+        },
+        {
+          "index": 9,
+          "label": "cushion",
+          "bbox": [
+            190.75,
+            335.8125,
+            352.75,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.3815,
+            0.8955,
+            0.7055,
+            0.9985
+          ],
+          "width": 162.0,
+          "height": 38.625
+        },
+        {
+          "index": 10,
+          "label": "kitchen & dining room table",
+          "bbox": [
+            84.75,
+            207.5625,
+            247.75,
+            281.8125
+          ],
+          "bbox_norm": [
+            0.1695,
+            0.5535,
+            0.4955,
+            0.7515
+          ],
+          "width": 163.0,
+          "height": 74.25
+        },
+        {
+          "index": 11,
+          "label": "painting",
+          "bbox": [
+            10.25,
+            50.8125,
+            63.75,
+            136.6875
+          ],
+          "bbox_norm": [
+            0.0205,
+            0.1355,
+            0.1275,
+            0.3645
+          ],
+          "width": 53.5,
+          "height": 85.875
+        },
+        {
+          "index": 12,
+          "label": "pillow",
+          "bbox": [
+            102.75,
+            231.1875,
+            254.75,
+            359.0625
+          ],
+          "bbox_norm": [
+            0.2055,
+            0.6165,
+            0.5095,
+            0.9575
+          ],
+          "width": 152.0,
+          "height": 127.875
+        },
+        {
+          "index": 13,
+          "label": "studio couch",
+          "bbox": [
+            312.25,
+            189.5625,
+            499.25,
+            365.4375
+          ],
+          "bbox_norm": [
+            0.6245,
+            0.5055,
+            0.9985,
+            0.9745
+          ],
+          "width": 187.0,
+          "height": 175.875
+        },
+        {
+          "index": 14,
+          "label": "wine glass",
+          "bbox": [
+            491.25,
+            308.8125,
+            499.25,
+            365.4375
+          ],
+          "bbox_norm": [
+            0.9825,
+            0.8235,
+            0.9985,
+            0.9745
+          ],
+          "width": 8.0,
+          "height": 56.625
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 13,
+          "label": "studio couch",
+          "bbox": [
+            312.25,
+            189.5625,
+            499.25,
+            365.4375
+          ],
+          "bbox_norm": [
+            0.6245,
+            0.5055,
+            0.9985,
+            0.9745
+          ],
+          "width": 187.0,
+          "height": 175.875,
+          "matched_class": "sofa"
+        }
+      ],
+      "num_all": 15,
+      "num_filtered": 1
+    }
+  ]
+}

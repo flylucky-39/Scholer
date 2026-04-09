@@ -1,0 +1,135 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002419.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_220><loc_155><loc_758><loc_759></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            110.25,
+            53.492000579833984,
+            379.25,
+            261.26800537109375
+          ],
+          "bbox_norm": [
+            0.2205,
+            0.1555000016855639,
+            0.7585,
+            0.7595000156136447
+          ],
+          "width": 269.0,
+          "height": 207.77600479125977
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_222><loc_305><loc_756><loc_757></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            111.25,
+            105.09200286865234,
+            378.25,
+            260.58001708984375
+          ],
+          "bbox_norm": [
+            0.2225,
+            0.3055000083391057,
+            0.7565,
+            0.7575000496797784
+          ],
+          "width": 267.0,
+          "height": 155.4880142211914
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a white background with a black and white image of a man in a suit and tie<loc_220><loc_157><loc_758><loc_760></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "the image shows a white background with a black and white image of a man in a suit and tie",
+          "bbox": [
+            110.25,
+            54.18000030517578,
+            379.25,
+            261.61199951171875
+          ],
+          "bbox_norm": [
+            0.2205,
+            0.1575000008871389,
+            0.7585,
+            0.7604999985805777
+          ],
+          "width": 269.0,
+          "height": 207.43199920654297
+        }
+      ]
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_221><loc_304><loc_755><loc_757></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            110.75,
+            104.74800109863281,
+            377.75,
+            260.58001708984375
+          ],
+          "bbox_norm": [
+            0.2215,
+            0.3045000031937,
+            0.7555,
+            0.7575000496797784
+          ],
+          "width": 267.0,
+          "height": 155.83201599121094
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_221><loc_304><loc_755><loc_757></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            110.75,
+            104.74800109863281,
+            377.75,
+            260.58001708984375
+          ],
+          "bbox_norm": [
+            0.2215,
+            0.3045000031937,
+            0.7555,
+            0.7575000496797784
+          ],
+          "width": 267.0,
+          "height": 155.83201599121094
+        }
+      ]
+    }
+  ]
+}

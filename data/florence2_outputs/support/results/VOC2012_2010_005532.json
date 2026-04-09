@@ -1,0 +1,116 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_005532.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_44><loc_187><loc_492><loc_644></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            22.25,
+            70.3125,
+            246.25,
+            241.6875
+          ],
+          "bbox_norm": [
+            0.0445,
+            0.1875,
+            0.4925,
+            0.6445
+          ],
+          "width": 224.0,
+          "height": 171.375
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_0><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            0.25,
+            0.1875,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.9985,
+            0.9985
+          ],
+          "width": 499.0,
+          "height": 374.25
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a close-up of a person's face with a white background and a black and white image of a woman's face in the center of the image, with a red and white striped pattern on the left and a white and black striped pattern in the background. The woman is wearing a white shirt and black pants, and she is holding a red, white, and blue striped shirt in her left hand and wearing a black, black, and white. She is wearing white and white with her white and blue stripes in her right hand and white, with her left and white stripes in the middle of her left, and her white, white and red, and the white and pink striped in her white.</s>",
+      "detections": []
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_43><loc_187><loc_490><loc_643></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            21.75,
+            70.3125,
+            245.25,
+            241.3125
+          ],
+          "bbox_norm": [
+            0.0435,
+            0.1875,
+            0.4905,
+            0.6435
+          ],
+          "width": 223.5,
+          "height": 171.0
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_0><loc_346><loc_886><loc_961></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            0.25,
+            129.9375,
+            443.25,
+            360.5625
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3465,
+            0.8865,
+            0.9615
+          ],
+          "width": 443.0,
+          "height": 230.625
+        }
+      ]
+    }
+  ]
+}

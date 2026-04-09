@@ -1,0 +1,134 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000674.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_111><loc_120><loc_998><loc_996></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            36.90650177001953,
+            60.25,
+            330.5035095214844,
+            498.25
+          ],
+          "bbox_norm": [
+            0.11150000534749104,
+            0.1205,
+            0.9985000287658138,
+            0.9965
+          ],
+          "width": 293.59700775146484,
+          "height": 438.0
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_0><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            0.1655000001192093,
+            0.25,
+            330.5035095214844,
+            499.25
+          ],
+          "bbox_norm": [
+            0.0005000000003601489,
+            0.0005,
+            0.9985000287658138,
+            0.9985
+          ],
+          "width": 330.33800952136517,
+          "height": 499.0
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a close-up of a person's face with a white background and a black and white image of a woman's face in the center. The woman appears to be wearing a white shirt and has her hair tied up in a bun. She has a white collar and is wearing a blue and white striped shirt and is holding a white pillow with her hands on her head. The background is a light blue color and she is wearing white and her hair is tied in a white and white pattern. She is also wearing a pink and white polka dot pattern.</s>",
+      "detections": []
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_0><loc_0><loc_998><loc_998><loc_0><loc_119><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            0.1655000001192093,
+            0.25,
+            330.5035095214844,
+            499.25
+          ],
+          "bbox_norm": [
+            0.0005000000003601489,
+            0.0005,
+            0.9985000287658138,
+            0.9985
+          ],
+          "width": 330.33800952136517,
+          "height": 499.0
+        },
+        {
+          "index": 1,
+          "label": "motorbike",
+          "bbox": [
+            0.1655000001192093,
+            59.75,
+            330.5035095214844,
+            499.25
+          ],
+          "bbox_norm": [
+            0.0005000000003601489,
+            0.1195,
+            0.9985000287658138,
+            0.9985
+          ],
+          "width": 330.33800952136517,
+          "height": 439.5
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_0><loc_195><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            0.1655000001192093,
+            97.75,
+            330.5035095214844,
+            499.25
+          ],
+          "bbox_norm": [
+            0.0005000000003601489,
+            0.1955,
+            0.9985000287658138,
+            0.9985
+          ],
+          "width": 330.33800952136517,
+          "height": 401.5
+        }
+      ]
+    }
+  ]
+}

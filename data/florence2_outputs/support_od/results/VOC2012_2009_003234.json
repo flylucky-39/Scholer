@@ -1,0 +1,90 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_003234.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>motorcycle<loc_256><loc_44><loc_951><loc_967>reflector<loc_851><loc_359><loc_870><loc_405>taillight<loc_917><loc_255><loc_934><loc_303></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "motorcycle",
+          "bbox": [
+            128.25,
+            10.101499557495117,
+            475.75,
+            219.62249755859375
+          ],
+          "bbox_norm": [
+            0.2565,
+            0.04449999805063928,
+            0.9515,
+            0.9674999892449064
+          ],
+          "width": 347.5,
+          "height": 209.52099800109863
+        },
+        {
+          "index": 1,
+          "label": "reflector",
+          "bbox": [
+            425.75,
+            81.60649871826172,
+            435.25,
+            92.04850006103516
+          ],
+          "bbox_norm": [
+            0.8515,
+            0.3594999943535759,
+            0.8705,
+            0.40550000026887734
+          ],
+          "width": 9.5,
+          "height": 10.442001342773438
+        },
+        {
+          "index": 2,
+          "label": "taillight",
+          "bbox": [
+            458.75,
+            57.99850082397461,
+            467.25,
+            68.89450073242188
+          ],
+          "bbox_norm": [
+            0.9175,
+            0.2555000036298441,
+            0.9345,
+            0.3035000032265281
+          ],
+          "width": 8.5,
+          "height": 10.895999908447266
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "motorcycle",
+          "bbox": [
+            128.25,
+            10.101499557495117,
+            475.75,
+            219.62249755859375
+          ],
+          "bbox_norm": [
+            0.2565,
+            0.04449999805063928,
+            0.9515,
+            0.9674999892449064
+          ],
+          "width": 347.5,
+          "height": 209.52099800109863,
+          "matched_class": "motorbike"
+        }
+      ],
+      "num_all": 3,
+      "num_filtered": 1
+    }
+  ]
+}

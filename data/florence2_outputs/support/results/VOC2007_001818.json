@@ -1,0 +1,135 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_001818.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_219><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            109.75,
+            0.16599999368190765,
+            499.25,
+            331.5019836425781
+          ],
+          "bbox_norm": [
+            0.2195,
+            0.0004999999809696013,
+            0.9985,
+            0.998499950730657
+          ],
+          "width": 389.5,
+          "height": 331.3359836488962
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_218><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            109.25,
+            0.16599999368190765,
+            499.25,
+            331.5019836425781
+          ],
+          "bbox_norm": [
+            0.2185,
+            0.0004999999809696013,
+            0.9985,
+            0.998499950730657
+          ],
+          "width": 390.0,
+          "height": 331.3359836488962
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a close-up of a person's face, with a white background and a black and white image of a woman's face in the background, and a white and black image of the word \"love\" written in a cursive font<loc_219><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "the image shows a close-up of a person's face, with a white background and a black and white image of a woman's face in the background, and a white and black image of the word \"love\" written in a cursive font",
+          "bbox": [
+            109.75,
+            0.16599999368190765,
+            499.25,
+            331.5019836425781
+          ],
+          "bbox_norm": [
+            0.2195,
+            0.0004999999809696013,
+            0.9985,
+            0.998499950730657
+          ],
+          "width": 389.5,
+          "height": 331.3359836488962
+        }
+      ]
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_218><loc_0><loc_998><loc_996></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            109.25,
+            0.16599999368190765,
+            499.25,
+            330.8379821777344
+          ],
+          "bbox_norm": [
+            0.2185,
+            0.0004999999809696013,
+            0.9985,
+            0.996499946318477
+          ],
+          "width": 390.0,
+          "height": 330.67198218405247
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_218><loc_0><loc_998><loc_998></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            109.25,
+            0.16599999368190765,
+            499.25,
+            331.5019836425781
+          ],
+          "bbox_norm": [
+            0.2185,
+            0.0004999999809696013,
+            0.9985,
+            0.998499950730657
+          ],
+          "width": 390.0,
+          "height": 331.3359836488962
+        }
+      ]
+    }
+  ]
+}

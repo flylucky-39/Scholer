@@ -1,0 +1,160 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_003646.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>bicycle<loc_666><loc_891><loc_998><loc_998>bicycle wheel<loc_574><loc_587><loc_720><loc_902>person<loc_636><loc_0><loc_998><loc_751><loc_569><loc_110><loc_867><loc_998>plastic bag<loc_329><loc_57><loc_492><loc_339><loc_78><loc_598><loc_223><loc_744>television<loc_213><loc_316><loc_625><loc_778><loc_30><loc_370><loc_222><loc_607></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "bicycle",
+          "bbox": [
+            333.25,
+            334.3125,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.6665,
+            0.8915,
+            0.9985,
+            0.9985
+          ],
+          "width": 166.0,
+          "height": 40.125
+        },
+        {
+          "index": 1,
+          "label": "bicycle wheel",
+          "bbox": [
+            287.25,
+            220.3125,
+            360.25,
+            338.4375
+          ],
+          "bbox_norm": [
+            0.5745,
+            0.5875,
+            0.7205,
+            0.9025
+          ],
+          "width": 73.0,
+          "height": 118.125
+        },
+        {
+          "index": 2,
+          "label": "person",
+          "bbox": [
+            318.25,
+            0.1875,
+            499.25,
+            281.8125
+          ],
+          "bbox_norm": [
+            0.6365,
+            0.0005,
+            0.9985,
+            0.7515
+          ],
+          "width": 181.0,
+          "height": 281.625
+        },
+        {
+          "index": 3,
+          "label": "person",
+          "bbox": [
+            284.75,
+            41.4375,
+            433.75,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.5695,
+            0.1105,
+            0.8675,
+            0.9985
+          ],
+          "width": 149.0,
+          "height": 333.0
+        },
+        {
+          "index": 4,
+          "label": "plastic bag",
+          "bbox": [
+            164.75,
+            21.5625,
+            246.25,
+            127.3125
+          ],
+          "bbox_norm": [
+            0.3295,
+            0.0575,
+            0.4925,
+            0.3395
+          ],
+          "width": 81.5,
+          "height": 105.75
+        },
+        {
+          "index": 5,
+          "label": "plastic bag",
+          "bbox": [
+            39.25,
+            224.4375,
+            111.75,
+            279.1875
+          ],
+          "bbox_norm": [
+            0.0785,
+            0.5985,
+            0.2235,
+            0.7445
+          ],
+          "width": 72.5,
+          "height": 54.75
+        },
+        {
+          "index": 6,
+          "label": "television",
+          "bbox": [
+            106.75,
+            118.6875,
+            312.75,
+            291.9375
+          ],
+          "bbox_norm": [
+            0.2135,
+            0.3165,
+            0.6255,
+            0.7785
+          ],
+          "width": 206.0,
+          "height": 173.25
+        },
+        {
+          "index": 7,
+          "label": "television",
+          "bbox": [
+            15.25,
+            138.9375,
+            111.25,
+            227.8125
+          ],
+          "bbox_norm": [
+            0.0305,
+            0.3705,
+            0.2225,
+            0.6075
+          ],
+          "width": 96.0,
+          "height": 88.875
+        }
+      ],
+      "filtered_detections": [],
+      "num_all": 8,
+      "num_filtered": 0
+    }
+  ]
+}

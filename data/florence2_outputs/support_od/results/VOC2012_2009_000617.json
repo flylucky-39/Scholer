@@ -1,0 +1,198 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_000617.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>bus<loc_123><loc_0><loc_998><loc_929>handbag<loc_172><loc_619><loc_274><loc_998><loc_330><loc_799><loc_464><loc_998><loc_769><loc_835><loc_845><loc_998>person<loc_0><loc_357><loc_383><loc_998><loc_678><loc_395><loc_998><loc_998><loc_206><loc_398><loc_424><loc_973>poster<loc_0><loc_352><loc_37><loc_612><loc_0><loc_62><loc_25><loc_326></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            61.75,
+            0.1875,
+            499.25,
+            348.5625
+          ],
+          "bbox_norm": [
+            0.1235,
+            0.0005,
+            0.9985,
+            0.9295
+          ],
+          "width": 437.5,
+          "height": 348.375
+        },
+        {
+          "index": 1,
+          "label": "handbag",
+          "bbox": [
+            86.25,
+            232.3125,
+            137.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.1725,
+            0.6195,
+            0.2745,
+            0.9985
+          ],
+          "width": 51.0,
+          "height": 142.125
+        },
+        {
+          "index": 2,
+          "label": "handbag",
+          "bbox": [
+            165.25,
+            299.8125,
+            232.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.3305,
+            0.7995,
+            0.4645,
+            0.9985
+          ],
+          "width": 67.0,
+          "height": 74.625
+        },
+        {
+          "index": 3,
+          "label": "handbag",
+          "bbox": [
+            384.75,
+            313.3125,
+            422.75,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.7695,
+            0.8355,
+            0.8455,
+            0.9985
+          ],
+          "width": 38.0,
+          "height": 61.125
+        },
+        {
+          "index": 4,
+          "label": "person",
+          "bbox": [
+            0.25,
+            134.0625,
+            191.75,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3575,
+            0.3835,
+            0.9985
+          ],
+          "width": 191.5,
+          "height": 240.375
+        },
+        {
+          "index": 5,
+          "label": "person",
+          "bbox": [
+            339.25,
+            148.3125,
+            499.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.6785,
+            0.3955,
+            0.9985,
+            0.9985
+          ],
+          "width": 160.0,
+          "height": 226.125
+        },
+        {
+          "index": 6,
+          "label": "person",
+          "bbox": [
+            103.25,
+            149.4375,
+            212.25,
+            365.0625
+          ],
+          "bbox_norm": [
+            0.2065,
+            0.3985,
+            0.4245,
+            0.9735
+          ],
+          "width": 109.0,
+          "height": 215.625
+        },
+        {
+          "index": 7,
+          "label": "poster",
+          "bbox": [
+            0.25,
+            132.1875,
+            18.75,
+            229.6875
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3525,
+            0.0375,
+            0.6125
+          ],
+          "width": 18.5,
+          "height": 97.5
+        },
+        {
+          "index": 8,
+          "label": "poster",
+          "bbox": [
+            0.25,
+            23.4375,
+            12.75,
+            122.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0625,
+            0.0255,
+            0.3265
+          ],
+          "width": 12.5,
+          "height": 99.0
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            61.75,
+            0.1875,
+            499.25,
+            348.5625
+          ],
+          "bbox_norm": [
+            0.1235,
+            0.0005,
+            0.9985,
+            0.9295
+          ],
+          "width": 437.5,
+          "height": 348.375,
+          "matched_class": "bus"
+        }
+      ],
+      "num_all": 9,
+      "num_filtered": 1
+    }
+  ]
+}

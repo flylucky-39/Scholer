@@ -1,0 +1,116 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_000545.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_500><loc_362><loc_728><loc_647></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            250.25,
+            135.9375,
+            364.25,
+            242.8125
+          ],
+          "bbox_norm": [
+            0.5005,
+            0.3625,
+            0.7285,
+            0.6475
+          ],
+          "width": 114.0,
+          "height": 106.875
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_500><loc_363><loc_727><loc_647></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            250.25,
+            136.3125,
+            363.75,
+            242.8125
+          ],
+          "bbox_norm": [
+            0.5005,
+            0.3635,
+            0.7275,
+            0.6475
+          ],
+          "width": 113.5,
+          "height": 106.5
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a white background with a black and white image of a white and red design on it. The design is simple and minimalistic, with a white, black, and red color scheme. The white is bold and bold, and the red is bold, with the words \"white and red\" written in a bold, white font. The word \"white\" and \"red\" in a white font, and \"white, white, and blue, and is written in red, and reads \"white.white, and white.\".\" written in white. The words \"and white, white\" in white, written in black, \"red, and 'white, 'white' in a red, 'and white' written in blue, 'blue, and' in white' in the white, 'red, 'black, and's written in the red, \"white' and 'blue' in blue ' 'white ' 'blue ' 'and' in red' written on 'red' in 'white', written in 'black' written 'white,' in white ' ' '</s>",
+      "detections": []
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_501><loc_451><loc_726><loc_646></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            250.75,
+            169.3125,
+            363.25,
+            242.4375
+          ],
+          "bbox_norm": [
+            0.5015,
+            0.4515,
+            0.7265,
+            0.6465
+          ],
+          "width": 112.5,
+          "height": 73.125
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_500><loc_364><loc_727><loc_647></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            250.25,
+            136.6875,
+            363.75,
+            242.8125
+          ],
+          "bbox_norm": [
+            0.5005,
+            0.3645,
+            0.7275,
+            0.6475
+          ],
+          "width": 113.5,
+          "height": 106.125
+        }
+      ]
+    }
+  ]
+}

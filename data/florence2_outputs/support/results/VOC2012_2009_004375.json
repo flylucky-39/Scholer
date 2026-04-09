@@ -1,0 +1,135 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_004375.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_335><loc_469><loc_573><loc_737></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            167.75,
+            139.9110107421875,
+            286.75,
+            219.77500915527344
+          ],
+          "bbox_norm": [
+            0.3355,
+            0.46950003604760904,
+            0.5735,
+            0.7375000307223941
+          ],
+          "width": 119.0,
+          "height": 79.86399841308594
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_335><loc_468><loc_573><loc_737></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            167.75,
+            139.61300659179688,
+            286.75,
+            219.77500915527344
+          ],
+          "bbox_norm": [
+            0.3355,
+            0.46850002212012376,
+            0.5735,
+            0.7375000307223941
+          ],
+          "width": 119.0,
+          "height": 80.16200256347656
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a close up of a person's face with a black and white image on it, which appears to be a picture of a man with a white and black image on his face, and he is wearing a white shirt with a red and black design on it. The man's face is also white and he's wearing a red, white, and black. He is also wearing a black, white and white striped shirt<loc_335><loc_469><loc_573><loc_737></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "the image shows a close up of a person's face with a black and white image on it, which appears to be a picture of a man with a white and black image on his face, and he is wearing a white shirt with a red and black design on it. The man's face is also white and he's wearing a red, white, and black. He is also wearing a black, white and white striped shirt",
+          "bbox": [
+            167.75,
+            139.9110107421875,
+            286.75,
+            219.77500915527344
+          ],
+          "bbox_norm": [
+            0.3355,
+            0.46950003604760904,
+            0.5735,
+            0.7375000307223941
+          ],
+          "width": 119.0,
+          "height": 79.86399841308594
+        }
+      ]
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_335><loc_467><loc_575><loc_741></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            167.75,
+            139.31500244140625,
+            287.75,
+            220.96701049804688
+          ],
+          "bbox_norm": [
+            0.3355,
+            0.4675000081926384,
+            0.5755,
+            0.7415000352283452
+          ],
+          "width": 120.0,
+          "height": 81.65200805664062
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_336><loc_470><loc_574><loc_737></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            168.25,
+            140.20899963378906,
+            287.25,
+            219.77500915527344
+          ],
+          "bbox_norm": [
+            0.3365,
+            0.4704999987711042,
+            0.5745,
+            0.7375000307223941
+          ],
+          "width": 119.0,
+          "height": 79.56600952148438
+        }
+      ]
+    }
+  ]
+}

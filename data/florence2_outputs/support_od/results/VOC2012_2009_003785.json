@@ -1,0 +1,252 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2009_003785.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>book<loc_776><loc_744><loc_980><loc_864><loc_801><loc_726><loc_998><loc_823><loc_818><loc_702><loc_998><loc_779><loc_682><loc_499><loc_844><loc_570><loc_800><loc_837><loc_980><loc_886><loc_746><loc_514><loc_845><loc_568><loc_968><loc_565><loc_998><loc_610>bowl<loc_819><loc_488><loc_975><loc_593>lamp<loc_700><loc_0><loc_959><loc_520>lampshade<loc_700><loc_0><loc_958><loc_214>person<loc_0><loc_256><loc_650><loc_900>studio couch<loc_0><loc_375><loc_756><loc_998></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "book",
+          "bbox": [
+            388.25,
+            279.1875,
+            490.25,
+            324.1875
+          ],
+          "bbox_norm": [
+            0.7765,
+            0.7445,
+            0.9805,
+            0.8645
+          ],
+          "width": 102.0,
+          "height": 45.0
+        },
+        {
+          "index": 1,
+          "label": "book",
+          "bbox": [
+            400.75,
+            272.4375,
+            499.25,
+            308.8125
+          ],
+          "bbox_norm": [
+            0.8015,
+            0.7265,
+            0.9985,
+            0.8235
+          ],
+          "width": 98.5,
+          "height": 36.375
+        },
+        {
+          "index": 2,
+          "label": "book",
+          "bbox": [
+            409.25,
+            263.4375,
+            499.25,
+            292.3125
+          ],
+          "bbox_norm": [
+            0.8185,
+            0.7025,
+            0.9985,
+            0.7795
+          ],
+          "width": 90.0,
+          "height": 28.875
+        },
+        {
+          "index": 3,
+          "label": "book",
+          "bbox": [
+            341.25,
+            187.3125,
+            422.25,
+            213.9375
+          ],
+          "bbox_norm": [
+            0.6825,
+            0.4995,
+            0.8445,
+            0.5705
+          ],
+          "width": 81.0,
+          "height": 26.625
+        },
+        {
+          "index": 4,
+          "label": "book",
+          "bbox": [
+            400.25,
+            314.0625,
+            490.25,
+            332.4375
+          ],
+          "bbox_norm": [
+            0.8005,
+            0.8375,
+            0.9805,
+            0.8865
+          ],
+          "width": 90.0,
+          "height": 18.375
+        },
+        {
+          "index": 5,
+          "label": "book",
+          "bbox": [
+            373.25,
+            192.9375,
+            422.75,
+            213.1875
+          ],
+          "bbox_norm": [
+            0.7465,
+            0.5145,
+            0.8455,
+            0.5685
+          ],
+          "width": 49.5,
+          "height": 20.25
+        },
+        {
+          "index": 6,
+          "label": "book",
+          "bbox": [
+            484.25,
+            212.0625,
+            499.25,
+            228.9375
+          ],
+          "bbox_norm": [
+            0.9685,
+            0.5655,
+            0.9985,
+            0.6105
+          ],
+          "width": 15.0,
+          "height": 16.875
+        },
+        {
+          "index": 7,
+          "label": "bowl",
+          "bbox": [
+            409.75,
+            183.1875,
+            487.75,
+            222.5625
+          ],
+          "bbox_norm": [
+            0.8195,
+            0.4885,
+            0.9755,
+            0.5935
+          ],
+          "width": 78.0,
+          "height": 39.375
+        },
+        {
+          "index": 8,
+          "label": "lamp",
+          "bbox": [
+            350.25,
+            0.1875,
+            479.75,
+            195.1875
+          ],
+          "bbox_norm": [
+            0.7005,
+            0.0005,
+            0.9595,
+            0.5205
+          ],
+          "width": 129.5,
+          "height": 195.0
+        },
+        {
+          "index": 9,
+          "label": "lampshade",
+          "bbox": [
+            350.25,
+            0.1875,
+            479.25,
+            80.4375
+          ],
+          "bbox_norm": [
+            0.7005,
+            0.0005,
+            0.9585,
+            0.2145
+          ],
+          "width": 129.0,
+          "height": 80.25
+        },
+        {
+          "index": 10,
+          "label": "person",
+          "bbox": [
+            0.25,
+            96.1875,
+            325.25,
+            337.6875
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.2565,
+            0.6505,
+            0.9005
+          ],
+          "width": 325.0,
+          "height": 241.5
+        },
+        {
+          "index": 11,
+          "label": "studio couch",
+          "bbox": [
+            0.25,
+            140.8125,
+            378.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3755,
+            0.7565,
+            0.9985
+          ],
+          "width": 378.0,
+          "height": 233.625
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 11,
+          "label": "studio couch",
+          "bbox": [
+            0.25,
+            140.8125,
+            378.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3755,
+            0.7565,
+            0.9985
+          ],
+          "width": 378.0,
+          "height": 233.625,
+          "matched_class": "sofa"
+        }
+      ],
+      "num_all": 12,
+      "num_filtered": 1
+    }
+  ]
+}

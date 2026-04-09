@@ -1,0 +1,144 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_006290.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>bus<loc_41><loc_178><loc_947><loc_822>car<loc_930><loc_511><loc_998><loc_718>headlight<loc_914><loc_639><loc_943><loc_677>wheel<loc_404><loc_622><loc_499><loc_797><loc_183><loc_577><loc_242><loc_695><loc_71><loc_562><loc_106><loc_642></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            20.75,
+            66.9375,
+            473.75,
+            308.4375
+          ],
+          "bbox_norm": [
+            0.0415,
+            0.1785,
+            0.9475,
+            0.8225
+          ],
+          "width": 453.0,
+          "height": 241.5
+        },
+        {
+          "index": 1,
+          "label": "car",
+          "bbox": [
+            465.25,
+            191.8125,
+            499.25,
+            269.4375
+          ],
+          "bbox_norm": [
+            0.9305,
+            0.5115,
+            0.9985,
+            0.7185
+          ],
+          "width": 34.0,
+          "height": 77.625
+        },
+        {
+          "index": 2,
+          "label": "headlight",
+          "bbox": [
+            457.25,
+            239.8125,
+            471.75,
+            254.0625
+          ],
+          "bbox_norm": [
+            0.9145,
+            0.6395,
+            0.9435,
+            0.6775
+          ],
+          "width": 14.5,
+          "height": 14.25
+        },
+        {
+          "index": 3,
+          "label": "wheel",
+          "bbox": [
+            202.25,
+            233.4375,
+            249.75,
+            299.0625
+          ],
+          "bbox_norm": [
+            0.4045,
+            0.6225,
+            0.4995,
+            0.7975
+          ],
+          "width": 47.5,
+          "height": 65.625
+        },
+        {
+          "index": 4,
+          "label": "wheel",
+          "bbox": [
+            91.75,
+            216.5625,
+            121.25,
+            260.8125
+          ],
+          "bbox_norm": [
+            0.1835,
+            0.5775,
+            0.2425,
+            0.6955
+          ],
+          "width": 29.5,
+          "height": 44.25
+        },
+        {
+          "index": 5,
+          "label": "wheel",
+          "bbox": [
+            35.75,
+            210.9375,
+            53.25,
+            240.9375
+          ],
+          "bbox_norm": [
+            0.0715,
+            0.5625,
+            0.1065,
+            0.6425
+          ],
+          "width": 17.5,
+          "height": 30.0
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            20.75,
+            66.9375,
+            473.75,
+            308.4375
+          ],
+          "bbox_norm": [
+            0.0415,
+            0.1785,
+            0.9475,
+            0.8225
+          ],
+          "width": 453.0,
+          "height": 241.5,
+          "matched_class": "bus"
+        }
+      ],
+      "num_all": 6,
+      "num_filtered": 1
+    }
+  ]
+}

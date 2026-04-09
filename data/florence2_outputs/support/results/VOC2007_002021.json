@@ -1,0 +1,116 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002021.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_347><loc_115><loc_998><loc_994></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            173.75,
+            38.46150207519531,
+            499.25,
+            331.16851806640625
+          ],
+          "bbox_norm": [
+            0.3475,
+            0.11550000623181776,
+            0.9985,
+            0.9945000542534722
+          ],
+          "width": 325.5,
+          "height": 292.70701599121094
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_346><loc_113><loc_998><loc_994></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            173.25,
+            37.795501708984375,
+            499.25,
+            331.16851806640625
+          ],
+          "bbox_norm": [
+            0.3465,
+            0.1135000051320852,
+            0.9985,
+            0.9945000542534722
+          ],
+          "width": 326.0,
+          "height": 293.3730163574219
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a close-up of a person wearing a white shirt and a black hat with a white logo on it. The person is standing in front of a white background and is wearing a black and white striped shirt and black pants. The shirt is white and has a white collar with a black logo on the left side of the image. The collar is black and is attached to a white and is white with a red and white logo. The white and white collar is also white and appears to be a white, and the white and red logo is written on the right side of this image.\n\n\nThe image shows the person wearing white and black, and they are wearing white, white and blue, and white, which is white. They are wearing a blue and white patterned shirt and white. The background is white, with white and yellow, and there are two white and green, which are white and gray. The words written in white and are written in black, which reads \"white and white.\"<loc_346><loc_116><loc_998><loc_998></s>",
+      "detections": []
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_347><loc_112><loc_998><loc_994></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            173.75,
+            37.462501525878906,
+            499.25,
+            331.16851806640625
+          ],
+          "bbox_norm": [
+            0.3475,
+            0.11250000458221894,
+            0.9985,
+            0.9945000542534722
+          ],
+          "width": 325.5,
+          "height": 293.70601654052734
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_347><loc_116><loc_998><loc_993></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            173.75,
+            38.79450225830078,
+            499.25,
+            330.83551025390625
+          ],
+          "bbox_norm": [
+            0.3475,
+            0.11650000678168403,
+            0.9985,
+            0.9935000307925113
+          ],
+          "width": 325.5,
+          "height": 292.04100799560547
+        }
+      ]
+    }
+  ]
+}

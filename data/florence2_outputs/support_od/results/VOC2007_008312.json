@@ -1,0 +1,90 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_008312.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>headlight<loc_292><loc_406><loc_394><loc_495>motorcycle<loc_101><loc_296><loc_691><loc_871>person<loc_459><loc_159><loc_892><loc_799></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "headlight",
+          "bbox": [
+            109.6875,
+            203.25,
+            147.9375,
+            247.75
+          ],
+          "bbox_norm": [
+            0.2925,
+            0.4065,
+            0.3945,
+            0.4955
+          ],
+          "width": 38.25,
+          "height": 44.5
+        },
+        {
+          "index": 1,
+          "label": "motorcycle",
+          "bbox": [
+            38.0625,
+            148.25,
+            259.3125,
+            435.75
+          ],
+          "bbox_norm": [
+            0.1015,
+            0.2965,
+            0.6915,
+            0.8715
+          ],
+          "width": 221.25,
+          "height": 287.5
+        },
+        {
+          "index": 2,
+          "label": "person",
+          "bbox": [
+            172.3125,
+            79.75,
+            334.6875,
+            399.75
+          ],
+          "bbox_norm": [
+            0.4595,
+            0.1595,
+            0.8925,
+            0.7995
+          ],
+          "width": 162.375,
+          "height": 320.0
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 1,
+          "label": "motorcycle",
+          "bbox": [
+            38.0625,
+            148.25,
+            259.3125,
+            435.75
+          ],
+          "bbox_norm": [
+            0.1015,
+            0.2965,
+            0.6915,
+            0.8715
+          ],
+          "width": 221.25,
+          "height": 287.5,
+          "matched_class": "motorbike"
+        }
+      ],
+      "num_all": 3,
+      "num_filtered": 1
+    }
+  ]
+}

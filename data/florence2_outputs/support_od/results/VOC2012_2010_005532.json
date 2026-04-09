@@ -1,0 +1,162 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_005532.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>blanket<loc_73><loc_578><loc_281><loc_873>dog<loc_47><loc_192><loc_490><loc_644><loc_792><loc_790><loc_970><loc_998>dog collar<loc_360><loc_401><loc_386><loc_538>person<loc_425><loc_213><loc_796><loc_902>studio couch<loc_0><loc_353><loc_887><loc_974>watch<loc_547><loc_439><loc_564><loc_470></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "blanket",
+          "bbox": [
+            36.75,
+            216.9375,
+            140.75,
+            327.5625
+          ],
+          "bbox_norm": [
+            0.0735,
+            0.5785,
+            0.2815,
+            0.8735
+          ],
+          "width": 104.0,
+          "height": 110.625
+        },
+        {
+          "index": 1,
+          "label": "dog",
+          "bbox": [
+            23.75,
+            72.1875,
+            245.25,
+            241.6875
+          ],
+          "bbox_norm": [
+            0.0475,
+            0.1925,
+            0.4905,
+            0.6445
+          ],
+          "width": 221.5,
+          "height": 169.5
+        },
+        {
+          "index": 2,
+          "label": "dog",
+          "bbox": [
+            396.25,
+            296.4375,
+            485.25,
+            374.4375
+          ],
+          "bbox_norm": [
+            0.7925,
+            0.7905,
+            0.9705,
+            0.9985
+          ],
+          "width": 89.0,
+          "height": 78.0
+        },
+        {
+          "index": 3,
+          "label": "dog collar",
+          "bbox": [
+            180.25,
+            150.5625,
+            193.25,
+            201.9375
+          ],
+          "bbox_norm": [
+            0.3605,
+            0.4015,
+            0.3865,
+            0.5385
+          ],
+          "width": 13.0,
+          "height": 51.375
+        },
+        {
+          "index": 4,
+          "label": "person",
+          "bbox": [
+            212.75,
+            80.0625,
+            398.25,
+            338.4375
+          ],
+          "bbox_norm": [
+            0.4255,
+            0.2135,
+            0.7965,
+            0.9025
+          ],
+          "width": 185.5,
+          "height": 258.375
+        },
+        {
+          "index": 5,
+          "label": "studio couch",
+          "bbox": [
+            0.25,
+            132.5625,
+            443.75,
+            365.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3535,
+            0.8875,
+            0.9745
+          ],
+          "width": 443.5,
+          "height": 232.875
+        },
+        {
+          "index": 6,
+          "label": "watch",
+          "bbox": [
+            273.75,
+            164.8125,
+            282.25,
+            176.4375
+          ],
+          "bbox_norm": [
+            0.5475,
+            0.4395,
+            0.5645,
+            0.4705
+          ],
+          "width": 8.5,
+          "height": 11.625
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 5,
+          "label": "studio couch",
+          "bbox": [
+            0.25,
+            132.5625,
+            443.75,
+            365.4375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.3535,
+            0.8875,
+            0.9745
+          ],
+          "width": 443.5,
+          "height": 232.875,
+          "matched_class": "sofa"
+        }
+      ],
+      "num_all": 7,
+      "num_filtered": 1
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_004138.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_897><loc_513><loc_947><loc_621></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            448.75,
+            151.4824981689453,
+            473.75,
+            183.34249877929688
+          ],
+          "bbox_norm": [
+            0.8975,
+            0.5134999937930349,
+            0.9475,
+            0.6214999958620233
+          ],
+          "width": 25.0,
+          "height": 31.860000610351562
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_375><loc_262><loc_520><loc_478></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            187.75,
+            77.4375,
+            260.25,
+            141.15750122070312
+          ],
+          "bbox_norm": [
+            0.3755,
+            0.2625,
+            0.5205,
+            0.4785000041379767
+          ],
+          "width": 72.5,
+          "height": 63.720001220703125
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image is of a picture of a man in a suit and tie, and he is wearing a white shirt with a black tie and a black and white striped tie. He has a white and black striped shirt and a white collar with a white stripe on the collar. He is also wearing a black shirt and white white shirt and black pants with a red and black stripe on his collar. The shirt is white and white and he has a black collar with white stripes on his neck. He also has a red, white, and black stripes on the left side of his neck and white collar.</s>",
+      "detections": []
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_374><loc_262><loc_520><loc_478></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            187.25,
+            77.4375,
+            260.25,
+            141.15750122070312
+          ],
+          "bbox_norm": [
+            0.3745,
+            0.2625,
+            0.5205,
+            0.4785000041379767
+          ],
+          "width": 73.0,
+          "height": 63.720001220703125
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_375><loc_263><loc_519><loc_478></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            187.75,
+            77.73249816894531,
+            259.75,
+            141.15750122070312
+          ],
+          "bbox_norm": [
+            0.3755,
+            0.26349999379303496,
+            0.5195,
+            0.4785000041379767
+          ],
+          "width": 72.0,
+          "height": 63.42500305175781
+        }
+      ]
+    }
+  ]
+}

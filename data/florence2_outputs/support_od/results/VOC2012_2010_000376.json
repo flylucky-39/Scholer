@@ -1,0 +1,252 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_000376.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>antenna<loc_144><loc_83><loc_172><loc_111>bus<loc_99><loc_288><loc_774><loc_746>headlight<loc_543><loc_663><loc_577><loc_695><loc_729><loc_659><loc_759><loc_690>parking meter<loc_961><loc_613><loc_988><loc_765>person<loc_523><loc_404><loc_584><loc_496><loc_276><loc_471><loc_319><loc_498>signboard<loc_765><loc_340><loc_903><loc_389>steering wheel<loc_521><loc_466><loc_569><loc_495>vehicle registration plate<loc_624><loc_699><loc_682><loc_719>windshield wiper<loc_583><loc_430><loc_654><loc_600><loc_656><loc_422><loc_725><loc_599></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "antenna",
+          "bbox": [
+            72.25,
+            31.3125,
+            86.25,
+            41.8125
+          ],
+          "bbox_norm": [
+            0.1445,
+            0.0835,
+            0.1725,
+            0.1115
+          ],
+          "width": 14.0,
+          "height": 10.5
+        },
+        {
+          "index": 1,
+          "label": "bus",
+          "bbox": [
+            49.75,
+            108.1875,
+            387.25,
+            279.9375
+          ],
+          "bbox_norm": [
+            0.0995,
+            0.2885,
+            0.7745,
+            0.7465
+          ],
+          "width": 337.5,
+          "height": 171.75
+        },
+        {
+          "index": 2,
+          "label": "headlight",
+          "bbox": [
+            271.75,
+            248.8125,
+            288.75,
+            260.8125
+          ],
+          "bbox_norm": [
+            0.5435,
+            0.6635,
+            0.5775,
+            0.6955
+          ],
+          "width": 17.0,
+          "height": 12.0
+        },
+        {
+          "index": 3,
+          "label": "headlight",
+          "bbox": [
+            364.75,
+            247.3125,
+            379.75,
+            258.9375
+          ],
+          "bbox_norm": [
+            0.7295,
+            0.6595,
+            0.7595,
+            0.6905
+          ],
+          "width": 15.0,
+          "height": 11.625
+        },
+        {
+          "index": 4,
+          "label": "parking meter",
+          "bbox": [
+            480.75,
+            230.0625,
+            494.25,
+            287.0625
+          ],
+          "bbox_norm": [
+            0.9615,
+            0.6135,
+            0.9885,
+            0.7655
+          ],
+          "width": 13.5,
+          "height": 57.0
+        },
+        {
+          "index": 5,
+          "label": "person",
+          "bbox": [
+            261.75,
+            151.6875,
+            292.25,
+            186.1875
+          ],
+          "bbox_norm": [
+            0.5235,
+            0.4045,
+            0.5845,
+            0.4965
+          ],
+          "width": 30.5,
+          "height": 34.5
+        },
+        {
+          "index": 6,
+          "label": "person",
+          "bbox": [
+            138.25,
+            176.8125,
+            159.75,
+            186.9375
+          ],
+          "bbox_norm": [
+            0.2765,
+            0.4715,
+            0.3195,
+            0.4985
+          ],
+          "width": 21.5,
+          "height": 10.125
+        },
+        {
+          "index": 7,
+          "label": "signboard",
+          "bbox": [
+            382.75,
+            127.6875,
+            451.75,
+            146.0625
+          ],
+          "bbox_norm": [
+            0.7655,
+            0.3405,
+            0.9035,
+            0.3895
+          ],
+          "width": 69.0,
+          "height": 18.375
+        },
+        {
+          "index": 8,
+          "label": "steering wheel",
+          "bbox": [
+            260.75,
+            174.9375,
+            284.75,
+            185.8125
+          ],
+          "bbox_norm": [
+            0.5215,
+            0.4665,
+            0.5695,
+            0.4955
+          ],
+          "width": 24.0,
+          "height": 10.875
+        },
+        {
+          "index": 9,
+          "label": "vehicle registration plate",
+          "bbox": [
+            312.25,
+            262.3125,
+            341.25,
+            269.8125
+          ],
+          "bbox_norm": [
+            0.6245,
+            0.6995,
+            0.6825,
+            0.7195
+          ],
+          "width": 29.0,
+          "height": 7.5
+        },
+        {
+          "index": 10,
+          "label": "windshield wiper",
+          "bbox": [
+            291.75,
+            161.4375,
+            327.25,
+            225.1875
+          ],
+          "bbox_norm": [
+            0.5835,
+            0.4305,
+            0.6545,
+            0.6005
+          ],
+          "width": 35.5,
+          "height": 63.75
+        },
+        {
+          "index": 11,
+          "label": "windshield wiper",
+          "bbox": [
+            328.25,
+            158.4375,
+            362.75,
+            224.8125
+          ],
+          "bbox_norm": [
+            0.6565,
+            0.4225,
+            0.7255,
+            0.5995
+          ],
+          "width": 34.5,
+          "height": 66.375
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 1,
+          "label": "bus",
+          "bbox": [
+            49.75,
+            108.1875,
+            387.25,
+            279.9375
+          ],
+          "bbox_norm": [
+            0.0995,
+            0.2885,
+            0.7745,
+            0.7465
+          ],
+          "width": 337.5,
+          "height": 171.75,
+          "matched_class": "bus"
+        }
+      ],
+      "num_all": 12,
+      "num_filtered": 1
+    }
+  ]
+}

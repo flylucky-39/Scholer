@@ -1,0 +1,72 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2008_007336.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>motorcycle<loc_25><loc_403><loc_958><loc_998>person<loc_64><loc_77><loc_735><loc_851></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "motorcycle",
+          "bbox": [
+            8.517000198364258,
+            201.75,
+            320.13897705078125,
+            499.25
+          ],
+          "bbox_norm": [
+            0.025500000593904965,
+            0.4035,
+            0.9584999312897642,
+            0.9985
+          ],
+          "width": 311.621976852417,
+          "height": 297.5
+        },
+        {
+          "index": 1,
+          "label": "person",
+          "bbox": [
+            21.542999267578125,
+            38.75,
+            245.65699768066406,
+            425.75
+          ],
+          "bbox_norm": [
+            0.06449999780712014,
+            0.0775,
+            0.7354999930558804,
+            0.8515
+          ],
+          "width": 224.11399841308594,
+          "height": 387.0
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "motorcycle",
+          "bbox": [
+            8.517000198364258,
+            201.75,
+            320.13897705078125,
+            499.25
+          ],
+          "bbox_norm": [
+            0.025500000593904965,
+            0.4035,
+            0.9584999312897642,
+            0.9985
+          ],
+          "width": 311.621976852417,
+          "height": 297.5,
+          "matched_class": "motorbike"
+        }
+      ],
+      "num_all": 2,
+      "num_filtered": 1
+    }
+  ]
+}

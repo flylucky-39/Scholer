@@ -1,0 +1,52 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2010_004138.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>boat<loc_369><loc_268><loc_524><loc_475><loc_895><loc_519><loc_948><loc_621></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "boat",
+          "bbox": [
+            184.75,
+            79.2074966430664,
+            262.25,
+            140.27249145507812
+          ],
+          "bbox_norm": [
+            0.3695,
+            0.26849998862056407,
+            0.5245,
+            0.47549997103416314
+          ],
+          "width": 77.5,
+          "height": 61.06499481201172
+        },
+        {
+          "index": 1,
+          "label": "boat",
+          "bbox": [
+            447.75,
+            153.2524871826172,
+            474.25,
+            183.34249877929688
+          ],
+          "bbox_norm": [
+            0.8955,
+            0.5194999565512447,
+            0.9485,
+            0.6214999958620233
+          ],
+          "width": 26.5,
+          "height": 30.090011596679688
+        }
+      ],
+      "filtered_detections": [],
+      "num_all": 2,
+      "num_filtered": 0
+    }
+  ]
+}

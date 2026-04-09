@@ -1,0 +1,180 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002278.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>bus<loc_14><loc_200><loc_984><loc_836>car<loc_0><loc_475><loc_18><loc_522>headlight<loc_832><loc_568><loc_850><loc_617>rearview mirror<loc_813><loc_409><loc_853><loc_450><loc_960><loc_428><loc_984><loc_466>steering wheel<loc_182><loc_229><loc_247><loc_272>vehicle registration plate<loc_903><loc_647><loc_926><loc_688>windshield wiper<loc_721><loc_399><loc_753><loc_424></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            7.25,
+            75.1875,
+            492.25,
+            313.6875
+          ],
+          "bbox_norm": [
+            0.0145,
+            0.2005,
+            0.9845,
+            0.8365
+          ],
+          "width": 485.0,
+          "height": 238.5
+        },
+        {
+          "index": 1,
+          "label": "car",
+          "bbox": [
+            0.25,
+            178.3125,
+            9.25,
+            195.9375
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.4755,
+            0.0185,
+            0.5225
+          ],
+          "width": 9.0,
+          "height": 17.625
+        },
+        {
+          "index": 2,
+          "label": "headlight",
+          "bbox": [
+            416.25,
+            213.1875,
+            425.25,
+            231.5625
+          ],
+          "bbox_norm": [
+            0.8325,
+            0.5685,
+            0.8505,
+            0.6175
+          ],
+          "width": 9.0,
+          "height": 18.375
+        },
+        {
+          "index": 3,
+          "label": "rearview mirror",
+          "bbox": [
+            406.75,
+            153.5625,
+            426.75,
+            168.9375
+          ],
+          "bbox_norm": [
+            0.8135,
+            0.4095,
+            0.8535,
+            0.4505
+          ],
+          "width": 20.0,
+          "height": 15.375
+        },
+        {
+          "index": 4,
+          "label": "rearview mirror",
+          "bbox": [
+            480.25,
+            160.6875,
+            492.25,
+            174.9375
+          ],
+          "bbox_norm": [
+            0.9605,
+            0.4285,
+            0.9845,
+            0.4665
+          ],
+          "width": 12.0,
+          "height": 14.25
+        },
+        {
+          "index": 5,
+          "label": "steering wheel",
+          "bbox": [
+            91.25,
+            86.0625,
+            123.75,
+            102.1875
+          ],
+          "bbox_norm": [
+            0.1825,
+            0.2295,
+            0.2475,
+            0.2725
+          ],
+          "width": 32.5,
+          "height": 16.125
+        },
+        {
+          "index": 6,
+          "label": "vehicle registration plate",
+          "bbox": [
+            451.75,
+            242.8125,
+            463.25,
+            258.1875
+          ],
+          "bbox_norm": [
+            0.9035,
+            0.6475,
+            0.9265,
+            0.6885
+          ],
+          "width": 11.5,
+          "height": 15.375
+        },
+        {
+          "index": 7,
+          "label": "windshield wiper",
+          "bbox": [
+            360.75,
+            149.8125,
+            376.75,
+            159.1875
+          ],
+          "bbox_norm": [
+            0.7215,
+            0.3995,
+            0.7535,
+            0.4245
+          ],
+          "width": 16.0,
+          "height": 9.375
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            7.25,
+            75.1875,
+            492.25,
+            313.6875
+          ],
+          "bbox_norm": [
+            0.0145,
+            0.2005,
+            0.9845,
+            0.8365
+          ],
+          "width": 485.0,
+          "height": 238.5,
+          "matched_class": "bus"
+        }
+      ],
+      "num_all": 8,
+      "num_filtered": 1
+    }
+  ]
+}

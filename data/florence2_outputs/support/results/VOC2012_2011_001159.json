@@ -1,0 +1,116 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2012_2011_001159.jpg",
+  "predictions": [
+    {
+      "query": "bird",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bird<loc_143><loc_386><loc_945><loc_882></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bird",
+          "bbox": [
+            71.75,
+            193.25,
+            472.75,
+            441.25
+          ],
+          "bbox_norm": [
+            0.1435,
+            0.3865,
+            0.9455,
+            0.8825
+          ],
+          "width": 401.0,
+          "height": 248.0
+        }
+      ]
+    },
+    {
+      "query": "bus",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>bus<loc_143><loc_386><loc_945><loc_882></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "bus",
+          "bbox": [
+            71.75,
+            193.25,
+            472.75,
+            441.25
+          ],
+          "bbox_norm": [
+            0.1435,
+            0.3865,
+            0.9455,
+            0.8825
+          ],
+          "width": 401.0,
+          "height": 248.0
+        }
+      ]
+    },
+    {
+      "query": "cow",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>the image shows a white background with a black and white image of a man in a suit and a woman in a white dress with a red and white</s>",
+      "detections": []
+    },
+    {
+      "query": "motorbike",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>motorbike<loc_142><loc_385><loc_946><loc_883></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "motorbike",
+          "bbox": [
+            71.25,
+            192.75,
+            473.25,
+            441.75
+          ],
+          "bbox_norm": [
+            0.1425,
+            0.3855,
+            0.9465,
+            0.8835
+          ],
+          "width": 402.0,
+          "height": 249.0
+        }
+      ]
+    },
+    {
+      "query": "sofa",
+      "task": "caption_to_phrase_grounding",
+      "task_token": "<CAPTION_TO_PHRASE_GROUNDING>",
+      "raw_text": "</s><s>sofa<loc_143><loc_386><loc_945><loc_881></s>",
+      "detections": [
+        {
+          "index": 0,
+          "label": "sofa",
+          "bbox": [
+            71.75,
+            193.25,
+            472.75,
+            440.75
+          ],
+          "bbox_norm": [
+            0.1435,
+            0.3865,
+            0.9455,
+            0.8815
+          ],
+          "width": 401.0,
+          "height": 247.5
+        }
+      ]
+    }
+  ]
+}

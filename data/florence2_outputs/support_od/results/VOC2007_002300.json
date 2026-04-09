@@ -1,0 +1,255 @@
+{
+  "image_path": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/images/novel_finetune/VOC2007_002300.jpg",
+  "predictions": [
+    {
+      "query": "",
+      "task": "od",
+      "task_token": "<OD>",
+      "raw_text": "</s><s>cattle<loc_220><loc_355><loc_793><loc_841><loc_546><loc_0><loc_998><loc_411><loc_0><loc_0><loc_243><loc_600><loc_830><loc_27><loc_998><loc_870>tag<loc_734><loc_408><loc_778><loc_481><loc_549><loc_436><loc_580><loc_498><loc_180><loc_138><loc_214><loc_189><loc_22><loc_148><loc_50><loc_202><loc_817><loc_52><loc_842><loc_94></s>",
+      "all_detections": [
+        {
+          "index": 0,
+          "label": "cattle",
+          "bbox": [
+            110.25,
+            133.3125,
+            396.75,
+            315.5625
+          ],
+          "bbox_norm": [
+            0.2205,
+            0.3555,
+            0.7935,
+            0.8415
+          ],
+          "width": 286.5,
+          "height": 182.25
+        },
+        {
+          "index": 1,
+          "label": "cattle",
+          "bbox": [
+            273.25,
+            0.1875,
+            499.25,
+            154.3125
+          ],
+          "bbox_norm": [
+            0.5465,
+            0.0005,
+            0.9985,
+            0.4115
+          ],
+          "width": 226.0,
+          "height": 154.125
+        },
+        {
+          "index": 2,
+          "label": "cattle",
+          "bbox": [
+            0.25,
+            0.1875,
+            121.75,
+            225.1875
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.2435,
+            0.6005
+          ],
+          "width": 121.5,
+          "height": 225.0
+        },
+        {
+          "index": 3,
+          "label": "cattle",
+          "bbox": [
+            415.25,
+            10.3125,
+            499.25,
+            326.4375
+          ],
+          "bbox_norm": [
+            0.8305,
+            0.0275,
+            0.9985,
+            0.8705
+          ],
+          "width": 84.0,
+          "height": 316.125
+        },
+        {
+          "index": 4,
+          "label": "tag",
+          "bbox": [
+            367.25,
+            153.1875,
+            389.25,
+            180.5625
+          ],
+          "bbox_norm": [
+            0.7345,
+            0.4085,
+            0.7785,
+            0.4815
+          ],
+          "width": 22.0,
+          "height": 27.375
+        },
+        {
+          "index": 5,
+          "label": "tag",
+          "bbox": [
+            274.75,
+            163.6875,
+            290.25,
+            186.9375
+          ],
+          "bbox_norm": [
+            0.5495,
+            0.4365,
+            0.5805,
+            0.4985
+          ],
+          "width": 15.5,
+          "height": 23.25
+        },
+        {
+          "index": 6,
+          "label": "tag",
+          "bbox": [
+            90.25,
+            51.9375,
+            107.25,
+            71.0625
+          ],
+          "bbox_norm": [
+            0.1805,
+            0.1385,
+            0.2145,
+            0.1895
+          ],
+          "width": 17.0,
+          "height": 19.125
+        },
+        {
+          "index": 7,
+          "label": "tag",
+          "bbox": [
+            11.25,
+            55.6875,
+            25.25,
+            75.9375
+          ],
+          "bbox_norm": [
+            0.0225,
+            0.1485,
+            0.0505,
+            0.2025
+          ],
+          "width": 14.0,
+          "height": 20.25
+        },
+        {
+          "index": 8,
+          "label": "tag",
+          "bbox": [
+            408.75,
+            19.6875,
+            421.25,
+            35.4375
+          ],
+          "bbox_norm": [
+            0.8175,
+            0.0525,
+            0.8425,
+            0.0945
+          ],
+          "width": 12.5,
+          "height": 15.75
+        }
+      ],
+      "filtered_detections": [
+        {
+          "index": 0,
+          "label": "cattle",
+          "bbox": [
+            110.25,
+            133.3125,
+            396.75,
+            315.5625
+          ],
+          "bbox_norm": [
+            0.2205,
+            0.3555,
+            0.7935,
+            0.8415
+          ],
+          "width": 286.5,
+          "height": 182.25,
+          "matched_class": "cow"
+        },
+        {
+          "index": 1,
+          "label": "cattle",
+          "bbox": [
+            273.25,
+            0.1875,
+            499.25,
+            154.3125
+          ],
+          "bbox_norm": [
+            0.5465,
+            0.0005,
+            0.9985,
+            0.4115
+          ],
+          "width": 226.0,
+          "height": 154.125,
+          "matched_class": "cow"
+        },
+        {
+          "index": 2,
+          "label": "cattle",
+          "bbox": [
+            0.25,
+            0.1875,
+            121.75,
+            225.1875
+          ],
+          "bbox_norm": [
+            0.0005,
+            0.0005,
+            0.2435,
+            0.6005
+          ],
+          "width": 121.5,
+          "height": 225.0,
+          "matched_class": "cow"
+        },
+        {
+          "index": 3,
+          "label": "cattle",
+          "bbox": [
+            415.25,
+            10.3125,
+            499.25,
+            326.4375
+          ],
+          "bbox_norm": [
+            0.8305,
+            0.0275,
+            0.9985,
+            0.8705
+          ],
+          "width": 84.0,
+          "height": 316.125,
+          "matched_class": "cow"
+        }
+      ],
+      "num_all": 9,
+      "num_filtered": 4
+    }
+  ]
+}
