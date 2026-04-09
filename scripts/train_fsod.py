@@ -158,6 +158,13 @@ def run_finetune_stage(
     print(f"Loading base pretrain weights: {base_weights}")
     model.load(str(base_weights))
 
+    # Prototype / Florence-2 init must happen AFTER model.train() rebuilds
+    # the model internally (via trainer.get_model). We use the
+    # on_pretrain_routine_end callback to inject weights right before the
+    # training loop starts.
+    _proto_init_data = None  # will be set below if needed
+    _florence_init_fn = None
+
     if use_prototype and not florence2_model:
         from fsod.voc import VOC_CLASSES
         from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
@@ -171,13 +178,7 @@ def run_finetune_stage(
             imgsz=int(config["image_size"]),
             device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
         )
-        print("Initializing cosine head with prototypes...")
-        init_cosine_head_with_prototypes(
-            model=model,
-            prototypes=prototypes,
-            novel_classes=novel_classes,
-            all_classes=VOC_CLASSES,
-        )
+        _proto_init_data = (prototypes, novel_classes, VOC_CLASSES)
 
     if florence2_model:
         from fsod.voc import VOC_CLASSES
@@ -248,15 +249,42 @@ def run_finetune_stage(
             device=device_str,
         )
 
-        print("Step 6/6: Initializing novel class weights via text-modulated prototypes...")
-        init_cosine_head_modulated(
-            model=model,
+        # Capture init data for callback (same issue: model.train rebuilds model)
+        _florence_init_fn = lambda m: init_cosine_head_modulated(
+            model=m,
             film=film,
             desc_embeddings=desc_embs,
             visual_prototypes=novel_protos,
             novel_classes=novel_classes,
             all_classes=VOC_CLASSES,
         )
+
+    # --- Register callback to inject prototype/florence weights after trainer rebuilds model ---
+    def _on_pretrain_routine_end(trainer):
+        """Inject custom CosineConv2d weights after trainer.setup_model() rebuilds the model."""
+        if _proto_init_data is not None:
+            from fsod.modules.prototype import init_cosine_head_with_prototypes
+            protos, n_cls, a_cls = _proto_init_data
+            print("Injecting prototype weights into rebuilt model...")
+            # trainer.model is the actual nn.Module
+            class _FakeYOLO:
+                """Thin wrapper so init_cosine_head_with_prototypes can access model.model.model[-1]."""
+                def __init__(self, det_model):
+                    self.model = det_model
+            init_cosine_head_with_prototypes(
+                model=_FakeYOLO(trainer.model),
+                prototypes=protos,
+                novel_classes=n_cls,
+                all_classes=a_cls,
+            )
+        if _florence_init_fn is not None:
+            print("Injecting Florence-2 modulated weights into rebuilt model...")
+            class _FakeYOLO2:
+                def __init__(self, det_model):
+                    self.model = det_model
+            _florence_init_fn(_FakeYOLO2(trainer.model))
+
+    model.add_callback("on_pretrain_routine_end", _on_pretrain_routine_end)
 
     model.train(
         data=str(data_yaml),
