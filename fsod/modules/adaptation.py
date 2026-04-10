@@ -692,11 +692,17 @@ def init_cosine_head_modulated(
     visual_prototypes: dict[str, torch.Tensor],
     novel_classes: list[str],
     all_classes: list[str],
+    alpha: float = 0.5,
 ) -> None:
-    """Initialize CosineConv2d novel class weights via FiLM(prototype, description).
+    """Initialize CosineConv2d novel class weights via alpha-blended FiLM + raw prototype.
 
     For each novel class:
-      w = normalize( FiLM(novel_proto, novel_desc_emb) )
+      film_w  = normalize( FiLM(novel_proto, novel_desc_emb) )
+      raw_w   = normalize( novel_proto )
+      final_w = normalize( alpha * raw_w + (1 - alpha) * film_w )
+
+    alpha=1.0 → pure prototype (same as --prototype only).
+    alpha=0.0 → pure FiLM output.
     """
     cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
     detect = model.model.model[-1]
@@ -706,11 +712,19 @@ def init_cosine_head_modulated(
     for cls_name in novel_classes:
         text_emb = desc_embeddings[cls_name].unsqueeze(0).to(device)
         proto = visual_prototypes[cls_name].unsqueeze(0).to(device)
-        proto = F.normalize(proto, dim=1)
+        proto_norm = F.normalize(proto, dim=1)
 
-        w = film(proto, text_emb).squeeze(0)
-        w = F.normalize(w.unsqueeze(0), dim=1).squeeze(0)
-        novel_weights[cls_name] = w
+        # FiLM-modulated weight
+        film_w = film(proto_norm, text_emb).squeeze(0)
+        film_w = F.normalize(film_w.unsqueeze(0), dim=1).squeeze(0)
+
+        # Raw prototype weight (same as prototype-only init)
+        raw_w = proto_norm.squeeze(0)
+
+        # Alpha blend then re-normalize
+        blended = alpha * raw_w + (1 - alpha) * film_w
+        blended = F.normalize(blended.unsqueeze(0), dim=1).squeeze(0)
+        novel_weights[cls_name] = blended
 
     for i in range(detect.nl):
         cosine_layer = detect.cv3[i][-1]
@@ -723,4 +737,4 @@ def init_cosine_head_modulated(
             weight[idx] = novel_weights[cls_name].to(weight.device)
 
         print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
-              f"via text-modulated prototypes")
+              f"via text-modulated prototypes (alpha={alpha:.2f})")

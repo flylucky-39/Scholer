@@ -241,15 +241,21 @@ def run_finetune_stage(
             target_classes=base_classes,
             all_classes=VOC_CLASSES,
         )
+        fl_cfg = config.get("florence2", {})
         film = train_modulation_network(
             desc_embeddings=desc_embs,
             visual_prototypes=base_protos,
             target_weights=target_wts,
             base_classes=base_classes,
+            hidden_dim=int(fl_cfg.get("film_hidden_dim", 128)),
+            epochs=int(fl_cfg.get("film_epochs", 300)),
+            weight_decay=float(fl_cfg.get("film_weight_decay", 0.05)),
             device=device_str,
         )
 
         # Capture init data for callback (same issue: model.train rebuilds model)
+        blend_alpha = float(fl_cfg.get("alpha", 0.5))
+        print(f"Step 6/6: Will blend proto + FiLM with alpha={blend_alpha:.2f} after model rebuild...")
         _florence_init_fn = lambda m: init_cosine_head_modulated(
             model=m,
             film=film,
@@ -257,6 +263,7 @@ def run_finetune_stage(
             visual_prototypes=novel_protos,
             novel_classes=novel_classes,
             all_classes=VOC_CLASSES,
+            alpha=blend_alpha,
         )
 
     # --- Register callback to inject prototype/florence weights after trainer rebuilds model ---

@@ -39,3 +39,9 @@ patience:
 replay:
   enabled: false
   base_images: 200
+
+florence2:
+  alpha: 0.7           # blend: alpha * raw_proto + (1-alpha) * film_output
+  film_hidden_dim: 128  # smaller network to reduce overfitting (was 256)
+  film_epochs: 300      # fewer epochs to reduce overfitting (was 1000)
+  film_weight_decay: 0.05  # stronger L2 regularization (was 0.01)
