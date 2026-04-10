@@ -42,11 +42,18 @@ def resolve_repo_path(raw_path: str) -> Path:
     return (PROJECT_ROOT / path).resolve()
 
 
+def get_yaml_prefix(config: dict) -> str:
+    if "coco_root" in config:
+        return "coco_fsod"
+    return "voc_fsod"
+
+
 def main() -> None:
     args = parse_args()
     config = load_config(resolve_repo_path(args.config))
     output_root = resolve_repo_path(config["output_root"])
-    data_yaml_name = "voc_fsod_eval_all.yaml" if args.scope == "all" else "voc_fsod_finetune.yaml"
+    prefix = get_yaml_prefix(config)
+    data_yaml_name = f"{prefix}_eval_all.yaml" if args.scope == "all" else f"{prefix}_finetune.yaml"
     data_yaml = output_root / data_yaml_name
 
     if not data_yaml.exists():

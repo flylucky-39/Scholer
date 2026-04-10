@@ -41,9 +41,15 @@ def resolve_repo_path(raw_path: str) -> Path:
     return (PROJECT_ROOT / path).resolve()
 
 
+def get_yaml_prefix(config: dict) -> str:
+    if "coco_root" in config:
+        return "coco_fsod"
+    return "voc_fsod"
+
+
 def run_base_stage(config: dict, output_root: Path) -> Path:
     runs_dir = resolve_repo_path(config["runs_dir"])
-    data_yaml = output_root / "voc_fsod_base.yaml"
+    data_yaml = output_root / f"{get_yaml_prefix(config)}_base.yaml"
     project = runs_dir
     name = "base_pretrain"
 
@@ -71,7 +77,7 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 
 def run_finetune_stage(config: dict, output_root: Path, weights_path: Path) -> Path:
     runs_dir = resolve_repo_path(config["runs_dir"])
-    data_yaml = output_root / "voc_fsod_finetune.yaml"
+    data_yaml = output_root / f"{get_yaml_prefix(config)}_finetune.yaml"
     project = runs_dir
     name = "novel_finetune"
 

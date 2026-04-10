@@ -91,10 +91,28 @@ def resolve_repo_path(raw_path: str) -> Path:
     return (PROJECT_ROOT / path).resolve()
 
 
+def get_all_classes(config: dict) -> list[str]:
+    """Return the full class list for the dataset specified in config."""
+    if "all_classes" in config:
+        return config["all_classes"]
+    if "coco_root" in config:
+        from fsod.coco import COCO_CLASSES
+        return list(COCO_CLASSES)
+    from fsod.voc import VOC_CLASSES
+    return list(VOC_CLASSES)
+
+
+def get_yaml_prefix(config: dict) -> str:
+    """Return dataset yaml filename prefix: 'coco_fsod' or 'voc_fsod'."""
+    if "coco_root" in config:
+        return "coco_fsod"
+    return "voc_fsod"
+
+
 def run_base_stage(config: dict, output_root: Path) -> Path:
     """Base pretrain with standard YOLO (same as baseline)."""
     runs_dir = resolve_repo_path(config["runs_dir"])
-    data_yaml = output_root / "voc_fsod_base.yaml"
+    data_yaml = output_root / f"{get_yaml_prefix(config)}_base.yaml"
 
     model_source = config["model"]
     if str(model_source).endswith((".pt", ".yaml", ".yml")) and "/" in str(model_source):
@@ -135,8 +153,9 @@ def run_finetune_stage(
     5. Trains on novel-only data
     """
     runs_dir = resolve_repo_path(config["runs_dir"])
-    data_yaml = output_root / "voc_fsod_finetune.yaml"
+    data_yaml = output_root / f"{get_yaml_prefix(config)}_finetune.yaml"
     novel_classes = config["novel_classes"]
+    all_classes = get_all_classes(config)
 
     finetune_epochs = epochs_override if epochs_override > 0 else int(config["epochs"]["finetune"])
 
@@ -166,7 +185,6 @@ def run_finetune_stage(
     _florence_init_fn = None
 
     if use_prototype and not florence2_model:
-        from fsod.voc import VOC_CLASSES
         from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
 
         print("Extracting class prototypes from support set...")
@@ -174,14 +192,13 @@ def run_finetune_stage(
             base_weights=base_weights,
             data_root=output_root,
             novel_classes=novel_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
         )
-        _proto_init_data = (prototypes, novel_classes, VOC_CLASSES)
+        _proto_init_data = (prototypes, novel_classes, all_classes)
 
     if florence2_model:
-        from fsod.voc import VOC_CLASSES
         from fsod.modules.adaptation import (
             generate_and_encode_descriptions,
             extract_base_prototypes,
@@ -192,7 +209,7 @@ def run_finetune_stage(
         from fsod.modules.prototype import extract_prototypes
 
         device_str = f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"]
-        base_classes = [c for c in VOC_CLASSES if c not in novel_classes]
+        base_classes = [c for c in all_classes if c not in novel_classes]
 
         print("Step 1/6: Generating descriptions for base classes (base_train)...")
         base_desc = generate_and_encode_descriptions(
@@ -200,7 +217,7 @@ def run_finetune_stage(
             data_root=output_root,
             split_name="base_train",
             target_classes=base_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
             device=device_str,
         )
 
@@ -210,7 +227,7 @@ def run_finetune_stage(
             data_root=output_root,
             split_name="novel_finetune",
             target_classes=novel_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
             device=device_str,
         )
         desc_embs = {**base_desc, **novel_desc}
@@ -220,7 +237,7 @@ def run_finetune_stage(
             base_weights=base_weights,
             data_root=output_root,
             base_classes=base_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=device_str,
         )
@@ -230,7 +247,7 @@ def run_finetune_stage(
             base_weights=base_weights,
             data_root=output_root,
             novel_classes=novel_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=device_str,
         )
@@ -239,7 +256,7 @@ def run_finetune_stage(
         target_wts = extract_target_weights(
             base_weights=base_weights,
             target_classes=base_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
         )
         fl_cfg = config.get("florence2", {})
         film = train_modulation_network(
@@ -262,7 +279,7 @@ def run_finetune_stage(
             desc_embeddings=desc_embs,
             visual_prototypes=novel_protos,
             novel_classes=novel_classes,
-            all_classes=VOC_CLASSES,
+            all_classes=all_classes,
             alpha=blend_alpha,
         )
 
