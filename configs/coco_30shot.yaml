@@ -27,7 +27,7 @@ novel_classes:
 
 shot: 30
 
-model: yolo11s.pt
+model: configs/yolo11s.yaml
 image_size: 640
 device: 0
 workers: 16
