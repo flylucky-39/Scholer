@@ -31,12 +31,16 @@ COCO_CLASSES = [
     "wine glass", "cup", "fork", "knife", "spoon",
     "bowl", "banana", "apple", "sandwich", "orange",
     "broccoli", "carrot", "hot dog", "pizza", "donut",
-    "cake", "bed", "dining table", "toilet", "tv",
+    "cake", "chair", "couch", "potted plant", "bed",
+    "dining table", "toilet", "tv",
     "laptop", "mouse", "remote", "keyboard", "cell phone",
     "microwave", "oven", "toaster", "sink", "refrigerator",
     "book", "clock", "vase", "scissors", "teddy bear",
     "hair drier", "toothbrush",
 ]
+
+if len(COCO_CLASSES) != 80:
+    raise ValueError(f"COCO_CLASSES must contain 80 classes, got {len(COCO_CLASSES)}")
 
 # The 20 novel classes that correspond to VOC-20 categories (Ultralytics 0-idx).
 COCO_NOVEL_INDICES = [
