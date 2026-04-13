@@ -270,7 +270,9 @@ def export_records(
                 shutil.copy2(src, img_target)
 
         lbl_target.write_text("\n".join(label_lines), encoding="utf-8")
-        manifest_lines.append(img_target.resolve().as_posix())
+        # NOTE: do NOT use .resolve() — it follows symlinks and breaks
+        # Ultralytics' images→labels path substitution.
+        manifest_lines.append(img_target.as_posix())
 
     manifest_path = manifests_dir / f"{split_name}.txt"
     manifest_path.write_text("\n".join(manifest_lines), encoding="utf-8")
