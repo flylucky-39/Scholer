@@ -49,7 +49,7 @@ freeze:
   backbone: 10
 
 patience:
-  finetune: 30
+  finetune: 80
 
 replay:
   enabled: false
