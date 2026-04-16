@@ -31,7 +31,7 @@ model: ../yolo11s.pt
 image_size: 640
 device: 0
 workers: 16
-runs_dir: ./runs/coco_fsod_10shot
+runs_dir: ./runs/coco_fsod_10shot_New
 
 epochs:
   base: 50

@@ -1,0 +1,8 @@
+实验目录,方法,Epoch,mAP@50,mAP@50-95,Precision,Recall
+coco_fsod_30shot（1）,novel_finetune,102,0.5315,0.3570,0.6606,0.4850
+coco_fsod_30shot（1）,novel_finetune_cosine,129,0.4835,0.3108,0.0690,0.7429
+coco_fsod_30shot（1）,novel_finetune_cosine_fused,53,0.5043,0.3329,0.0412,0.7514
+coco_fsod_30shot（1）,novel_finetune_cosine_proto,66,0.4988,0.3357,0.1045,0.6643
+coco_fsod_30shot,novel_finetune_cosine,200,0.4441,0.2783,0.0426,0.7627
+coco_fsod_30shot,novel_finetune_cosine_fused,104,0.4951,0.3199,0.0379,0.7530
+coco_fsod_30shot,novel_finetune_cosine_proto,119,0.4998,0.3313,0.0765,0.6910

@@ -9,6 +9,7 @@ __pycache__/
 venv/
 runs/
 data/voc_fsod_*/
+data/coco_fsod_*/
 *.pt
 *.pth
 *.log
