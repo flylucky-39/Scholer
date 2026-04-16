@@ -600,8 +600,8 @@ def extract_target_weights(
     base_weights: str | Path,
     target_classes: list[str],
     all_classes: list[str],
-) -> dict[str, torch.Tensor]:
-    """Extract Conv2d classification weights from base-pretrained YOLO model.
+) -> list[dict[str, torch.Tensor]]:
+    """Extract per-scale Conv2d classification weights from base-pretrained YOLO model.
 
     These are the optimal classification directions learned during full base
     pretraining, used as supervision targets for the FiLM modulation network.
@@ -611,73 +611,88 @@ def extract_target_weights(
 
     cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
 
-    # cv3[0][-1] is nn.Conv2d(c3, nc, 1) in standard Detect
-    last_conv = detect.cv3[0][-1]
-    w = last_conv.weight.data  # (nc, c3, 1, 1)
-    if w.dim() == 4:
-        w = w.squeeze(-1).squeeze(-1)  # → (nc, c3)
+    scale_weights: list[dict[str, torch.Tensor]] = []
+    for scale_idx in range(detect.nl):
+        last_conv = detect.cv3[scale_idx][-1]
+        w = last_conv.weight.data  # (nc, c3, 1, 1)
+        if w.dim() == 4:
+            w = w.squeeze(-1).squeeze(-1)  # → (nc, c3)
 
-    weights = {}
-    for cls_name in target_classes:
-        idx = cls_name_to_idx.get(cls_name)
-        if idx is not None:
-            weights[cls_name] = F.normalize(w[idx:idx + 1], dim=1).squeeze(0).cpu()
+        weights = {}
+        for cls_name in target_classes:
+            idx = cls_name_to_idx.get(cls_name)
+            if idx is not None:
+                weights[cls_name] = F.normalize(w[idx:idx + 1], dim=1).squeeze(0).cpu()
 
-    print(f"  Extracted {len(weights)} target weights (dim={w.shape[1]})")
+        scale_weights.append(weights)
+        print(f"  Scale {scale_idx}: extracted {len(weights)} target weights (dim={w.shape[1]})")
+
     del model
     torch.cuda.empty_cache()
-    return weights
+    return scale_weights
 
 
 def train_modulation_network(
     desc_embeddings: dict[str, torch.Tensor],
     visual_prototypes: dict[str, torch.Tensor],
-    target_weights: dict[str, torch.Tensor],
+    target_weights: list[dict[str, torch.Tensor]],
     base_classes: list[str],
     hidden_dim: int = 256,
     lr: float = 1e-3,
     weight_decay: float = 1e-2,
     epochs: int = 1000,
     device: str = "cuda:0",
-) -> TextModulatedPrototype:
-    """Train FiLM modulation network on base class data.
+) -> nn.ModuleList:
+    """Train one FiLM modulation network per detection scale.
 
-    Learns: FiLM(base_proto, base_description_emb) ≈ base_pretrained_weight
-    Then for novel classes: FiLM(novel_proto, novel_desc_emb) → novel_weight
+    Learns, for each scale s:
+      FiLM_s(base_proto, base_description_emb) ≈ base_pretrained_weight_s
+
+    Then for novel classes:
+      FiLM_s(novel_proto, novel_desc_emb) → scale-specific novel weight
     """
     X_text = torch.stack([desc_embeddings[c] for c in base_classes]).to(device)
     X_proto = torch.stack([visual_prototypes[c] for c in base_classes]).to(device)
     X_proto = F.normalize(X_proto, dim=1)
-    Y = torch.stack([target_weights[c] for c in base_classes]).to(device)
-    # Y is already L2-normalized from extract_target_weights
+    targets_by_scale = [torch.stack([scale_weights[c] for c in base_classes]).to(device) for scale_weights in target_weights]
 
     text_dim = X_text.shape[1]
     proto_dim = X_proto.shape[1]
 
-    film = TextModulatedPrototype(text_dim, proto_dim, hidden_dim).to(device)
-    optimizer = torch.optim.AdamW(film.parameters(), lr=lr, weight_decay=weight_decay)
+    films = nn.ModuleList(
+        [TextModulatedPrototype(text_dim, proto_dim, hidden_dim) for _ in targets_by_scale]
+    ).to(device)
+    optimizer = torch.optim.AdamW(films.parameters(), lr=lr, weight_decay=weight_decay)
 
-    print(f"  Training FiLM ({text_dim}+{proto_dim}→{proto_dim}) "
-          f"on {len(base_classes)} base classes for {epochs} epochs...")
+    print(
+        f"  Training {len(films)} scale-specific FiLM heads "
+        f"({text_dim}+{proto_dim}→{proto_dim}) on {len(base_classes)} base classes for {epochs} epochs..."
+    )
 
-    film.train()
+    films.train()
     for epoch in range(epochs):
-        pred = film(X_proto, X_text)
-        pred_norm = F.normalize(pred, dim=1)
-
-        cos_sim = (pred_norm * Y).sum(dim=1)
-        loss = (1 - cos_sim).mean()
-
         optimizer.zero_grad()
+        scale_losses = []
+        scale_cos_sims = []
+        for film, scale_targets in zip(films, targets_by_scale):
+            pred = film(X_proto, X_text)
+            pred_norm = F.normalize(pred, dim=1)
+
+            cos_sim = (pred_norm * scale_targets).sum(dim=1)
+            scale_losses.append((1 - cos_sim).mean())
+            scale_cos_sims.append(cos_sim.mean().detach())
+
+        loss = torch.stack(scale_losses).mean()
         loss.backward()
         optimizer.step()
 
         if (epoch + 1) % 200 == 0 or epoch == 0:
-            print(f"  Epoch {epoch + 1:4d}/{epochs}: loss={loss.item():.4f}, "
-                  f"mean_cos_sim={cos_sim.mean().item():.4f}")
+            mean_cos = torch.stack(scale_cos_sims)
+            cos_str = ", ".join(f"P{scale_idx + 3}={value.item():.4f}" for scale_idx, value in enumerate(mean_cos))
+            print(f"  Epoch {epoch + 1:4d}/{epochs}: loss={loss.item():.4f}, {cos_str}")
 
-    film.eval()
-    return film
+    films.eval()
+    return films
 
 
 # ---------------------------------------------------------------------------
@@ -687,54 +702,63 @@ def train_modulation_network(
 @torch.no_grad()
 def init_cosine_head_modulated(
     model: YOLO,
-    film: TextModulatedPrototype,
+    film: TextModulatedPrototype | nn.ModuleList | list[TextModulatedPrototype],
     desc_embeddings: dict[str, torch.Tensor],
     visual_prototypes: dict[str, torch.Tensor],
     novel_classes: list[str],
     all_classes: list[str],
     alpha: float = 0.5,
 ) -> None:
-    """Initialize CosineConv2d novel class weights via alpha-blended FiLM + raw prototype.
+    """Initialize CosineConv2d novel class weights via scale-specific FiLM + learnable prototype prior.
 
     For each novel class:
-      film_w  = normalize( FiLM(novel_proto, novel_desc_emb) )
+      film_w  = normalize( FiLM_scale(novel_proto, novel_desc_emb) )
       raw_w   = normalize( novel_proto )
-      final_w = normalize( alpha * raw_w + (1 - alpha) * film_w )
 
-    alpha=1.0 → pure prototype (same as --prototype only).
-    alpha=0.0 → pure FiLM output.
+    The trainable branch is initialized with film_w, while raw_w is stored as a
+    fixed prior inside each CosineConv2d layer. During finetuning the effective
+    novel-class weight becomes:
+      final_w = normalize( alpha_scale * raw_w + (1 - alpha_scale) * trainable_w )
+
+    This adds exactly one learnable alpha per detection scale with zero extra
+    data-loading or VLM inference cost during training.
     """
     cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
     detect = model.model.model[-1]
-    device = next(film.parameters()).device
+    if isinstance(film, TextModulatedPrototype):
+        films = [film] * detect.nl
+    else:
+        films = list(film)
+    if len(films) != detect.nl:
+        raise ValueError(f"Expected {detect.nl} FiLM modules, got {len(films)}")
 
-    novel_weights: dict[str, torch.Tensor] = {}
-    for cls_name in novel_classes:
-        text_emb = desc_embeddings[cls_name].unsqueeze(0).to(device)
-        proto = visual_prototypes[cls_name].unsqueeze(0).to(device)
-        proto_norm = F.normalize(proto, dim=1)
-
-        # FiLM-modulated weight
-        film_w = film(proto_norm, text_emb).squeeze(0)
-        film_w = F.normalize(film_w.unsqueeze(0), dim=1).squeeze(0)
-
-        # Raw prototype weight (same as prototype-only init)
-        raw_w = proto_norm.squeeze(0)
-
-        # Alpha blend then re-normalize
-        blended = alpha * raw_w + (1 - alpha) * film_w
-        blended = F.normalize(blended.unsqueeze(0), dim=1).squeeze(0)
-        novel_weights[cls_name] = blended
+    device = next(films[0].parameters()).device
 
     for i in range(detect.nl):
+        scale_film = films[i]
         cosine_layer = detect.cv3[i][-1]
         weight = cosine_layer.weight.data
+        prior_indices: list[int] = []
+        prior_weights: list[torch.Tensor] = []
 
         for cls_name in novel_classes:
             idx = cls_name_to_idx.get(cls_name)
             if idx is None:
                 continue
-            weight[idx] = novel_weights[cls_name].to(weight.device)
+
+            text_emb = desc_embeddings[cls_name].unsqueeze(0).to(device)
+            proto = visual_prototypes[cls_name].unsqueeze(0).to(device)
+            proto_norm = F.normalize(proto, dim=1)
+
+            film_w = scale_film(proto_norm, text_emb).squeeze(0)
+            film_w = F.normalize(film_w.unsqueeze(0), dim=1).squeeze(0)
+
+            weight[idx] = film_w.to(weight.device)
+            prior_indices.append(idx)
+            prior_weights.append(proto_norm.squeeze(0).to(weight.device))
+
+        if prior_indices:
+            cosine_layer.set_weight_prior(prior_indices, torch.stack(prior_weights), alpha_init=alpha)
 
         print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
-              f"via text-modulated prototypes (alpha={alpha:.2f})")
+              f"via text-modulated prototypes (learnable alpha init={cosine_layer.get_blend_alpha():.2f})")

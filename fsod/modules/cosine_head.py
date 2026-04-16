@@ -37,7 +37,38 @@ class CosineConv2d(nn.Module):
         self.bias = nn.Parameter(torch.zeros(out_channels))
         # Learnable temperature (log-space for positivity)
         self.scale = nn.Parameter(torch.tensor(math.log(temperature)))
+        self.blend_logit = nn.Parameter(torch.tensor(0.0))
+        self.register_buffer("weight_prior", torch.zeros(out_channels, in_channels))
+        self.register_buffer("weight_prior_mask", torch.zeros(out_channels, dtype=torch.bool))
         nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+
+    def set_weight_prior(self, class_indices: list[int], prior_weights: torch.Tensor, alpha_init: float = 0.5) -> None:
+        """Register fixed prototype priors for selected class rows.
+
+        During finetuning the effective classifier weight for masked rows becomes:
+            normalize(alpha * prior + (1 - alpha) * trainable_weight)
+        where alpha is a single learnable scalar for this detection scale.
+        """
+        self.weight_prior.zero_()
+        self.weight_prior_mask.zero_()
+        if not class_indices:
+            return
+
+        if prior_weights.ndim != 2 or prior_weights.shape[1] != self.in_channels:
+            raise ValueError(
+                f"Expected prior_weights shape (N, {self.in_channels}), got {tuple(prior_weights.shape)}"
+            )
+
+        prior_weights = prior_weights.to(device=self.weight_prior.device, dtype=self.weight_prior.dtype)
+        self.weight_prior[class_indices] = prior_weights
+        self.weight_prior_mask[class_indices] = True
+
+        alpha_init = min(max(alpha_init, 1e-4), 1 - 1e-4)
+        self.blend_logit.data.fill_(math.log(alpha_init / (1 - alpha_init)))
+
+    def get_blend_alpha(self) -> float:
+        """Return the current prior fusion weight for logging."""
+        return torch.sigmoid(self.blend_logit.detach()).item()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -48,6 +79,13 @@ class CosineConv2d(nn.Module):
         """
         # Normalize weight: (C_out, C_in)
         w_norm = F.normalize(self.weight, dim=1)
+        if self.weight_prior_mask.any():
+            prior_norm = F.normalize(self.weight_prior, dim=1)
+            alpha = torch.sigmoid(self.blend_logit)
+            fused = alpha * prior_norm + (1 - alpha) * w_norm
+            fused = F.normalize(fused, dim=1)
+            mask = self.weight_prior_mask.view(-1, 1)
+            w_norm = torch.where(mask, fused, w_norm)
         # Normalize input along channel dim: (B, C_in, H, W)
         x_norm = F.normalize(x, dim=1)
         # 1x1 conv with normalized weight → cosine similarity

@@ -252,7 +252,7 @@ def run_finetune_stage(
             device=device_str,
         )
 
-        print("Step 5/6: Training FiLM modulation network on base classes...")
+        print("Step 5/6: Training scale-specific FiLM modulation networks on base classes...")
         target_wts = extract_target_weights(
             base_weights=base_weights,
             target_classes=base_classes,
@@ -272,7 +272,7 @@ def run_finetune_stage(
 
         # Capture init data for callback (same issue: model.train rebuilds model)
         blend_alpha = float(fl_cfg.get("alpha", 0.5))
-        print(f"Step 6/6: Will blend proto + FiLM with alpha={blend_alpha:.2f} after model rebuild...")
+        print(f"Step 6/6: Will register prototype priors with learnable scale-wise alpha init={blend_alpha:.2f} after model rebuild...")
         _florence_init_fn = lambda m: init_cosine_head_modulated(
             model=m,
             film=film,
