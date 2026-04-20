@@ -708,20 +708,20 @@ def init_cosine_head_modulated(
     novel_classes: list[str],
     all_classes: list[str],
     alpha: float = 0.5,
+        fusion_mode: str = "learnable",
 ) -> None:
-    """Initialize CosineConv2d novel class weights via scale-specific FiLM + learnable prototype prior.
+        """Initialize novel CosineConv2d weights with configurable VLM/prototype fusion.
 
     For each novel class:
-      film_w  = normalize( FiLM_scale(novel_proto, novel_desc_emb) )
-      raw_w   = normalize( novel_proto )
+            film_w = normalize(FiLM_scale(novel_proto, novel_desc_emb))
+            raw_w = normalize(novel_proto)
 
-    The trainable branch is initialized with film_w, while raw_w is stored as a
-    fixed prior inside each CosineConv2d layer. During finetuning the effective
-    novel-class weight becomes:
-      final_w = normalize( alpha_scale * raw_w + (1 - alpha_scale) * trainable_w )
-
-    This adds exactly one learnable alpha per detection scale with zero extra
-    data-loading or VLM inference cost during training.
+        Modes:
+            learnable: initialize with film_w and keep raw_w as a fixed prior with a
+                learnable per-scale alpha during finetuning.
+            fixed: same as learnable, but alpha remains fixed at the configured value.
+            init_only: initialize once with normalize(alpha * raw_w + (1 - alpha) *
+                film_w) and disable training-time prior fusion.
     """
     cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
     detect = model.model.model[-1]
@@ -753,12 +753,30 @@ def init_cosine_head_modulated(
             film_w = scale_film(proto_norm, text_emb).squeeze(0)
             film_w = F.normalize(film_w.unsqueeze(0), dim=1).squeeze(0)
 
+            if fusion_mode == "init_only":
+                final_w = alpha * proto_norm.squeeze(0) + (1 - alpha) * film_w
+                final_w = F.normalize(final_w.unsqueeze(0), dim=1).squeeze(0)
+                weight[idx] = final_w.to(weight.device)
+                continue
+
             weight[idx] = film_w.to(weight.device)
             prior_indices.append(idx)
             prior_weights.append(proto_norm.squeeze(0).to(weight.device))
 
         if prior_indices:
-            cosine_layer.set_weight_prior(prior_indices, torch.stack(prior_weights), alpha_init=alpha)
+            cosine_layer.set_weight_prior(
+                prior_indices,
+                torch.stack(prior_weights),
+                alpha_init=alpha,
+                fusion_mode=fusion_mode,
+            )
 
-        print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
-              f"via text-modulated prototypes (learnable alpha init={cosine_layer.get_blend_alpha():.2f})")
+        mode_desc = (
+            "init-only alpha blend"
+            if fusion_mode == "init_only"
+            else f"{fusion_mode} alpha={cosine_layer.get_blend_alpha():.2f}"
+        )
+        print(
+            f"  Scale {i}: initialized {len(novel_classes)} novel class weights "
+            f"via text-modulated prototypes ({mode_desc})"
+        )

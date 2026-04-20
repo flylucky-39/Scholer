@@ -40,19 +40,32 @@ class CosineConv2d(nn.Module):
         self.blend_logit = nn.Parameter(torch.tensor(0.0))
         self.register_buffer("weight_prior", torch.zeros(out_channels, in_channels))
         self.register_buffer("weight_prior_mask", torch.zeros(out_channels, dtype=torch.bool))
+        self.register_buffer("fixed_blend_alpha", torch.tensor(0.5))
+        self.prior_fusion_mode = "learnable"
         nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
 
-    def set_weight_prior(self, class_indices: list[int], prior_weights: torch.Tensor, alpha_init: float = 0.5) -> None:
+    def set_weight_prior(
+        self,
+        class_indices: list[int],
+        prior_weights: torch.Tensor,
+        alpha_init: float = 0.5,
+        fusion_mode: str = "learnable",
+    ) -> None:
         """Register fixed prototype priors for selected class rows.
 
         During finetuning the effective classifier weight for masked rows becomes:
             normalize(alpha * prior + (1 - alpha) * trainable_weight)
-        where alpha is a single learnable scalar for this detection scale.
+        where alpha is either a single learnable scalar, a fixed scalar, or is
+        disabled after initialization depending on fusion_mode.
         """
         self.weight_prior.zero_()
         self.weight_prior_mask.zero_()
+        self.prior_fusion_mode = fusion_mode
         if not class_indices:
             return
+
+        if fusion_mode not in {"learnable", "fixed", "init_only"}:
+            raise ValueError(f"Unsupported fusion_mode: {fusion_mode}")
 
         if prior_weights.ndim != 2 or prior_weights.shape[1] != self.in_channels:
             raise ValueError(
@@ -65,9 +78,20 @@ class CosineConv2d(nn.Module):
 
         alpha_init = min(max(alpha_init, 1e-4), 1 - 1e-4)
         self.blend_logit.data.fill_(math.log(alpha_init / (1 - alpha_init)))
+        self.fixed_blend_alpha.fill_(alpha_init)
+        self.blend_logit.requires_grad_(fusion_mode == "learnable")
+
+        if fusion_mode == "init_only":
+            self.weight_prior_mask.zero_()
+
+    def has_active_prior(self) -> bool:
+        """Whether prior fusion is active during the forward pass."""
+        return bool(self.weight_prior_mask.any().item())
 
     def get_blend_alpha(self) -> float:
         """Return the current prior fusion weight for logging."""
+        if self.prior_fusion_mode == "fixed":
+            return float(self.fixed_blend_alpha.item())
         return torch.sigmoid(self.blend_logit.detach()).item()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -81,7 +105,10 @@ class CosineConv2d(nn.Module):
         w_norm = F.normalize(self.weight, dim=1)
         if self.weight_prior_mask.any():
             prior_norm = F.normalize(self.weight_prior, dim=1)
-            alpha = torch.sigmoid(self.blend_logit)
+            if self.prior_fusion_mode == "fixed":
+                alpha = self.fixed_blend_alpha
+            else:
+                alpha = torch.sigmoid(self.blend_logit)
             fused = alpha * prior_norm + (1 - alpha) * w_norm
             fused = F.normalize(fused, dim=1)
             mask = self.weight_prior_mask.view(-1, 1)

@@ -183,6 +183,7 @@ def run_finetune_stage(
     # training loop starts.
     _proto_init_data = None  # will be set below if needed
     _florence_init_fn = None
+    _alpha_log_enabled = False
 
     if use_prototype and not florence2_model:
         from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
@@ -259,6 +260,9 @@ def run_finetune_stage(
             all_classes=all_classes,
         )
         fl_cfg = config.get("florence2", {})
+        fusion_mode = str(fl_cfg.get("fusion_mode", "learnable")).strip().lower()
+        if fusion_mode not in {"learnable", "fixed", "init_only"}:
+            raise ValueError(f"Unsupported florence2.fusion_mode: {fusion_mode}")
         film = train_modulation_network(
             desc_embeddings=desc_embs,
             visual_prototypes=base_protos,
@@ -272,7 +276,13 @@ def run_finetune_stage(
 
         # Capture init data for callback (same issue: model.train rebuilds model)
         blend_alpha = float(fl_cfg.get("alpha", 0.5))
-        print(f"Step 6/6: Will register prototype priors with learnable scale-wise alpha init={blend_alpha:.2f} after model rebuild...")
+        _alpha_log_enabled = bool(fl_cfg.get("alpha_logging", False))
+        if fusion_mode != "learnable":
+            run_name += f"_{fusion_mode}"
+        print(
+            f"Step 6/6: Will initialize VLM fusion in {fusion_mode} mode "
+            f"with alpha={blend_alpha:.2f} after model rebuild..."
+        )
         _florence_init_fn = lambda m: init_cosine_head_modulated(
             model=m,
             film=film,
@@ -281,6 +291,7 @@ def run_finetune_stage(
             novel_classes=novel_classes,
             all_classes=all_classes,
             alpha=blend_alpha,
+            fusion_mode=fusion_mode,
         )
 
     # --- Register callback to inject prototype/florence weights after trainer rebuilds model ---
@@ -308,7 +319,25 @@ def run_finetune_stage(
                     self.model = det_model
             _florence_init_fn(_FakeYOLO2(trainer.model))
 
+    def _on_train_epoch_end(trainer):
+        if not _alpha_log_enabled:
+            return
+        detect = trainer.model.model[-1]
+        alpha_parts = []
+        for scale_idx in range(detect.nl):
+            cosine_layer = detect.cv3[scale_idx][-1]
+            if not hasattr(cosine_layer, "get_blend_alpha"):
+                continue
+            alpha_value = cosine_layer.get_blend_alpha()
+            active = getattr(cosine_layer, "has_active_prior", lambda: False)()
+            state = "active" if active else "inactive"
+            alpha_parts.append(f"P{scale_idx + 3}={alpha_value:.4f}({state})")
+        if alpha_parts:
+            epoch_idx = getattr(trainer, "epoch", -1) + 1
+            print(f"[alpha] epoch={epoch_idx}: " + ", ".join(alpha_parts))
+
     model.add_callback("on_pretrain_routine_end", _on_pretrain_routine_end)
+    model.add_callback("on_train_epoch_end", _on_train_epoch_end)
 
     model.train(
         data=str(data_yaml),

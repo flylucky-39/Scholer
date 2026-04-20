@@ -1,0 +1,64 @@
+seed: 3407
+
+coco_root: ~/epfs/07_FSOD_LLM/datasets/coco
+output_root: ./data/coco_fsod_30shot
+
+novel_classes:
+  - person
+  - bicycle
+  - car
+  - motorcycle
+  - airplane
+  - bus
+  - train
+  - boat
+  - bird
+  - cat
+  - dog
+  - horse
+  - sheep
+  - cow
+  - bottle
+  - chair
+  - couch
+  - potted plant
+  - dining table
+  - tv
+
+shot: 30
+
+model: ../yolo11s.pt
+image_size: 640
+device: 0
+workers: 16
+runs_dir: ./runs/coco_fsod_30shot_vlm_learnable
+
+epochs:
+  base: 50
+  finetune: 200
+
+batch_size:
+  base: 64
+  finetune: 4
+
+lr0:
+  base: 0.01
+  finetune: 0.0005
+
+freeze:
+  backbone: 10
+
+patience:
+  finetune: 80
+
+replay:
+  enabled: false
+  base_images: 200
+
+florence2:
+  alpha: 0.15
+  fusion_mode: learnable
+  alpha_logging: true
+  film_hidden_dim: 128
+  film_epochs: 300
+  film_weight_decay: 0.05
