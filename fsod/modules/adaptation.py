@@ -708,20 +708,20 @@ def init_cosine_head_modulated(
     novel_classes: list[str],
     all_classes: list[str],
     alpha: float = 0.5,
-        fusion_mode: str = "learnable",
+    fusion_mode: str = "learnable",
 ) -> None:
-        """Initialize novel CosineConv2d weights with configurable VLM/prototype fusion.
+    """Initialize novel CosineConv2d weights with configurable VLM/prototype fusion.
 
     For each novel class:
-            film_w = normalize(FiLM_scale(novel_proto, novel_desc_emb))
-            raw_w = normalize(novel_proto)
+      film_w = normalize(FiLM_scale(novel_proto, novel_desc_emb))
+      raw_w = normalize(novel_proto)
 
-        Modes:
-            learnable: initialize with film_w and keep raw_w as a fixed prior with a
-                learnable per-scale alpha during finetuning.
-            fixed: same as learnable, but alpha remains fixed at the configured value.
-            init_only: initialize once with normalize(alpha * raw_w + (1 - alpha) *
-                film_w) and disable training-time prior fusion.
+    Modes:
+      learnable: initialize with film_w and keep raw_w as a fixed prior with a
+        learnable per-scale alpha during finetuning.
+      fixed: same as learnable, but alpha remains fixed at the configured value.
+      init_only: initialize once with normalize(alpha * raw_w + (1 - alpha) *
+        film_w) and disable training-time prior fusion.
     """
     cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
     detect = model.model.model[-1]
