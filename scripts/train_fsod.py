@@ -319,6 +319,16 @@ def run_finetune_stage(
                     self.model = det_model
             _florence_init_fn(_FakeYOLO2(trainer.model))
 
+        # Sync injected weights to EMA — critical because EMA is deepcopied
+        # *before* this callback, and bool buffers (weight_prior_mask) are
+        # never updated by ModelEMA.update() which only touches floating-point tensors.
+        if (_proto_init_data is not None or _florence_init_fn is not None) and getattr(trainer, "ema", None) is not None:
+            model_sd = trainer.model.state_dict()
+            for k, v in trainer.ema.ema.state_dict().items():
+                if k in model_sd:
+                    v.copy_(model_sd[k])
+            print("Synced injected weights (incl. bool buffers) to EMA model")
+
     def _on_train_epoch_end(trainer):
         if not _alpha_log_enabled:
             return
