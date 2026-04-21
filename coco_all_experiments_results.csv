@@ -1,0 +1,21 @@
+Experiment,Shot,Method,Precision,Recall,mAP50,mAP50-95
+10shot_exp/base_pretrain,10,Base Pretrain,0.71093,0.36961,0.51423,0.36652
+10shot_exp/novel_finetune,10,Finetune,0.89483,0.27973,0.58969,0.41236
+10shot_exp/novel_finetune_cosine,10,Cosine,0.13988,0.66119,0.47079,0.31023
+10shot_exp/novel_finetune_cosine_fused,10,Cosine+Fused,0.12745,0.64657,0.46962,0.31865
+10shot_exp/novel_finetune_cosine_proto,10,Cosine+Proto,0.15836,0.58428,0.47150,0.32407
+30shot_OLD/novel_finetune,30,Finetune,0.28493,0.69167,0.60267,0.42024
+30shot_OLD/novel_finetune_cosine,30,Cosine,0.07264,0.75341,0.49587,0.32205
+30shot_OLD/novel_finetune_cosine_fused,30,Cosine+Fused,0.10348,0.70229,0.51548,0.35188
+30shot_OLD/novel_finetune_cosine_proto,30,Cosine+Proto,0.17298,0.61384,0.51293,0.35774
+30shot_New/novel_finetune,30,Finetune,0.28493,0.69167,0.60267,0.42024
+30shot_New/novel_finetune_cosine,30,Cosine,0.11526,0.73592,0.49377,0.32376
+30shot_New/novel_finetune_cosine_fused,30,Cosine+Fused,0.30919,0.52897,0.47405,0.30856
+30shot_New/novel_finetune_cosine_proto,30,Cosine+Proto,0.17987,0.61460,0.51374,0.35864
+30shot_Vlm/novel_finetune_cosine_fused,30,VLM-Cosine+Fused,0.02939,0.75687,0.48450,0.31364
+30shot_Vlm/novel_finetune_cosine_fused_fixed,30,VLM-Cosine+Fused(Fixed),0.02922,0.75433,0.48505,0.31818
+30shot_Vlm/novel_finetune_cosine_fused_init_only,30,VLM-Cosine+Fused(InitOnly),0.93444,0.06427,0.49686,0.32544
+30shot_baseline/novel_finetune_cosine,30,Baseline-Cosine,0.07507,0.73964,0.48949,0.31784
+30shot_exp/novel_finetune_cosine,30,Exp-Cosine,0.07204,0.75974,0.48812,0.31509
+30shot_exp/novel_finetune_cosine_fused,30,Exp-Cosine+Fused,0.12005,0.70162,0.52287,0.35696
+30shot_exp/novel_finetune_cosine_proto,30,Exp-Cosine+Proto,0.15016,0.64138,0.51620,0.35916
