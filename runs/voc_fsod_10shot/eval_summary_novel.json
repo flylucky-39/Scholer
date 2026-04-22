@@ -1,0 +1,8 @@
+{
+  "weights": "/root/epfs/07_FSOD_LLM/fsod/runs/fsod_baseline/novel_finetune/weights/best.pt",
+  "scope": "novel",
+  "data_yaml": "/root/epfs/07_FSOD_LLM/fsod/data/voc_fsod_split1_10shot/voc_fsod_finetune.yaml",
+  "map50": 0.36899917326619447,
+  "map": 0.2712161583095436,
+  "map75": 0.2926104644334591
+}

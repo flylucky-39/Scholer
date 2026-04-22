@@ -1,0 +1,10 @@
+domain_gap_g: 0.012962551787495613
+alpha: 0.0
+k: 6.0
+g0: 0.35
+dge_backend: "stub_random_proj (dev only \u2014 install open_clip for research use)"
+no_text: true
+no_dge: false
+no_cdpc: false
+dataset: DIOR
+shot: 10

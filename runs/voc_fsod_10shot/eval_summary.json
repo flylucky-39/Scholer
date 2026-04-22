@@ -1,0 +1,6 @@
+{
+  "weights": "/root/epfs/07_FSOD_LLM/fsod/runs/fsod_baseline/novel_finetune/weights/best.pt",
+  "map50": 0.6445586524182314,
+  "map": 0.49608710409519746,
+  "map75": 0.545921911477265
+}
