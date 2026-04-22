@@ -13,6 +13,8 @@ from .adaptation import (
     train_adaptation_mlp,
     train_modulation_network,
 )
+from .dual_path_fusion import fuse_box_scores
+from .vlm_verifier import CLIPVerifier
 
 __all__ = [
     "CosineConv2d",
@@ -30,4 +32,6 @@ __all__ = [
     "init_cosine_head_with_florence2",
     "train_adaptation_mlp",
     "train_modulation_network",
+    "CLIPVerifier",
+    "fuse_box_scores",
 ]

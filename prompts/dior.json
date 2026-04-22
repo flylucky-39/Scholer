@@ -1,0 +1,37 @@
+{
+  "dataset": "DIOR",
+  "description": "Readable label per DIOR class + CLIP prompt templates (generic + aerial).",
+  "class_labels": {
+    "airplane": "airplane",
+    "airport": "airport",
+    "baseballfield": "baseball field",
+    "basketballcourt": "basketball court",
+    "bridge": "bridge",
+    "chimney": "chimney",
+    "dam": "dam",
+    "expressway-service-area": "expressway service area",
+    "expressway-toll-station": "expressway toll station",
+    "golffield": "golf field",
+    "groundtrackfield": "ground track field",
+    "harbor": "harbor",
+    "overpass": "overpass",
+    "ship": "ship",
+    "stadium": "stadium",
+    "storagetank": "storage tank",
+    "tenniscourt": "tennis court",
+    "trainstation": "train station",
+    "vehicle": "vehicle",
+    "windmill": "windmill"
+  },
+  "templates": [
+    "a photo of a {label}.",
+    "a photo of the {label}.",
+    "an image of a {label}.",
+    "a close-up photo of a {label}.",
+    "a satellite image of a {label}.",
+    "an aerial photo of a {label}.",
+    "a remote sensing image of a {label}.",
+    "a top-down view of a {label}.",
+    "a high-resolution aerial image of a {label}."
+  ]
+}
