@@ -1,0 +1,63 @@
+{
+  "row": {
+    "run_tag": "smoke_baseline",
+    "weights": "/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt",
+    "fusion_mode": "none",
+    "gamma": 0.5,
+    "vlm_temperature": 100.0,
+    "top_k": 100,
+    "pad_ratio": 1.2,
+    "first_conf": 0.001,
+    "first_iou": 0.7,
+    "final_iou": 0.6,
+    "n_images": 10,
+    "mAP50": 0.5044,
+    "mAP50_95": 0.2679,
+    "mAP75": 0.1799,
+    "P": 0.5156,
+    "R": 0.4188,
+    "latency_ms": 147.71
+  },
+  "per_class_ap50": [
+    0.5570588235294118,
+    0.0,
+    0.995,
+    0.995,
+    0.26185,
+    0.5037931034482759,
+    0.20809050148019223,
+    0.5145000000000001
+  ],
+  "per_class_ap": [
+    0.5216470588235295,
+    0.0,
+    0.199,
+    0.49749999999999994,
+    0.235665,
+    0.45341379310344826,
+    0.11929973635784366,
+    0.11676666666666669
+  ],
+  "class_names": [
+    "airplane",
+    "airport",
+    "baseballfield",
+    "basketballcourt",
+    "bridge",
+    "chimney",
+    "dam",
+    "expressway-service-area",
+    "expressway-toll-station",
+    "golffield",
+    "groundtrackfield",
+    "harbor",
+    "overpass",
+    "ship",
+    "stadium",
+    "storagetank",
+    "tenniscourt",
+    "trainstation",
+    "vehicle",
+    "windmill"
+  ]
+}

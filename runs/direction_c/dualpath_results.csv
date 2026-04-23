@@ -1,0 +1,5 @@
+run_tag,weights,fusion_mode,gamma,vlm_temperature,top_k,pad_ratio,first_conf,first_iou,final_iou,n_images,mAP50,mAP50_95,mAP75,P,R,latency_ms
+smoke_baseline,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,none,0.5,100.0,100,1.2,0.001,0.7,0.6,10,0.5044,0.2679,0.1799,0.5156,0.4188,147.71
+A_baseline,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,none,0.0,100.0,100,1.2,0.001,0.7,0.6,5000,0.2602,0.1769,0.1891,0.4181,0.2486,30.38
+B_fixed_g03,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,fixed,0.3,100.0,100,1.2,0.001,0.7,0.6,5000,0.2407,0.1519,0.1564,0.2272,0.3044,130.27
+C_fixed_g05,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,fixed,0.5,100.0,100,1.2,0.001,0.7,0.6,5000,0.2272,0.1415,0.1439,0.2252,0.2953,86.34
