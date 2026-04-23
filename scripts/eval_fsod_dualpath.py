@@ -65,6 +65,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gamma", type=float, default=0.5,
                         help="Mixing weight for fixed mode.")
     parser.add_argument("--vlm-temperature", type=float, default=100.0)
+    parser.add_argument("--vlm-only-below", type=float, default=1.0,
+                        help="Only fuse VLM into boxes whose YOLO conf is BELOW this. "
+                             "1.0 = always fuse (original behaviour); 0.5 = only "
+                             "low-conf boxes get CLIP help, high-conf boxes keep YOLO score.")
     parser.add_argument("--top-k", type=int, default=100,
                         help="Max detections per image after first NMS.")
     parser.add_argument("--pad-ratio", type=float, default=1.2,
@@ -314,6 +318,11 @@ def main() -> None:
                 gamma=args.gamma,
                 vlm_temperature=args.vlm_temperature,
             )
+            # Selective fusion: high-confidence YOLO boxes bypass the verifier.
+            if args.vlm_only_below < 1.0:
+                bypass = s_yolo >= args.vlm_only_below
+                if bypass.any():
+                    new_conf = torch.where(bypass, s_yolo, new_conf)
         else:
             new_conf = s_yolo
 
@@ -394,6 +403,7 @@ def main() -> None:
         "fusion_mode": args.fusion_mode,
         "gamma": args.gamma,
         "vlm_temperature": args.vlm_temperature,
+        "vlm_only_below": args.vlm_only_below,
         "top_k": args.top_k,
         "pad_ratio": args.pad_ratio,
         "first_conf": args.first_conf,
