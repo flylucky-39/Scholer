@@ -57,6 +57,8 @@ class CLIPVerifier:
         pad_ratio: float = 1.2,
         input_size: int = 224,
         batch_size: int = 64,
+        local_files_only: bool = True,
+        cache_dir: Optional[str | Path] = None,
     ) -> None:
         if not torch.cuda.is_available() and device == "cuda":
             device = "cpu"
@@ -64,6 +66,8 @@ class CLIPVerifier:
         self.pad_ratio = float(pad_ratio)
         self.input_size = int(input_size)
         self.batch_size = int(batch_size)
+        self.local_files_only = bool(local_files_only)
+        self.cache_dir = str(Path(cache_dir).expanduser()) if cache_dir else None
 
         proto_path = Path(text_proto_path).expanduser()
         if not proto_path.exists():
@@ -76,7 +80,18 @@ class CLIPVerifier:
         resolved_model_name: str = model_name or payload["model_name"]
 
         from transformers import CLIPModel
-        self._clip = CLIPModel.from_pretrained(resolved_model_name).to(self.device).eval()
+        try:
+            self._clip = CLIPModel.from_pretrained(
+                resolved_model_name,
+                local_files_only=self.local_files_only,
+                cache_dir=self.cache_dir,
+            ).to(self.device).eval()
+        except OSError as exc:
+            raise RuntimeError(
+                "Failed to load CLIP image encoder in offline mode. "
+                "Provide a local model directory via model_name (or embed it in text proto), "
+                "or set local_files_only=False in an online environment."
+            ) from exc
         # Freeze for inference.
         for p in self._clip.parameters():
             p.requires_grad_(False)

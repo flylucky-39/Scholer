@@ -79,6 +79,10 @@ def parse_args() -> argparse.Namespace:
                         help="Drop boxes whose fused confidence is below this.")
     parser.add_argument("--clip-model", type=str, default="",
                         help="Override CLIP HF id (default = stored in text-proto).")
+    parser.add_argument("--clip-cache-dir", type=str, default="",
+                        help="Optional HuggingFace cache dir for offline loading.")
+    parser.add_argument("--clip-allow-online", action="store_true",
+                        help="Allow downloading CLIP files if not cached locally.")
     parser.add_argument("--clip-input-size", type=int, default=224)
     parser.add_argument("--clip-batch-size", type=int, default=64)
     parser.add_argument("--device", type=str, default="cuda")
@@ -236,6 +240,8 @@ def main() -> None:
             pad_ratio=args.pad_ratio,
             input_size=args.clip_input_size,
             batch_size=args.clip_batch_size,
+            local_files_only=not args.clip_allow_online,
+            cache_dir=(resolve_repo_path(args.clip_cache_dir) if args.clip_cache_dir else None),
         )
         verifier.assert_class_alignment(yolo_names)
         print(f"[setup] verifier:   CLIP backbone aligned to {len(verifier.class_names)} classes")

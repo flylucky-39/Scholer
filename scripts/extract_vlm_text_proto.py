@@ -44,11 +44,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prompts", type=str, required=True,
                         help="Path to prompt json (e.g. prompts/dior.json).")
     parser.add_argument("--model", type=str, default="openai/clip-vit-base-patch32",
-                        help="HF CLIP model id.")
+                        help="HF CLIP model id or local model directory.")
     parser.add_argument("--out", type=str, required=True,
                         help="Output .pt path.")
     parser.add_argument("--device", type=str, default="cuda",
                         help="Device for text encoder (cuda or cpu).")
+    parser.add_argument("--cache-dir", type=str, default="",
+                        help="Optional HuggingFace cache dir for offline loading.")
+    parser.add_argument("--allow-online", action="store_true",
+                        help="Allow remote download when model files are not cached locally.")
     return parser.parse_args()
 
 
@@ -76,11 +80,32 @@ def main() -> None:
         raise KeyError(f"prompts/{args.dataset.lower()}.json missing labels for: {missing}")
 
     device = args.device if torch.cuda.is_available() and args.device == "cuda" else "cpu"
-    print(f"Loading CLIP model: {args.model} (device={device})")
+    local_files_only = not args.allow_online
+    cache_dir = resolve_repo_path(args.cache_dir) if args.cache_dir else None
+    print(
+        f"Loading CLIP model: {args.model} (device={device}, "
+        f"local_files_only={local_files_only})"
+    )
 
     from transformers import CLIPModel, CLIPTokenizer
-    model = CLIPModel.from_pretrained(args.model).to(device).eval()
-    tokenizer = CLIPTokenizer.from_pretrained(args.model)
+    try:
+        model = CLIPModel.from_pretrained(
+            args.model,
+            local_files_only=local_files_only,
+            cache_dir=str(cache_dir) if cache_dir else None,
+        ).to(device).eval()
+        tokenizer = CLIPTokenizer.from_pretrained(
+            args.model,
+            local_files_only=local_files_only,
+            cache_dir=str(cache_dir) if cache_dir else None,
+        )
+    except OSError as exc:
+        raise RuntimeError(
+            "Failed to load CLIP model/tokenizer in offline mode. "
+            "If server has no internet, pre-download the model on a networked machine "
+            "and copy the full model directory to server, then pass that local directory "
+            "to --model. Example: --model /root/models/clip-vit-base-patch32."
+        ) from exc
 
     proto_list = []
     prompts_used = []

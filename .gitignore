@@ -13,3 +13,4 @@ data/coco_fsod_*/
 *.pth
 *.log
 data
+models
