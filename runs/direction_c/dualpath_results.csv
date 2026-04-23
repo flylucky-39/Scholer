@@ -10,3 +10,12 @@ B_fixed_g03,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10sh
 C_fixed_g05,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,fixed,0.5,100.0,100,1.2,0.001,0.7,0.6,89,0.4489,0.3595,0.363,0.247,0.6697,86.54
 D_fixed_g07,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,fixed,0.7,100.0,100,1.2,0.001,0.7,0.6,89,0.4114,0.3147,0.3071,0.2364,0.6476,89.68
 E_mult,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,100.0,100,1.2,0.001,0.7,0.6,89,0.705,0.6225,0.6627,0.3109,0.7817,202.99
+F_mult_T1,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,1.0,1.0,100,1.2,0.001,0.7,0.6,89,0.7917,0.7331,0.7817,0.6623,0.7228,202.19
+F_mult_T5,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,5.0,1.0,100,1.2,0.001,0.7,0.6,89,0.8226,0.75,0.8061,0.637,0.8117,186.65
+F_mult_T10,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,10.0,1.0,100,1.2,0.001,0.7,0.6,89,0.8122,0.7363,0.7911,0.589,0.8262,191.95
+F_mult_T30,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,30.0,1.0,100,1.2,0.001,0.7,0.6,89,0.7845,0.7022,0.7524,0.4546,0.8394,195.65
+G_mult_T10_below0.3,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,10.0,0.3,100,1.2,0.001,0.7,0.6,89,0.8122,0.7363,0.7911,0.589,0.8262,189.56
+G_mult_T10_below0.5,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,10.0,0.5,100,1.2,0.001,0.7,0.6,89,0.8122,0.7363,0.7911,0.589,0.8262,191.74
+G_mult_T10_below0.7,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,multiplicative,0.5,10.0,0.7,100,1.2,0.001,0.7,0.6,89,0.8122,0.7363,0.7911,0.589,0.8262,187.25
+H_fixed_g03_T10_below0.5,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,fixed,0.3,10.0,0.5,100,1.2,0.001,0.7,0.6,89,0.8159,0.7266,0.7866,0.6043,0.7433,202.15
+H_fixed_g03_T10_below0.7,/root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot/cdfsod_DIOR_10shot_daf_a0.12/weights/best.pt,val,fixed,0.3,10.0,0.7,100,1.2,0.001,0.7,0.6,89,0.8159,0.7266,0.7866,0.6043,0.7433,202.2
