@@ -86,8 +86,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--clip-input-size", type=int, default=224)
     parser.add_argument("--clip-batch-size", type=int, default=64)
     parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument("--split", type=str, default="val", choices=["val", "test"],
+                        help="Which split to evaluate on. Default `val` matches Phase-1 baseline.")
     parser.add_argument("--limit", type=int, default=0,
-                        help="If > 0, only evaluate the first N test images (smoke test).")
+                        help="If > 0, only evaluate the first N images (smoke test).")
     parser.add_argument("--out-csv", type=str, default="runs/direction_c/dualpath_results.csv",
                         help="Append-mode CSV for the result row.")
     parser.add_argument("--run-tag", type=str, default="",
@@ -115,19 +117,24 @@ def find_test_manifest(output_root: Path) -> Path:
     return candidates[0]
 
 
-def load_image_list(data_yaml: Path) -> list[Path]:
+def load_image_list(data_yaml: Path, split: str = "val") -> list[Path]:
     with data_yaml.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
-    test_field = cfg.get("test") or cfg.get("val")
-    if test_field is None:
-        raise KeyError(f"data yaml {data_yaml} has no test/val entry")
-    test_path = Path(test_field).expanduser()
-    if test_path.is_file() and test_path.suffix == ".txt":
-        with test_path.open("r", encoding="utf-8") as f:
+    field = cfg.get(split)
+    if field is None:
+        # Fallback to the other split if the requested one is missing.
+        other = "test" if split == "val" else "val"
+        field = cfg.get(other)
+        if field is None:
+            raise KeyError(f"data yaml {data_yaml} has no {split!r} or {other!r} entry")
+        print(f"[warn] split={split!r} missing in {data_yaml.name}; falling back to {other!r}")
+    p = Path(field).expanduser()
+    if p.is_file() and p.suffix == ".txt":
+        with p.open("r", encoding="utf-8") as f:
             return [Path(line.strip()) for line in f if line.strip()]
-    if test_path.is_dir():
-        return sorted(p for p in test_path.rglob("*") if p.suffix.lower() in {".jpg", ".jpeg", ".png"})
-    raise FileNotFoundError(f"test path not found: {test_path}")
+    if p.is_dir():
+        return sorted(q for q in p.rglob("*") if q.suffix.lower() in {".jpg", ".jpeg", ".png"})
+    raise FileNotFoundError(f"split path not found: {p}")
 
 
 def load_gt_for_image(image_path: Path, num_classes: int) -> tuple[np.ndarray, np.ndarray]:
@@ -247,10 +254,11 @@ def main() -> None:
         print(f"[setup] verifier:   CLIP backbone aligned to {len(verifier.class_names)} classes")
 
     data_yaml = find_test_manifest(output_root)
-    image_paths = load_image_list(data_yaml)
+    image_paths = load_image_list(data_yaml, split=args.split)
     if args.limit > 0:
         image_paths = image_paths[: args.limit]
     print(f"[setup] data yaml:  {data_yaml}")
+    print(f"[setup] split:      {args.split}")
     print(f"[setup] images:     {len(image_paths)}")
 
     iouv = torch.linspace(0.5, 0.95, 10)
@@ -382,6 +390,7 @@ def main() -> None:
     row = {
         "run_tag": args.run_tag,
         "weights": str(weights_path),
+        "split": args.split,
         "fusion_mode": args.fusion_mode,
         "gamma": args.gamma,
         "vlm_temperature": args.vlm_temperature,
