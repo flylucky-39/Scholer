@@ -1,0 +1,10 @@
+domain_gap_g: 0.5
+alpha: 0.0
+k: 6.0
+g0: 0.35
+dge_backend: "<DGE disabled \u2014 using alpha_default as gap stand-in>"
+no_text: true
+no_dge: true
+no_cdpc: true
+dataset: DIOR
+shot: 1

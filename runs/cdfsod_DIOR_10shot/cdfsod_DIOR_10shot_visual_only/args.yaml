@@ -15,7 +15,7 @@ workers: 16
 project: /root/epfs/07_FSOD_LLM/fsod/runs/cdfsod_DIOR_10shot
 name: cdfsod_DIOR_10shot_visual_only
 exist_ok: true
-pretrained: /root/epfs/07_FSOD_LLM/fsod/runs/coco_fsod_10shot_exp/base_pretrain/weights/best.pt
+pretrained: /root/epfs/07_FSOD_LLM/fsod/base_pretrain/weights/best.pt
 optimizer: auto
 verbose: true
 seed: 3407

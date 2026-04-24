@@ -1,10 +1,10 @@
-domain_gap_g: 0.012962551787495613
+domain_gap_g: 0.5
 alpha: 0.0
 k: 6.0
 g0: 0.35
-dge_backend: "stub_random_proj (dev only \u2014 install open_clip for research use)"
+dge_backend: "<DGE disabled \u2014 using alpha_default as gap stand-in>"
 no_text: true
-no_dge: false
-no_cdpc: false
+no_dge: true
+no_cdpc: true
 dataset: DIOR
 shot: 10
