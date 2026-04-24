@@ -1,0 +1,67 @@
+seed: 3407
+
+# -----------------------------------------------------------------------------
+# CD-FSOD-Bench dataset selection
+# -----------------------------------------------------------------------------
+cdfsod_root: ~/epfs/07_FSOD_LLM/datasets/cdfsod_bench   # root holding ArTaxOr/, DIOR/, ...
+cdfsod_dataset: ArTaxOr                                    # one of: ArTaxOr, Clipart1k, DIOR, DeepFish, NEU-DET, UODD
+shot: 1
+include_base_pool: false                                # set true to also write a base_train manifest
+
+# -----------------------------------------------------------------------------
+# Output / run paths
+# -----------------------------------------------------------------------------
+output_root: ./data/cdfsod_ArTaxOr_1shot
+runs_dir: ./runs/cdfsod_ArTaxOr_1shot
+
+# -----------------------------------------------------------------------------
+# Model + training
+# -----------------------------------------------------------------------------
+model: ../yolo11s.pt
+image_size: 640
+device: 0
+workers: 16
+
+epochs:
+  finetune: 200
+
+batch_size:
+  finetune: 4
+
+lr0:
+  finetune: 0.0005
+
+freeze:
+  backbone: 10
+
+patience:
+  finetune: 80
+
+# -----------------------------------------------------------------------------
+# Domain-Gap Estimator (DGE) source images
+#   exactly one of `source_image_manifest` / `source_image_dir` is required
+#   unless --no-dge is passed.
+# -----------------------------------------------------------------------------
+# source_image_manifest: ./data/coco_fsod_30shot/manifests/base_train.txt
+source_image_dir: ~/epfs/07_FSOD_LLM/datasets/coco/images/train2017
+dge_max_images: 200
+
+# -----------------------------------------------------------------------------
+# Domain-Adaptive Fusion (DAF)
+#   alpha(g) = sigmoid( k * (g - g0) )
+# -----------------------------------------------------------------------------
+daf:
+  k: 6.0
+  g0: 0.35
+alpha_default: 0.5      # only used when --no-dge is passed
+
+# -----------------------------------------------------------------------------
+# Cross-Domain Prototype Calibration (CDPC) step size
+# -----------------------------------------------------------------------------
+cdpc_step: 0.1
+
+# -----------------------------------------------------------------------------
+# Optional VLM (Florence-2) for text prototypes.
+# Leave empty / comment out to disable text branch entirely.
+# -----------------------------------------------------------------------------
+florence2_model: ~/epfs/07_FSOD_LLM/models/Florence-2-base/

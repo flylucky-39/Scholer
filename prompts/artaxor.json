@@ -1,0 +1,24 @@
+{
+  "dataset": "ArTaxOr",
+  "description": "Arthropod orders, fine-grained natural-image classification.",
+  "class_labels": {
+    "Araneae": "spider",
+    "Coleoptera": "beetle",
+    "Diptera": "fly",
+    "Hemiptera": "true bug",
+    "Hymenoptera": "bee or wasp or ant",
+    "Lepidoptera": "butterfly or moth",
+    "Odonata": "dragonfly or damselfly"
+  },
+  "templates": [
+    "a photo of a {label}.",
+    "a photo of the {label}.",
+    "an image of a {label}.",
+    "a close-up photo of a {label}.",
+    "a macro photograph of a {label}.",
+    "a nature photo of a {label}.",
+    "a photo of a {label}, an arthropod.",
+    "a high-resolution image of a {label}.",
+    "a photo of a single {label} on a leaf or surface."
+  ]
+}

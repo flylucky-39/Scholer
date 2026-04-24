@@ -1,0 +1,18 @@
+{
+  "dataset": "DeepFish",
+  "description": "Underwater single-class fish detection.",
+  "class_labels": {
+    "fish": "fish"
+  },
+  "templates": [
+    "a photo of a {label}.",
+    "a photo of the {label}.",
+    "an image of a {label}.",
+    "an underwater photo of a {label}.",
+    "an underwater image of a {label} swimming.",
+    "a close-up underwater photo of a {label}.",
+    "a marine biology photo of a {label}.",
+    "a photo of a {label} in the ocean.",
+    "an underwater scene with a {label}."
+  ]
+}

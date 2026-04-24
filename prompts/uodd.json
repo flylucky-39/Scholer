@@ -1,0 +1,20 @@
+{
+  "dataset": "UODD",
+  "description": "Underwater object detection (sea creatures).",
+  "class_labels": {
+    "seacucumber": "sea cucumber",
+    "seaurchin": "sea urchin",
+    "scallop": "scallop"
+  },
+  "templates": [
+    "a photo of a {label}.",
+    "a photo of the {label}.",
+    "an underwater photo of a {label}.",
+    "an underwater image of a {label} on the sea floor.",
+    "a close-up underwater photo of a {label}.",
+    "a marine biology photo of a {label}.",
+    "a photo of a {label} on the ocean bottom.",
+    "an underwater scene with a {label}.",
+    "a high-resolution underwater image of a {label}."
+  ]
+}

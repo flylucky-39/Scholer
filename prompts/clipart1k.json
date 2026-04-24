@@ -1,0 +1,37 @@
+{
+  "dataset": "Clipart1k",
+  "description": "VOC-style classes drawn as clipart/illustration. CLIP very familiar with this domain.",
+  "class_labels": {
+    "aeroplane": "airplane",
+    "bicycle": "bicycle",
+    "bird": "bird",
+    "boat": "boat",
+    "bottle": "bottle",
+    "bus": "bus",
+    "car": "car",
+    "cat": "cat",
+    "chair": "chair",
+    "cow": "cow",
+    "diningtable": "dining table",
+    "dog": "dog",
+    "horse": "horse",
+    "motorbike": "motorbike",
+    "person": "person",
+    "pottedplant": "potted plant",
+    "sheep": "sheep",
+    "sofa": "sofa",
+    "train": "train",
+    "tvmonitor": "TV monitor"
+  },
+  "templates": [
+    "a photo of a {label}.",
+    "a photo of the {label}.",
+    "an image of a {label}.",
+    "a clipart of a {label}.",
+    "a cartoon of a {label}.",
+    "a drawing of a {label}.",
+    "an illustration of a {label}.",
+    "a sketch of a {label}.",
+    "a colorful clipart image of a {label}."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "dataset": "NEU-DET",
+  "description": "Steel-surface defect inspection. Very far from CLIP training distribution.",
+  "class_labels": {
+    "crazing": "crazing surface defect",
+    "inclusion": "inclusion defect on metal",
+    "patches": "patch defect on steel surface",
+    "pitted_surface": "pitted surface defect",
+    "rolled-in_scale": "rolled-in scale defect",
+    "scratches": "scratch defect on metal"
+  },
+  "templates": [
+    "a photo of a {label}.",
+    "a close-up photo of a {label}.",
+    "an industrial inspection image of a {label}.",
+    "a microscope image of a {label} on steel.",
+    "a defect detection image showing a {label}.",
+    "a grayscale image of a {label}.",
+    "a metal surface with a {label}.",
+    "a quality control photo of a {label}.",
+    "a high-resolution image of a {label} on a steel plate."
+  ]
+}
