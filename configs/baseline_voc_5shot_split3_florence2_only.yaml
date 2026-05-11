@@ -1,0 +1,48 @@
+seed: 3409
+
+voc_root: /root/epfs/05_Old_FSOD/Baseline_Yolo/datasets/VOCdevkit
+output_root: ./data/voc_fsod_split3_5shot
+
+novel_classes:
+  - bird
+  - bus
+  - cow
+  - motorbike
+  - sofa
+
+shot: 5
+
+model: yolo11s.pt
+image_size: 640
+device: 0
+workers: 16
+runs_dir: ./runs/voc_fsod_5shot_split3
+
+epochs:
+  base: 100
+  finetune: 200
+
+batch_size:
+  base: 64
+  finetune: 4
+
+lr0:
+  base: 0.01
+  finetune: 0.0005
+
+freeze:
+  backbone: 10
+
+patience:
+  finetune: 30
+
+replay:
+  enabled: false
+  base_images: 200
+
+florence2:
+  alpha: 0.0
+  fusion_mode: init_only
+  film_hidden_dim: 128
+  film_epochs: 300
+  film_weight_decay: 0.05
