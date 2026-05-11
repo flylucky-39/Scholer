@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: 0
 workers: 16
-project: /root/epfs/07_FSOD_LLM/fsod/runs/fsod_baseline
+project: /root/epfs/07_FSOD_LLM/fsod/runs/voc_fsod_10shot
 name: novel_finetune_cosine_fused_mt1
 exist_ok: true
 pretrained: /root/epfs/07_FSOD_LLM/fsod/base_pretrain/weights/best.pt
@@ -103,4 +103,4 @@ erasing: 0.4
 crop_fraction: 1.0
 cfg: null
 tracker: botsort.yaml
-save_dir: /root/epfs/07_FSOD_LLM/fsod/runs/fsod_baseline/novel_finetune_cosine_fused_mt1
+save_dir: /root/epfs/07_FSOD_LLM/fsod/runs/voc_fsod_10shot/novel_finetune_cosine_fused_mt1
