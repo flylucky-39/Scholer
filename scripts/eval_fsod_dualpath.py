@@ -69,6 +69,8 @@ def parse_args() -> argparse.Namespace:
                         help="Only fuse VLM into boxes whose YOLO conf is BELOW this. "
                              "1.0 = always fuse (original behaviour); 0.5 = only "
                              "low-conf boxes get CLIP help, high-conf boxes keep YOLO score.")
+    parser.add_argument("--no-adaptive", action="store_true",
+                        help="Disable per-box adaptive gamma (use original global gamma).")
     parser.add_argument("--top-k", type=int, default=100,
                         help="Max detections per image after first NMS.")
     parser.add_argument("--pad-ratio", type=float, default=1.2,
@@ -317,6 +319,7 @@ def main() -> None:
                 mode=args.fusion_mode,
                 gamma=args.gamma,
                 vlm_temperature=args.vlm_temperature,
+                adaptive=not args.no_adaptive,
             )
             # Selective fusion: high-confidence YOLO boxes bypass the verifier.
             if args.vlm_only_below < 1.0:

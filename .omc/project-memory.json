@@ -1,0 +1,219 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1778468083038,
+  "projectRoot": "E:\\Study\\FSOD_VLM\\fsod",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "requirements.txt"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "pip",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "base_pretrain": {
+      "path": "base_pretrain",
+      "purpose": null,
+      "fileCount": 22,
+      "lastAccessed": 1778468082498,
+      "keyFiles": [
+        "args.yaml",
+        "BoxF1_curve.png",
+        "BoxPR_curve.png",
+        "BoxP_curve.png",
+        "BoxR_curve.png"
+      ]
+    },
+    "configs": {
+      "path": "configs",
+      "purpose": null,
+      "fileCount": 32,
+      "lastAccessed": 1778468082506,
+      "keyFiles": [
+        "ablation_voc_10shot_50ep.yaml",
+        "baseline_voc_10shot.yaml",
+        "baseline_voc_1shot.yaml",
+        "baseline_voc_3shot.yaml",
+        "baseline_voc_5shot.yaml"
+      ]
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 0,
+      "lastAccessed": 1778468082508,
+      "keyFiles": []
+    },
+    "datasets": {
+      "path": "datasets",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778468082509,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 13,
+      "lastAccessed": 1778468082510,
+      "keyFiles": [
+        "baseline_reproduction_plan.md",
+        "cdfsod_quickstart.md",
+        "fig1_framework.pdf",
+        "fig1_framework.png",
+        "fig2_shot_map50.pdf"
+      ]
+    },
+    "fsod": {
+      "path": "fsod",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1778468082511,
+      "keyFiles": [
+        "coco.py",
+        "florence2.py",
+        "voc.py",
+        "__init__.py"
+      ]
+    },
+    "models": {
+      "path": "models",
+      "purpose": "Data models",
+      "fileCount": 1,
+      "lastAccessed": 1778468082512,
+      "keyFiles": [
+        "clip-vit-base-patch32.tgz"
+      ]
+    },
+    "prompts": {
+      "path": "prompts",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1778468082514,
+      "keyFiles": [
+        "artaxor.json",
+        "clipart1k.json",
+        "deepfish.json",
+        "dior.json",
+        "neu-det.json"
+      ]
+    },
+    "runs": {
+      "path": "runs",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778468082515,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 18,
+      "lastAccessed": 1778468082517,
+      "keyFiles": [
+        "benchmark_speed.py",
+        "download_clip_vitb32_minimal.py",
+        "eval_baseline.py",
+        "eval_fsod.py",
+        "eval_fsod_dualpath.py"
+      ]
+    },
+    "third_party": {
+      "path": "third_party",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1778468082518,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "docs\\vcp_paper_draft.tex",
+      "accessCount": 56,
+      "lastAccessed": 1778483584756,
+      "type": "file"
+    },
+    {
+      "path": "docs\\generate_figures.py",
+      "accessCount": 30,
+      "lastAccessed": 1778479838442,
+      "type": "file"
+    },
+    {
+      "path": "docs\\vcp_paper_draft.md",
+      "accessCount": 21,
+      "lastAccessed": 1778488884347,
+      "type": "file"
+    },
+    {
+      "path": "docs\\extract_doc.py",
+      "accessCount": 4,
+      "lastAccessed": 1778481142070,
+      "type": "file"
+    },
+    {
+      "path": "docs\\fig1_framework.jpg",
+      "accessCount": 2,
+      "lastAccessed": 1778478742382,
+      "type": "file"
+    },
+    {
+      "path": "docs\\doc_output.txt",
+      "accessCount": 2,
+      "lastAccessed": 1778481483863,
+      "type": "file"
+    },
+    {
+      "path": "docs",
+      "accessCount": 1,
+      "lastAccessed": 1778470062430,
+      "type": "directory"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1778470062586,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\fig1_framework.png",
+      "accessCount": 1,
+      "lastAccessed": 1778477386019,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

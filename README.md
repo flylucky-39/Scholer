@@ -1,196 +1,75 @@
-# FSOD LLM Baseline
+# FSOD VLM Baseline Reproduction Workspace
 
-这版仓库先只做一个干净、可复现实验的 baseline，不把轻量视觉大模型定位、特征适配层、Prototype、Cosine Classifier 直接揉进来。
+这个仓库现在作为跨域少样本目标检测（CD-FSOD）的 baseline 复现与改进工作区使用。当前主线从自研 YOLO + DAF + Dual-Path 探索，切换为：
 
-当前 baseline 定义如下：
+1. 先复现外部强 baseline 论文，例如 CD-ViTO / DE-ViT。
+2. 在统一数据集、统一 split、统一指标口径下建立可靠对照。
+3. 再围绕 prototype、prompt、support quality 或 background calibration 做小而明确的改进。
 
-1. 使用 Ultralytics YOLO11s 作为 baseline 检测器。
-2. 用 VOC2007 trainval + VOC2012 trainval 做 base 训练。
-3. 用自定义 novel 类别的 10-shot 样本做第二阶段微调。
-4. 用 VOC2007 test 做统一评估，指标先看 mAP@0.5。
+旧 VOC / COCO / YOLO-FSOD / Dual-Path 代码和结果暂时保留为历史资产，第一轮清理不删除、不移动代码文件。
 
-后续你可以在这个 baseline 上逐步加：
+## 当前定位
 
-1. Cosine Classifier
-2. Prototype 构建与更新
-3. 轻量视觉模型定位模块
-4. 特征适配层 / mask 融合
+推荐新方向：**Quality-Aware Prototype Calibration for Cross-Domain Few-Shot Object Detection**。
 
-## 项目结构
+核心思路是：以 CD-ViTO / DE-ViT 等已发表方法作为主 baseline，优先复现 CD-FSOD-Bench 上的 1/5/10-shot 结果，然后加入质量感知 prototype 校准、领域 prompt 或背景原型校准模块。
+
+## 重要文档
+
+- [docs/baseline_reproduction_plan.md](docs/baseline_reproduction_plan.md)：新 baseline 复现路线。
+- [docs/restart_baseline_cleanup_plan.md](docs/restart_baseline_cleanup_plan.md)：第一轮清理边界和后续清理建议。
+- [docs/archive/README.md](docs/archive/README.md)：旧方向资产说明。
+- [cdfssod_banchmarkRESULT.md](cdfssod_banchmarkRESULT.md)：已有 CD-ViTO DIOR 10-shot 复现记录。
+- [docs/cdfsod_quickstart.md](docs/cdfsod_quickstart.md)：当前 CD-FSOD 数据准备和旧 YOLO-FSOD 流程说明。
+
+## 建议保留资产
 
 ```text
-configs/
-  baseline_voc_10shot.yaml    # 实验配置
-scripts/
-  prepare_voc_fewshot.py      # VOC 转 YOLO + few-shot 划分
-  train_baseline.py           # 两阶段训练入口
-  eval_baseline.py            # 评估入口
-fsod/
-  voc.py                      # VOC 数据处理工具
-data/
-  # prepare 后自动生成
+configs/cdfsod_*shot.yaml       # 6 个 CD-FSOD 数据集的 1/5/10-shot 配置
+prompts/*.json                  # 每个数据集的类别 prompt 文件
+fsod/cdfsod/                    # CD-FSOD 数据集注册、domain gap、calibration 工具
+scripts/prepare_cdfsod.py       # CD-FSOD 数据转换入口
+cdfssod_banchmarkRESULT.md      # CD-ViTO 复现记录
+third_party/ultralytics/        # 旧 YOLO-FSOD 线仍依赖的 vendored Ultralytics
 ```
 
-## 环境
+## 第一阶段目标
 
-建议 Python 3.10 或 3.11。
+1. 选定主 baseline：优先 CD-ViTO，备选 DE-ViT。
+2. 复现至少 3 个代表性数据集：DIOR、Clipart1k、DeepFish。
+3. 每个数据集先跑 1/5/10-shot，记录 AP、AP50、AP75。
+4. 固定环境、配置、权重和 split，形成可重复的 baseline 表。
+5. 在 baseline 稳定后，再加入自己的 prototype calibration 改进。
 
-安装依赖：
+## 当前已有结果
+
+已有一版 CD-ViTO DIOR 10-shot 复现结果：
+
+| Method | Dataset | Shot | AP | AP50 | AP75 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| CD-ViTO | DIOR | 10 | 30.41 | 46.56 | 32.47 |
+
+结果细节见 [cdfssod_banchmarkRESULT.md](cdfssod_banchmarkRESULT.md)。
+
+## 清理原则
+
+第一轮只做文档层清理：
+
+1. README 改为新方向入口。
+2. 新增 baseline 复现计划。
+3. 新增旧方向归档说明。
+4. 不删除任何文件。
+5. 不移动 Python 代码。
+6. 不回滚当前未提交改动。
+
+后续如果要删除或移动文件，需要逐项确认。
+
+## 环境提示
+
+本仓库仍保留旧 YOLO-FSOD 依赖：
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 数据准备
-
-默认假设你的 VOC 根目录结构如下：
-
-```text
-VOCdevkit/
-  VOC2007/
-  VOC2012/
-```
-
-在 [configs/baseline_voc_10shot.yaml](configs/baseline_voc_10shot.yaml) 里修改：
-
-1. `voc_root`
-2. `output_root`
-3. `novel_classes`
-4. `shot`
-
-当前默认配置已经按你的服务器目录做了适配：
-
-1. 项目目录：`~/epfs/07_FSOD_LLM/fsod`
-2. VOC 数据目录：`~/epfs/07_FSOD_LLM/datasets/VOCdevkit`
-3. 脚本现在支持 `~` 路径展开，并且相对路径统一按仓库根目录解析。
-
-然后运行：
-
-```bash
-python scripts/prepare_voc_fewshot.py --config configs/baseline_voc_10shot.yaml
-```
-
-该脚本会做三件事：
-
-1. 把 VOC 标注转换为 YOLO 格式。
-2. 导出 base 训练集、few-shot 微调集、test 集。
-3. 生成训练所需的数据集 yaml 和统计信息。
-
-## 训练
-
-完整两阶段训练：
-
-```bash
-python scripts/train_baseline.py --config configs/baseline_voc_10shot.yaml --stage all
-```
-
-只跑第一阶段 base 预训练：
-
-```bash
-python scripts/train_baseline.py --config configs/baseline_voc_10shot.yaml --stage base
-```
-
-只跑第二阶段 few-shot 微调：
-
-```bash
-python scripts/train_baseline.py --config configs/baseline_voc_10shot.yaml --stage finetune --weights runs/fsod_baseline/base_pretrain/weights/best.pt
-```
-
-## 评估
-
-```bash
-python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml
-```
-
-默认会读取第二阶段微调后的权重，并使用全 20 类 test 标签评估。
-
-如果只看 novel 类评估：
-
-```bash
-python scripts/eval_baseline.py --config configs/baseline_voc_10shot.yaml --scope novel
-```
-
-当前 few-shot 协议下：
-
-1. `voc_fsod_finetune.yaml` 用于 novel-only 微调，并在训练时用 novel-only test 标签做验证。
-2. `voc_fsod_eval_all.yaml` 用于训练后查看全 20 类 test 指标。
-
-## Baseline 边界
-
-这版 baseline 故意保持简单，目的是先拿到一个可信的对照组：
-
-1. 第一阶段只保留 base 类标注，novel 类在 base 训练中不参与监督。
-2. 第二阶段用 novel few-shot 样本微调，同时可选混入少量 base replay 图像。
-3. 分类头仍然使用 YOLO 原生分类方式，不引入 prototype / cosine。
-
-## 建议的实验顺序
-
-1. 先固定 5 个 novel 类，跑通 10-shot baseline。
-2. 确认 base / novel / all 三组 AP 都能正常输出。
-3. 再替换分类头为 cosine classifier。
-4. 最后再加入定位模块和适配层。
-
-## 下一步怎么接你的研究方向
-
-你现在要做的是“重新开始做一版 baseline”，那最稳妥的顺序是：
-
-1. 先用这套工程拿到可复现的 baseline 指标。
-2. 在微调阶段插入 prototype 分支，先不动定位模块。
-3. 验证 cosine classifier + prototype 的纯增益。
-4. 最后再接入轻量视觉大模型和特征掩码，做完整消融。
-
-这样实验逻辑是干净的，论文写作也更顺。
-
-## Florence-2 输出处理
-
-当 novel-only baseline 固定后，下一步建议不要直接改训练主线，而是先把 Florence-2 的输出稳定导出来。
-
-当前仓库新增了一个批量导出脚本：
-
-```bash
-python scripts/export_florence2_outputs.py --model-path /path/to/Florence-2-base --input-manifest data/voc_fsod_split1_10shot/manifests/novel_finetune.txt --task caption_to_phrase_grounding --output-dir data/florence2_outputs/support
-```
-
-`--model-path` 必须指向本地 Florence-2 模型目录本身，并且该目录下需要能找到 `config.json`。
-如果你给的是 Hugging Face 缓存根目录，脚本也会自动尝试使用其中的 `snapshots/*` 子目录。
-
-默认行为：
-
-1. 读取 `configs/baseline_voc_10shot.yaml` 中的 `novel_classes`
-2. 对每张图分别以 `bird,bus,cow,motorbike,sofa` 做类引导 grounding
-3. 导出每张图的 JSON 结果
-4. 结果中包含原始文本、bbox、归一化 bbox 等信息
-
-如果只想做无提示区域提案：
-
-```bash
-python scripts/export_florence2_outputs.py --model-path /path/to/Florence-2-base --input-manifest data/voc_fsod_split1_10shot/manifests/novel_finetune.txt --task region_proposal --output-dir data/florence2_outputs/proposals
-```
-
-推荐先导出 support set 的结果，再检查：
-
-1. `bird`
-2. `cow`
-3. `sofa`
-
-这三个弱类最适合拿来验证 Florence-2 的 ROI 是否能改善 few-shot 表现。
-
-## GitLab 到服务器工作流
-
-如果你准备把代码上传到 GitLab，再由服务器拉取运行，建议直接按这个顺序做：
-
-1. 本地初始化 git 仓库并提交代码。
-2. 在 GitLab 创建空仓库。
-3. 本地添加 `origin` 并 push 到 GitLab。
-4. 服务器配置 SSH key 后从 GitLab clone。
-5. 后续开发统一走 `git add -> git commit -> git push`，服务器用 `git pull` 同步。
-
-如果服务器分支历史被覆盖过，不要用 `git pull`，改用：
-
-```bash
-git fetch origin
-git checkout FSOD_LLM
-git reset --hard origin/FSOD_LLM
-```
-
-更具体的命令说明见 [docs/gitlab_server_workflow.md](docs/gitlab_server_workflow.md)。
+CD-ViTO / DE-ViT 复现通常需要单独的 Detectron2 / RegionCLIP / DINOv2 环境，建议和本仓库 Python 环境隔离管理，并在 `baselines/` 或文档中记录完整命令。

@@ -27,6 +27,7 @@ def fuse_box_scores(
     mode: FusionMode = "fixed",
     gamma: float = 0.5,
     vlm_temperature: float = 100.0,
+    adaptive: bool = True,
 ) -> Tensor:
     """Fuse per-box YOLO confidence with VLM verifier similarity.
 
@@ -47,6 +48,10 @@ def fuse_box_scores(
           * ``"rerank"`` — drop YOLO and use VLM only (diagnostic).
     gamma : float
         Mixing weight for ``"fixed"``. Ignored otherwise.
+    adaptive : bool
+        When True (default), gamma is scaled per-box by ``(1 - s_yolo)`` so
+        that high-confidence boxes get less VLM influence. Set to False for
+        the original global-gamma behaviour.
     vlm_temperature : float
         Logit temperature applied before softmax. CLIP's typical scale is
         ~100 (matches its ``logit_scale.exp()``).
@@ -84,12 +89,24 @@ def fuse_box_scores(
     s_vlm_for_cls = s_vlm_prob.gather(1, cls_index.unsqueeze(1)).squeeze(1)
     s_vlm_for_cls = s_vlm_for_cls.to(s_yolo.device)
 
+    # Per-box adaptive gamma: high YOLO confidence → less VLM influence.
+    if adaptive and mode != "rerank":
+        gamma_i = gamma * (1.0 - s_yolo)
+    else:
+        gamma_i = gamma
+
     if mode == "fixed":
         if not 0.0 <= gamma <= 1.0:
             raise ValueError(f"gamma must be in [0, 1], got {gamma}")
-        fused = (1.0 - gamma) * s_yolo + gamma * s_vlm_for_cls
+        fused = (1.0 - gamma_i) * s_yolo + gamma_i * s_vlm_for_cls
     elif mode == "multiplicative":
-        fused = s_yolo * s_vlm_for_cls
+        if adaptive:
+            # Interpolate between pure YOLO and multiplicative:
+            # gamma_i=0 (high YOLO conf) → s_yolo;  gamma_i=1 → s_yolo * s_vlm
+            fused_mul = s_yolo * s_vlm_for_cls
+            fused = (1.0 - gamma_i) * s_yolo + gamma_i * fused_mul
+        else:
+            fused = s_yolo * s_vlm_for_cls
     elif mode == "rerank":
         fused = s_vlm_for_cls
     else:

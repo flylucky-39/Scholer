@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd E:/Study/FSOD_VLM/fsod/docs && python extract_doc.py > doc_output.txt 2>&1\",\"description\":\"Extract doc text to file\"}",
+  "error": "Exit code 1",
+  "timestamp": "2026-05-11T06:32:07.329Z",
+  "retry_count": 1
+}
