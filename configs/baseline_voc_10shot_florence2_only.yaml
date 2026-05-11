@@ -1,0 +1,48 @@
+seed: 3407
+
+voc_root: ~/epfs/07_FSOD_LLM/datasets/VOCdevkit
+output_root: ./data/voc_fsod_split1_10shot
+
+novel_classes:
+  - bird
+  - bus
+  - cow
+  - motorbike
+  - sofa
+
+shot: 10
+
+model: yolo11s.pt
+image_size: 640
+device: 0
+workers: 16
+runs_dir: ./runs/voc_fsod_10shot
+
+epochs:
+  base: 100
+  finetune: 200
+
+batch_size:
+  base: 64
+  finetune: 4
+
+lr0:
+  base: 0.01
+  finetune: 0.0005
+
+freeze:
+  backbone: 10
+
+patience:
+  finetune: 30
+
+replay:
+  enabled: false
+  base_images: 200
+
+florence2:
+  alpha: 0.0           # 0% visual prototype, 100% Florence-2 FiLM
+  fusion_mode: init_only  # one-shot blend, no learnable alpha during finetune
+  film_hidden_dim: 128
+  film_epochs: 300
+  film_weight_decay: 0.05
