@@ -77,7 +77,7 @@ where $\alpha=0.7$ and $W_f$ is a learnable projection matrix. Critically, seman
 
 The gradient of cosine similarity w.r.t.\ feature $f$ reveals the mechanism behind its behavioral pattern:
 \begin{equation}
-\frac{\partial \cos(f, p_c)}{\partial f} = \frac{p_c - \cos(f, p_c) \cdot f}{\|f\|}
+\frac{\partial \cos(f, p_c)}{\partial f} = \frac{p_c - \cos(f, p_c) \cdot \hat{f}}{\|f\|}, \quad \hat{f} = \frac{f}{\|f\|}
 \label{eq:gradient}
 \end{equation}
 When $f$ has low similarity to $p_c$, the gradient magnitude is large, driving the decision boundary outward. When similarity is already high, gradients diminish. Unlike linear classifiers whose gradient $\partial(W_c f)/\partial f = W_c$ is uniform, the cosine classifier \textit{disproportionately updates low-confidence samples}, naturally favoring a ``better safe than sorry'' strategy: it detects more true positives (high recall) but admits more false positives (low precision). We term this property the \textbf{Recall Booster}. Whether this yields a net mAP gain depends on the product of baseline recall headroom and the dataset's P-R tradeoff ratio, as validated in Section~IV.
@@ -92,7 +92,7 @@ Four variants are compared: (1) \textit{Finetune}---standard YOLO11s with linear
 
 \subsection{Main Results}
 
-\textbf{VOC Results.} Table~\ref{tab:voc_main} presents VOC mAP50 (Split 1 / 3-split mean $\pm$ std). Three trends emerge: (1) The cosine classifier drives a qualitative leap---5-shot mean: 32.9\% $\rightarrow$ 57.8\% (+24.9 pp); 10-shot: 51.3\% $\rightarrow$ 69.0\% (+17.7 pp). (2) Visual prototype initialization contributes +2.7 pp at 10-shot (mean). (3) Florence-2 fusion adds a consistent +0.5 pp across all three 10-shot splits, limited but directionally positive.
+\textbf{VOC Results.} Table~\ref{tab:voc_main} presents VOC mAP50 (Split 1 / 3-split mean $\pm$ std). Three trends emerge: (1) The cosine classifier drives a qualitative leap---5-shot (Split 1): 32.9\% $\rightarrow$ 66.9\% (+34.0 pp); 10-shot (Split 1): 51.3\% $\rightarrow$ 70.7\% (+19.4 pp). (2) Visual prototype initialization contributes +3.7 pp at 10-shot (Split 1). (3) Florence-2 fusion adds +0.3 pp at 10-shot (Split 1), directionally consistent across all three splits.
 
 \begin{table*}[t]
 \centering\footnotesize
@@ -213,7 +213,7 @@ VCP Cos+Proto    & 21.5 & 52.3 & 68.8 & 74.4 \\
 
 \subsection{Inference Speed}
 
-Table~\ref{tab:fps} compares inference speed (NVIDIA H20, $640\times640$, batch 1). VCP Fused achieves 54.4 FPS---4--5$\times$ faster than two-stage FSOD methods---with only 9.4M parameters. The cosine classifier adds $\sim$4 ms latency (from L2 normalization), still well above the 30 FPS real-time threshold. Critically, Florence-2 is \textit{not} loaded at inference; semantic prototypes are pre-computed and stored in the classifier weights.
+Table~\ref{tab:fps} compares inference speed (NVIDIA H20, $640\times640$, batch 1). VCP Fused achieves 54.4 FPS---4--5$\times$ faster than two-stage FSOD methods---with only 9.5M parameters. The cosine classifier adds $\sim$4 ms latency (from L2 normalization), still well above the 30 FPS real-time threshold. Critically, Florence-2 is \textit{not} loaded at inference; semantic prototypes are pre-computed and stored in the classifier weights.
 
 \begin{table}[ht]
 \centering
@@ -225,10 +225,10 @@ Model & Latency (ms) & FPS & Params \\
 \midrule
 FRCN R-101 (ref.) & $\sim$85 & $\sim$12 & $\sim$60M \\
 \midrule
-YOLO11s baseline & 14.4 & 69.5 & 9.4M \\
-Finetune          & 14.7 & 68.2 & 9.4M \\
-Cosine            & 18.9 & 52.8 & 9.4M \\
-Fused (VCP)       & 18.4 & \textbf{54.4} & 9.4M \\
+YOLO11s baseline & 14.4 & 69.5 & 9.5M \\
+Finetune          & 14.7 & 68.2 & 9.5M \\
+Cosine            & 18.9 & 52.8 & 9.5M \\
+Fused (VCP)       & 18.4 & \textbf{54.4} & 9.5M \\
 \bottomrule
 \end{tabular}
 \end{table}
