@@ -28,7 +28,7 @@ felix.fei@qfnu.edu.cn}
 \maketitle
 
 \begin{abstract}
-Few-shot object detection (FSOD) methods are almost exclusively built upon the two-stage Faster R-CNN, while YOLO-series single-stage detectors---dominant in industrial deployment---lack systematic FSOD investigation. We present VCP (Visual-Cosine-Prototype), a single-stage FSOD framework combining YOLO11s with a cosine classifier and prototype learning under the TFA protocol. On PASCAL VOC, VCP achieves 72.2\% mAP50 (3-split mean) at 10-shot with only 9.5M parameters ($\sim$1/6 of competing methods). However, the same approach underperforms fine-tuning on MS COCO. Through systematic Precision-Recall decomposition across 24 comparison groups, we reveal that the cosine classifier acts as a \textit{Recall Booster}---consistently pushing the operating point toward higher recall and lower precision. We formulate the P-R Tradeoff Hypothesis: the net benefit depends on the product of baseline recall headroom and the dataset-specific P-R tradeoff ratio, explaining the VOC-COCO divergence. We further explore Florence-2 VLM semantic prototypes as auxiliary priors (+0.5 pp at 10-shot). VCP runs at 54.4 FPS, 4--5$\times$ faster than two-stage FSOD methods with zero VLM inference overhead.
+Few-shot object detection (FSOD) methods are almost exclusively built upon the two-stage Faster R-CNN, while YOLO-series single-stage detectors---dominant in industrial deployment---lack systematic FSOD investigation. We present VCP (Visual-Cosine-Prototype), a single-stage FSOD framework combining YOLO11s with a cosine classifier and prototype learning under the TFA protocol. On PASCAL VOC, VCP achieves 72.2\% mAP50 (3-split mean) at 10-shot with only 9.5M parameters ($\sim$1/6 of competing methods). However, the same approach underperforms fine-tuning on MS COCO. Through systematic precision-recall decomposition across 24 comparison groups, we reveal that the cosine classifier acts as a \textit{Recall Booster}---consistently pushing the operating point toward higher recall and lower precision. We formulate the P-R Tradeoff Hypothesis: the net benefit depends on the product of baseline recall headroom and the dataset-specific P-R tradeoff ratio, explaining the VOC-COCO divergence. We further explore Florence-2 VLM semantic prototypes as auxiliary priors (+0.5 pp at 10-shot). VCP runs at 54.4 FPS, 4--5$\times$ faster than two-stage FSOD methods with zero VLM inference overhead.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -37,19 +37,19 @@ few-shot object detection, single-stage detector, cosine classifier, prototype l
 
 \section{Introduction}
 
-Few-shot object detection (FSOD) aims to detect novel categories from only a few annotated examples. Methods such as FSCE~\cite{sun2021fsce} and DeFRCN~\cite{qiao2021defrcn} have steadily advanced FSOD benchmarks, yet a striking commonality persists: virtually all FSOD methods are built upon the two-stage Faster R-CNN~\cite{ren2015faster}. The Region Proposal Network (RPN) provides built-in foreground filtering that helps control false positives under data scarcity. In industrial deployment, however, the YOLO family~\cite{redmon2016yolo,jocher2023ultralytics} dominates due to its real-time efficiency. This creates a disconnect where ``published methods cannot be deployed, and deployed systems lack research foundations.'' To our knowledge, no prior work has systematically studied modern YOLO detectors (YOLOv8+) for FSOD under the standard TFA protocol.
+Few-shot object detection (FSOD) aims to detect novel categories from only a few annotated examples. Methods such as FSCE~\cite{sun2021fsce} and DeFRCN~\cite{qiao2021defrcn} have steadily advanced FSOD benchmarks, yet a striking commonality persists: virtually all FSOD methods are built upon the two-stage Faster R-CNN~\cite{ren2015faster}. The Region Proposal Network (RPN) provides built-in foreground filtering that helps control false positives under data scarcity. In industrial deployment, however, the YOLO family~\cite{redmon2016yolo,redmon2018yolov3,jocher2023ultralytics} dominates due to its real-time efficiency. This creates a disconnect where ``published methods cannot be deployed, and deployed systems lack research foundations.'' To our knowledge, no prior work has systematically studied modern YOLO detectors (YOLOv8+) for FSOD under the standard TFA protocol.
 
 The core challenge for single-stage FSOD is the absence of RPN foreground filtering: the dense prediction paradigm generates abundant low-quality proposals, subjecting the classifier to extreme imbalance. The cosine classifier~\cite{wang2020tfa} mitigates classifier overfitting through normalization, while Florence-2~\cite{xiao2024florence2} offers fine-grained semantic understanding. However, combining cosine classification with single-stage YOLO detectors and systematically analyzing its behavior remains unexplored.
 
-We propose VCP (Visual-Cosine-Prototype), which replaces YOLO11s's linear classification head with a cosine classifier initialized by support-set visual prototypes (Proto mode), and further explores Florence-2 semantic descriptions as auxiliary priors (Fused mode). On PASCAL VOC, VCP achieves 72.2\% mAP50 at 10-shot (3-split mean) with $\sim$9.5M parameters, competitive against $\sim$60M-parameter SOTA methods; Split 1 reaches 74.7\%, surpassing all existing methods.
+We propose VCP (Visual-Cosine-Prototype), which replaces YOLO11s's linear classification head with a cosine classifier initialized by support-set visual prototypes (Proto mode), and further explores Florence-2 semantic descriptions as auxiliary priors (Fused mode). On PASCAL VOC, VCP achieves 72.2\% mAP50 at 10-shot (3-split mean) with $\sim$9.5M parameters, competitive with $\sim$60M-parameter SOTA methods; Split 1 reaches 74.7\%, surpassing all existing methods.
 
 However, applying the same approach to MS COCO yields the opposite outcome: cosine-based methods consistently underperform standard fine-tuning. Through systematic P-R decomposition across 24 comparison groups, we identify a consistent pattern: the cosine classifier invariably sacrifices precision for recall---acting as a \textbf{Recall Booster}. We formulate the \textbf{P-R Tradeoff Hypothesis} to explain this cross-dataset divergence. Our contributions are: (1) the first systematic exploration of single-stage YOLO detectors under the TFA FSOD protocol; (2) identification of the cosine classifier's Recall Booster property and the P-R Tradeoff Hypothesis; (3) preliminary investigation of VLM semantic prototypes as auxiliary priors and their engineering efficiency.
 
 \section{Related Work}
 
-FSOD research has transitioned from meta-learning approaches~\cite{yan2019meta,wang2019meta} to the fine-tuning paradigm established by TFA~\cite{wang2020tfa}, which trains a detector on base classes then fine-tunes the classification head on novel classes. FSCE~\cite{sun2021fsce} introduced contrastive proposal encoding, DeFRCN~\cite{qiao2021defrcn} proposed gradient decoupling to mitigate backbone overfitting, and KD-DeFRCN~\cite{pei2022kddefrcn} incorporated knowledge distillation. All these methods share a common backbone: Faster R-CNN, exploiting its RPN for proposal quality control.
+FSOD research has transitioned from meta-learning approaches~\cite{yan2019meta,wang2019meta} to the fine-tuning paradigm established by TFA~\cite{wang2020tfa}, which trains a detector on base classes then fine-tunes the classification head on novel classes. FSCE~\cite{sun2021fsce} introduced contrastive proposal encoding, DeFRCN~\cite{qiao2021defrcn} proposed gradient decoupling to mitigate backbone overfitting, and KD-DeFRCN~\cite{pei2022kddefrcn} incorporated knowledge distillation. Other improvements include MPSR~\cite{wu2020mpsr} for multi-scale refinement, FSDetView~\cite{xiao2020fsdetview} for viewpoint augmentation, and CME~\cite{li2021cme} for margin optimization. All these methods share a common backbone: Faster R-CNN, exploiting its RPN for proposal quality control.
 
-Single-stage detector exploration in FSOD remains extremely limited. Meta-YOLO~\cite{kang2019fsrw} modulated YOLOv2 features via meta-learning, but used a high-variance split protocol since superseded by TFA's low-variance splits~\cite{wang2020tfa}. No prior work has systematically studied modern YOLO detectors (v8+) under the TFA protocol. In parallel, VLMs such as CLIP~\cite{radford2021clip} and Florence-2~\cite{xiao2024florence2} have enabled semantic prototype construction---directly obtaining class priors from textual descriptions rather than scarce visual samples. However, leveraging VLM prototypes under FSOD's strict data constraints (1--10 samples per class) without introducing excessive semantic noise remains underexplored.
+Single-stage detector exploration in FSOD remains extremely limited. Meta-YOLO~\cite{kang2019fsrw} modulated YOLOv2 features via meta-learning, but used a high-variance split protocol since superseded by TFA's low-variance splits~\cite{wang2020tfa}. No prior work has systematically studied modern YOLO detectors (v8+) under the TFA protocol. In parallel, VLMs such as CLIP~\cite{radford2021clip} and Florence-2~\cite{xiao2024florence2} have enabled semantic prototype construction---directly obtaining class priors from textual descriptions rather than scarce visual samples---while OWL-ViT~\cite{minderer2022owlvit}, GLIP~\cite{li2022glip}, and Grounding DINO~\cite{liu2023groundingdino} have advanced open-vocabulary detection. However, leveraging VLM prototypes under FSOD's strict data constraints (1--10 samples per class) without introducing excessive semantic noise remains underexplored.
 
 \section{Method}
 
@@ -59,14 +59,14 @@ VCP adopts YOLO11s as the base detector with a critical modification: the linear
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{fig1_framework.jpg}
-\caption{VCP framework: YOLO11s backbone+neck $\rightarrow$ decoupled head $\rightarrow$ cosine classifier. Visual prototypes are extracted from support-set via RoIAlign; semantic prototypes from Florence-2 $\rightarrow$ BART encoder. Fused at $\alpha=0.7$.}
+\includegraphics[width=0.90\textwidth]{fig1_framework.jpg}
+\caption{VCP framework: YOLO11s backbone+neck, decoupled head, cosine classifier. Visual prototypes via RoIAlign; semantic prototypes via Florence-2 + BART. Fused at $\alpha=0.7$.}
 \label{fig:framework}
 \end{figure*}
 
-Prototypes are constructed from two complementary sources. \textbf{Visual Prototype (Proto mode):} For each novel class $c$ with $K$ support samples, RoIAlign extracts features within ground-truth boxes from FPN levels P3--P5 at the classification branch input (cv3 layer). Averaging and L2-normalizing yields $p_c^{\text{vis}} = \frac{1}{K}\sum_{i=1}^K \text{RoIAlign}(F_i, b_i)$, directly written into the cosine classifier weights.
+Prototypes are derived from two sources. \textbf{Visual Prototype (Proto):} For each novel class $c$, RoIAlign extracts features within GT boxes from FPN P3--P5 at the classification branch, averaged and L2-normalized: $p_c^{\text{vis}} = \frac{1}{K}\sum_{i=1}^K \text{RoIAlign}(F_i, b_i)$, written directly into classifier weights.
 
-\textbf{Semantic Prototype \& Fused mode:} Target region crops are fed to Florence-2 with the \texttt{<DETAILED\_CAPTION>} prompt, and the resulting textual descriptions are encoded via BART to produce $p_c^{\text{text}}$. The final prototype fuses both sources with a learnable weight:
+\textbf{Semantic Prototype (Fused):} Target crops are fed to Florence-2 with \texttt{<DETAILED\_CAPTION>}, text descriptions encoded via BART to $p_c^{\text{text}}$. The fused prototype is:
 \begin{equation}
 p_c = \alpha \cdot p_c^{\text{vis}} + (1 - \alpha) \cdot W_f \cdot p_c^{\text{text}}
 \label{eq:fused}
@@ -80,19 +80,19 @@ The gradient of cosine similarity w.r.t.\ feature $f$ reveals the mechanism behi
 \frac{\partial \cos(f, p_c)}{\partial f} = \frac{p_c - \cos(f, p_c) \cdot \hat{f}}{\|f\|}, \quad \hat{f} = \frac{f}{\|f\|}
 \label{eq:gradient}
 \end{equation}
-When $f$ has low similarity to $p_c$, the gradient magnitude is large, driving the decision boundary outward. When similarity is already high, gradients diminish. Unlike linear classifiers whose gradient $\partial(W_c f)/\partial f = W_c$ is uniform, the cosine classifier \textit{disproportionately updates low-confidence samples}, naturally favoring a ``better safe than sorry'' strategy: it detects more true positives (high recall) but admits more false positives (low precision). We term this property the \textbf{Recall Booster}. Whether this yields a net mAP gain depends on the product of baseline recall headroom and the dataset's P-R tradeoff ratio, as validated in Section~IV.
+When $f$ has low similarity to $p_c$, the gradient magnitude is large, driving the decision boundary outward. When similarity is already high, gradients diminish. Unlike linear classifiers whose gradient $\partial(W_c f)/\partial f = W_c$ is uniform, the cosine classifier \textit{disproportionately updates low-confidence samples}, naturally favoring a high-recall detection strategy: it detects more true positives (high recall) but admits more false positives (low precision). We term this property the \textbf{Recall Booster}. Whether this yields a net mAP gain depends on the product of baseline recall headroom and the dataset's P-R tradeoff ratio, as validated in Section~IV.
 
 \section{Experiments}
 
 \subsection{Setup}
 
-We evaluate on PASCAL VOC 2007+2012 and MS COCO 2014 under the TFA split protocol~\cite{wang2020tfa}: VOC's 20 classes partitioned into 15 base / 5 novel (3 splits); COCO's 20 VOC-overlapping classes as novel, 60 as base. Base detector is YOLO11s (9.5M params), pre-trained on COCO base classes. Stage 1: 100 epochs on base classes, batch 64, lr 0.01. Stage 2: fine-tune on novel classes up to 200 epochs with early stopping (patience 30), batch 4, lr 0.0005. SGD optimizer (momentum 0.937, weight decay 0.0005, 3-epoch warmup), backbone frozen first 10 epochs. Data augmentation: mosaic, RandAugment, random flip, HSV jitter, translation, scaling, and random erasing. Input size $640\times640$. Temperature $\tau$ initialized at 5.0 (learnable). All experiments on a single NVIDIA H20 GPU.
+We evaluate on PASCAL VOC 2007+2012 and MS COCO 2014 under the TFA split protocol~\cite{wang2020tfa}: VOC's 20 classes partitioned into 15 base / 5 novel (3 splits); COCO's 20 VOC-overlapping classes as novel, 60 as base. Base detector is YOLO11s (9.5M params), pre-trained on COCO base classes. Stage 1: 100 epochs on base classes, batch 64, lr 0.01. Stage 2: fine-tune on novel classes up to 200 epochs with early stopping (patience 30), batch 4, lr 0.0005. SGD optimizer (momentum 0.937, weight decay 0.0005, 3-epoch warmup), backbone frozen first 10 epochs. Data augmentation: mosaic, RandAugment, HSV jitter, random flip/scale/translate, and random erasing. Input size $640\times640$. Temperature $\tau$ initialized at 5.0 (learnable). All experiments on a single NVIDIA H20 GPU.
 
 Four variants are compared: (1) \textit{Finetune}---standard YOLO11s with linear classifier; (2) \textit{Cosine}---cosine classifier, random initialization; (3) \textit{Cosine+Proto}---cosine classifier initialized with visual prototypes; (4) \textit{Cosine+Fused}---cosine classifier with visual + Florence-2 fused prototypes.
 
 \subsection{Main Results}
 
-\textbf{VOC Results.} Table~\ref{tab:voc_main} presents VOC mAP50 (Split 1 / 3-split mean $\pm$ std). Three trends emerge: (1) The cosine classifier drives a qualitative leap---5-shot (Split 1): 32.9\% $\rightarrow$ 66.9\% (+34.0 pp); 10-shot (Split 1): 51.3\% $\rightarrow$ 70.7\% (+19.4 pp). (2) Visual prototype initialization contributes +3.7 pp at 10-shot (Split 1). (3) Florence-2 fusion adds +0.3 pp at 10-shot (Split 1), directionally consistent across all three splits.
+\textbf{VOC Results.} Table~\ref{tab:voc_main} presents VOC mAP50 (Split 1 / 3-split mean $\pm$ std). We observe three trends: (1) The cosine classifier drives a qualitative leap---5-shot (Split 1): 32.9\% $\rightarrow$ 66.9\% (+34.0 pp); 10-shot (Split 1): 51.3\% $\rightarrow$ 70.7\% (+19.4 pp). (2) Visual prototype initialization contributes +3.7 pp at 10-shot (Split 1). (3) Florence-2 fusion adds +0.3 pp at 10-shot (Split 1), directionally consistent across all three splits.
 
 \begin{table*}[t]
 \centering\footnotesize
@@ -148,26 +148,15 @@ COCO 30-shot Cos+Fused&$-$0.56& +0.14 & $-$8.0 & 0.25 \\
 \end{tabular}
 \end{table}
 
-Three findings emerge from the full decomposition (all changes relative to Finetune baseline):
+Three findings are observed (vs.\ Finetune baseline):
 
-\textbf{Finding 1---Invariant Recall Booster Behavior:} Across all 24 comparisons, every cosine variant \textit{without exception} shifts the operating point toward higher recall and lower precision. The directionality is perfectly consistent---this is a systematic property, not a conditional artifact (see gradient analysis, Section~III-B).
+\textbf{Finding 1---Invariant Recall Booster:} All 24 cosine variants \textit{without exception} shift toward higher recall and lower precision---a systematic property (see gradient analysis, Section~III-B).
 
-\textbf{Finding 2---Tradeoff Ratio Determines Net Benefit:} On VOC, each unit of recall gain costs relatively little precision ($\Delta$R/$|\Delta$P$| \approx 2.0$ at 5-shot), and the large recall boost dominates. On COCO, the ratio collapses: $\Delta$R/$|\Delta$P$| \approx 0.48$ at 10-shot and 0.25 at 30-shot, as precision plummets from 0.895 to 0.084. COCO's 20 novel classes (vs.\ 5 on VOC) and higher scene complexity cause the cosine classifier's relaxed decision boundary to generate massive cross-class false positives.
+\textbf{Finding 2---Tradeoff Ratio Determines Net Benefit:} On VOC, $\Delta$R/$|\Delta$P$| \approx 2.0$ at 5-shot; recall gain dominates. On COCO, the ratio collapses to 0.48 (10-shot) and 0.25 (30-shot), with $\Delta$P far exceeding $\Delta$R in magnitude. COCO's 20 novel classes (vs.\ 5 on VOC) cause massive cross-class false positives under the relaxed decision boundary.
 
-\textbf{Finding 3---Fused Mode Modulates P-R Balance:} At VOC 10-shot, Fused (P=0.200, R=0.872) vs.\ pure Cosine (P=0.336, R=0.848) partially recovers precision (+0.136) with minimal recall loss ($-$0.024), suggesting semantic priors help moderate the over-relaxation of visual prototypes.
+\textbf{Finding 3---Fused Mode Modulates P-R Balance:} VOC 10-shot Fused (P=0.336, R=0.848) recovers precision (+0.136 vs.\ pure Cosine at P=0.200, R=0.872) with minimal recall loss ($-$0.024), suggesting semantic priors moderate prototype over-relaxation.
 
-We formalize these observations as the \textbf{P-R Tradeoff Hypothesis}:
-
-\begin{quote}\small
-The cosine classifier inherently pushes the detector toward a high-recall, low-precision operating point. Net benefit is determined by the product of: (1) baseline recall headroom, and (2) the dataset's P-R tradeoff ratio (driven by class count and scene complexity). VOC possesses both low baseline recall and a favorable tradeoff ratio, yielding significant gains; COCO faces an unfavorable tradeoff ratio, where precision loss dominates.
-\end{quote}
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{fig3_pr_comparison.jpg}
-\caption{VOC 5-shot vs.\ COCO 30-shot Precision-Recall comparison, validating the P-R Tradeoff Hypothesis.}
-\label{fig:pr_comparison}
-\end{figure*}
+We formalize these observations as the \textbf{P-R Tradeoff Hypothesis}: the cosine classifier inherently pushes toward high-recall, low-precision operation; net benefit is the product of (1) baseline recall headroom and (2) the dataset P-R tradeoff ratio, determined by class count and scene complexity.
 
 \subsection{Ablation and SOTA Comparison}
 
@@ -235,9 +224,9 @@ Fused (VCP)       & 18.4 & \textbf{54.4} & 9.5M \\
 
 \section{Conclusion}
 
-We presented VCP, a single-stage FSOD framework integrating YOLO11s with cosine classification and prototype learning. Key findings: (1) Single-stage FSOD is viable---VCP achieves competitive performance at 1/6 the parameter count of two-stage methods, with 54.4 FPS real-time inference. (2) Through 24-group P-R decomposition, we identified the cosine classifier's Recall Booster property and formulated the P-R Tradeoff Hypothesis explaining VOC-COCO divergence via the product of baseline recall headroom and dataset tradeoff ratio. (3) Florence-2 semantic prototypes provide directionally consistent but limited gains (+0.5 pp at 10-shot), with zero inference overhead.
+We presented VCP, a single-stage FSOD framework combining YOLO11s with cosine classification and prototype learning. Key findings: (1) Single-stage FSOD is viable---VCP achieves competitive performance at 1/6 the parameters of two-stage methods, at 54.4 FPS. (2) Through 24-group P-R decomposition, we identified the Recall Booster property and P-R Tradeoff Hypothesis, explaining VOC-COCO divergence via baseline recall headroom and dataset tradeoff ratio. (3) Florence-2 semantic prototypes provide consistent but limited gains with zero inference overhead.
 
-Limitations include weak 1-shot performance, single-split COCO evaluation, and the post-hoc nature of the tradeoff hypothesis. Future work will explore adaptive VLM fusion, cross-domain FSOD generalization, and independent validation of the hypothesis on additional datasets.
+Limitations include weak 1-shot performance, single-split COCO evaluation, and the post-hoc nature of the tradeoff hypothesis. Future work will explore adaptive VLM fusion, cross-domain generalization, and independent hypothesis validation.
 
 \begin{thebibliography}{99}
 
@@ -272,7 +261,7 @@ X.~Yan et al., ``Meta R-CNN: Towards general solver for instance-level low-shot 
 Y.-X.~Wang et al., ``Meta-learning to detect rare objects,'' in \emph{ICCV}, 2019, pp. 9925--9934.
 
 \bibitem{pei2022kddefrcn}
-W.~Pei et al., ``Few-shot object detection by knowledge distillation using bag-of-visual-words representations,'' in \emph{ECCV}, 2022, pp. 283--300.
+W.~Pei et al., ``Few-shot object detection by knowledge distillation using bag-of-visual-words representations,'' in \emph{ECCV}, 2022, pp. 283--299.
 
 \bibitem{wu2020mpsr}
 J.~Wu et al., ``Multi-scale positive sample refinement for few-shot object detection,'' in \emph{ECCV}, 2020, pp. 456--472.
