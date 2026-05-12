@@ -97,7 +97,7 @@ VCP adopts YOLO11s as the base detector with a critical modification: the linear
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.90\textwidth]{fig1_framework.jpg}
+\includegraphics[width=0.88\textwidth]{fig1_framework.jpg}
 \caption{VCP framework: YOLO11s backbone+neck, decoupled head, cosine classifier. Visual prototypes via RoIAlign; semantic prototypes via Florence-2 + BART. Fused at $\alpha=0.7$.}
 \label{fig:framework}
 \end{figure*}
@@ -259,12 +259,10 @@ Fused (VCP)       & 18.4 & \textbf{54.4} & 9.5M \\
 \bottomrule
 \end{tabular}
 \end{table}
-
+\vspace{-6pt}
 \section{Conclusion}
 
-We presented VCP, a single-stage FSOD framework combining YOLO11s with cosine classification and prototype learning. Key findings: (1) Single-stage FSOD is viable---VCP achieves competitive performance at 1/6 the parameters of two-stage methods, at 54.4 FPS. (2) Through 24-group P-R decomposition, we identified the Recall Booster property and P-R Tradeoff Hypothesis, explaining VOC-COCO divergence via baseline recall headroom and dataset tradeoff ratio. (3) Florence-2 semantic prototypes provide consistent but limited gains with zero inference overhead.
-
-Limitations include weak 1-shot performance, single-split COCO evaluation, and the post-hoc nature of the tradeoff hypothesis. Future work will explore adaptive VLM fusion, cross-domain generalization, and independent hypothesis validation.
+We presented VCP, combining YOLO11s with cosine classification and prototype learning for single-stage FSOD. Key findings: (1) Single-stage FSOD is viable---VCP achieves competitive performance at 1/6 the parameters of two-stage methods, at 54.4 FPS. (2) Through 24-group P-R decomposition, we identified the Recall Booster property and P-R Tradeoff Hypothesis, explaining VOC-COCO divergence. (3) Florence-2 semantic prototypes provide modest gains with zero inference overhead. Limitations include weak 1-shot performance and single-split COCO evaluation. Future work will explore adaptive VLM fusion and cross-domain generalization.
 
 \begin{thebibliography}{99}
 
