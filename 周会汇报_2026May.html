@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>周会汇报 — 费祥</title>
+<style>
+  :root {
+    --bg: #0f0f14; --card: #1a1a24; --border: #2a2a3a;
+    --text: #e0e0e0; --dim: #8888a0;
+    --accent: #6c8cff; --accent2: #50c878;
+    --tag-bg: #1e2a3a; --tag-text: #80b0ff;
+    --warn: #ffa940; --red: #ff6b6b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+    line-height: 1.6; scroll-snap-type: y mandatory;
+    overflow-y: scroll; height: 100vh;
+  }
+  .slide {
+    min-height: 100vh; scroll-snap-align: start;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 50px 70px; border-bottom: 1px solid var(--border);
+  }
+  .slide-title {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    text-align: center;
+  }
+  .slide-title h1 {
+    font-size: 2.8em; font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), #a0c4ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+  .slide-title .sub { color: var(--dim); font-size: 1.1em; }
+  .content-wrap { max-width: 960px; width: 100%; }
+  .section-tag {
+    display: inline-block; background: var(--tag-bg); color: var(--tag-text);
+    padding: 4px 14px; border-radius: 20px; font-size: 0.82em;
+    margin-bottom: 16px; font-weight: 500;
+  }
+  h2 {
+    font-size: 1.65em; margin-bottom: 22px; color: #fff;
+    border-left: 4px solid var(--accent); padding-left: 14px;
+  }
+  h3 { font-size: 1.1em; color: var(--accent2); margin: 18px 0 8px; }
+  .grid-2, .grid-3, .grid-4 {
+    display: grid; gap: 16px; width: 100%;
+  }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 18px;
+  }
+  .card h4 { font-size: 1em; margin-bottom: 8px; color: #fff; }
+  .card p, .card li { color: var(--dim); font-size: 0.88em; }
+  .card ul, .card ol { padding-left: 18px; }
+  .card li { margin-bottom: 4px; }
+  .num-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .num-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; text-align: center; flex: 1; min-width: 90px;
+  }
+  .num-card .val { font-size: 1.4em; font-weight: 700; color: var(--accent); }
+  .num-card .lab { font-size: 0.75em; color: var(--dim); margin-top: 3px; }
+  .num-card.green .val { color: var(--accent2); }
+  .num-card.warn .val { color: var(--warn); }
+  .highlight-box {
+    background: rgba(108,140,255,0.08); border: 1px solid rgba(108,140,255,0.25);
+    border-radius: 8px; padding: 14px 18px; margin-top: 12px;
+  }
+  .highlight-box p, .highlight-box li { color: #c0d0ff; font-size: 0.86em; }
+  .warn-box {
+    background: rgba(255,169,64,0.08); border: 1px solid rgba(255,169,64,0.25);
+    border-radius: 8px; padding: 14px 18px; margin-top: 12px;
+  }
+  .warn-box p, .warn-box li { color: #ffd08a; font-size: 0.86em; }
+  .flow-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0; font-size: 0.8em; }
+  .flow-step { background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; color: var(--dim); }
+  .flow-arrow { color: var(--accent); font-size: 1em; }
+  .metric-label { font-size: 0.78em; color: var(--dim); margin-bottom: 2px; }
+  .metric-val { font-size: 1.15em; font-weight: 600; color: #fff; }
+  .page-num { position: absolute; bottom: 20px; right: 36px; color: var(--dim); font-size: 0.75em; }
+  .footer-note { margin-top: 22px; color: var(--dim); font-size: 0.8em; text-align: center; }
+  .table-sm { width:100%; border-collapse:collapse; font-size:0.84em; margin-top:8px; }
+  .table-sm th { color:var(--dim); font-weight:500; text-align:left; padding:5px 8px; border-bottom:1px solid var(--border); }
+  .table-sm td { color:var(--text); padding:5px 8px; border-bottom:1px solid rgba(42,42,58,0.5); }
+  .done { color: var(--accent2); }
+  .wip { color: var(--warn); }
+  .todo { color: var(--dim); }
+  .code-snip {
+    background:#0d0d16; border:1px solid var(--border); border-radius:6px;
+    padding:10px 14px; font-family:"Consolas","Courier New",monospace;
+    font-size:0.78em; color:var(--dim); margin-top:8px; overflow-x:auto;
+  }
+  @media (max-width: 768px) {
+    .slide { padding: 36px 20px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .slide-title h1 { font-size: 1.8em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!-- SLIDE 1: 标题 -->
+<!-- ================================================================ -->
+<div class="slide slide-title">
+  <h1>周 会 汇 报</h1>
+  <p class="sub">联培单位项目进展 & 会议论文投稿</p>
+  <p class="sub" style="margin-top:8px;font-size:0.9em;">Xiang Fei &nbsp;|&nbsp; 曲阜师范大学工学院 &nbsp;|&nbsp; 2026.05</p>
+  <p class="page-num">1/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 2: AI教岗 — 做什么 + 技术栈 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">联培单位项目 · GoerTek</div>
+    <h2>AI 教岗 — 项目概述</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>🎯 核心目标</h4>
+        <p>用工位摄像头替代人眼盯岗。YOLO 实时检测操作员的 <strong>手部、工具（扫码枪/压线笔）、工件（基座/下盖）</strong>，判断是否进入预设 ROI 区域，按 SOP 步骤链自动校验操作合规性。</p>
+      </div>
+      <div class="card">
+        <h4>🏗️ 技术栈</h4>
+        <table class="table-sm">
+          <tr><td>推理引擎</td><td>Python + PyTorch + YOLO (Ultralytics)</td></tr>
+          <tr><td>API 层</td><td>FastAPI（HTTP + WebSocket upgrade + WebRTC signaling）</td></tr>
+          <tr><td>视频传输</td><td>aiortc (WebRTC)，低延迟推流</td></tr>
+          <tr><td>前端后端</td><td>Node.js + Express</td></tr>
+          <tr><td>前端</td><td>Vue 3 + Naive UI（PJ1218）</td></tr>
+          <tr><td>存储</td><td>SQLite</td></tr>
+          <tr><td>模型</td><td>自主训练的 YOLO 手部/工具/工件检测模型</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="num-row" style="margin-top:14px;">
+      <div class="num-card"><div class="val">14 步</div><div class="lab">下盖装配 SOP</div></div>
+      <div class="num-card"><div class="val">13 个</div><div class="lab">ROI 检测区</div></div>
+      <div class="num-card"><div class="val">2 通道</div><div class="lab">WebRTC + WebSocket</div></div>
+      <div class="num-card"><div class="val">2 模式</div><div class="lab">训练 / 考试</div></div>
+    </div>
+  </div>
+  <p class="page-num">2/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 3: AI教岗 — 检测逻辑详解 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">联培单位项目 · GoerTek</div>
+    <h2>检测机制 — 它是怎么判断"做对了"的</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>🔍 检测类型（不止一种）</h4>
+        <table class="table-sm">
+          <tr><th>类型</th><th>判断逻辑</th><th>示例步骤</th></tr>
+          <tr><td>手部中心入区</td><td>手 bbox 中心点落在 ROI 多边形内</td><td>① 拉取工装</td></tr>
+          <tr><td>框重叠</td><td>手/工具 bbox 与 ROI 区域 IoU &gt; 0</td><td>⑩ 取泡棉</td></tr>
+          <tr><td>组合检测</td><td>双手同时覆盖两个 ROI + 持续 0.75s</td><td>③ 压紧下盖</td></tr>
+          <tr><td>工具检测</td><td>压线笔/扫码枪 bbox 进入指定 ROI</td><td>⑦ 压线 / ⑨ 扫码</td></tr>
+          <tr><td>标签检测</td><td>基座+下盖同时被 YOLO 检出且中心重叠</td><td>② 下盖安装</td></tr>
+          <tr><td>连续帧判定</td><td>连续 N 帧满足条件才触发（防抖动）</td><td>④ 绕圈 5 帧</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h4>⚙️ 关键技术细节</h4>
+        <ul>
+          <li><strong>滞回滤波</strong>：手部 ENTER 阈值 0.6 / EXIT 阈值 0.4 + IoU 跨帧匹配，防止检测框闪烁导致误判</li>
+          <li><strong>基座绑定</strong>：部分 ROI 坐标跟随基座位置动态调整（bound_region_ids），工装移动后检测区跟着走</li>
+          <li><strong>越序/跳步检测</strong>：SOP 步骤链有严格顺序，手进入非当前步骤区域时记录事件日志</li>
+          <li><strong>循环逻辑</strong>：步骤⑩-⑬ 需要拿取→安装→再拿取→再安装，通过 loop_count 计数器管理</li>
+          <li><strong>帧计数器</strong>：每个步骤有独立计数器（如排线 6 帧、扫码 3+3 帧、风扇 5 帧），防止误触发</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h4>📋 下盖装配 14 步 — 每步判定规则</h4>
+      <div style="font-size:0.8em;color:var(--dim);">
+        <table class="table-sm">
+          <tr><th>#</th><th>步骤名</th><th>检测类型</th><th>ROI</th><th>判定条件</th></tr>
+          <tr><td>1</td><td>拉取工装</td><td>手部中心</td><td>1</td><td>手入区域1</td></tr>
+          <tr><td>2</td><td>下盖安装</td><td>标签检测</td><td>—</td><td>基座+下盖同时检出且中心重叠</td></tr>
+          <tr><td>3</td><td>压紧下盖</td><td>组合检测</td><td>3+4</td><td>手同时覆盖3和4 ≥0.75s</td></tr>
+          <tr><td>4</td><td>绕圈检查风扇槽</td><td>手部中心</td><td>5</td><td>连续5帧</td></tr>
+          <tr><td>5</td><td>检查风扇</td><td>标签检测</td><td>—</td><td>风扇标签连续5帧</td></tr>
+          <tr><td>6</td><td>排线</td><td>手部中心</td><td>7</td><td>连续6帧</td></tr>
+          <tr><td>7</td><td>压线</td><td>工具检测</td><td>7</td><td>压线笔入区连续2帧</td></tr>
+          <tr><td>8</td><td>理线</td><td>手部中心</td><td>7</td><td>连续6帧</td></tr>
+          <tr><td>9</td><td>扫码</td><td>工具检测</td><td>8+9</td><td>扫码枪入区8和9各3帧</td></tr>
+          <tr><td>10</td><td>取导电泡棉①</td><td>框重叠</td><td>10</td><td>连续2帧</td></tr>
+          <tr><td>11</td><td>安装泡棉①</td><td>组合检测</td><td>11+12</td><td>双手各入11和12</td></tr>
+          <tr><td>12</td><td>取导电泡棉②</td><td>框重叠</td><td>10</td><td>连续3帧（循环）</td></tr>
+          <tr><td>13</td><td>安装泡棉②</td><td>组合检测</td><td>11+12</td><td>双手各入11和12（循环）</td></tr>
+          <tr><td>14</td><td>推送下一站</td><td>框重叠</td><td>13</td><td>基座/下盖入区连续5帧</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="page-num">3/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 4: AI教岗 — 实际进度 + 功能状态 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">联培单位项目 · GoerTek</div>
+    <h2>功能模块 & 实际完成度</h2>
+
+    <table class="table-sm">
+      <tr><th style="width:22%;">模块</th><th style="width:48%;">详细说明</th><th style="width:15%;">完成度</th><th style="width:15%;">状态</th></tr>
+      <tr>
+        <td>📹 视频流</td>
+        <td>支持 RTSP 摄像头 + 视频文件双源输入；aiortc WebRTC 推流到浏览器；断线重连；视频循环播放</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>🧠 YOLO 检测</td>
+        <td>手部（滞回滤波 0.6/0.4）+ 基座 + 下盖 + 风扇 + 扫码枪 + 压线笔多类检测；置信度阈值 0.8</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>📍 ROI 碰撞</td>
+        <td>13 个多边形 ROI 区域；支持点包含判定 + bbox 重叠判定 + 组合判定 + 基座绑定动态坐标</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>📋 SOP 逻辑</td>
+        <td>14 步状态机；每步独立帧计数器；越序/跳步事件日志；循环逻辑（泡棉 2 轮）</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>📚 训练模式</td>
+        <td>前端叠加当前步骤 ROI 区域框 + 步骤进度条；实时推送检测结果（合规/越序/完成）</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>📝 考试模式</td>
+        <td>关闭 ROI 提示；记录每步开始/完成时间、违规事件；自动生成评分报告</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>🌐 前端 UI</td>
+        <td>Vue 3 + Naive UI；中/越双语；培训/考试双页面；步骤进度可视化</td>
+        <td>100%</td>
+        <td class="done">✅</td>
+      </tr>
+      <tr>
+        <td>🏭 工站适配</td>
+        <td>下盖装配（14步）+ 另 2 个工站（主板/电源板等）的 ROI 配置 + SOP 逻辑 + YOLO 模型适配</td>
+        <td>3/N</td>
+        <td class="wip">🔄</td>
+      </tr>
+      <tr>
+        <td>🤖 大模型问答</td>
+        <td>SOP 知识库构建 → RAG 检索增强 → 学员自然语言提问 → LLM 生成解答；需覆盖多工站多语种</td>
+        <td>~20%</td>
+        <td class="wip">🔄 知识库搭建中</td>
+      </tr>
+      <tr>
+        <td>🔧 工站扩展</td>
+        <td>产线其余工站的 ROI 标注 + SOP 逻辑配置 + 视觉模型微调</td>
+        <td>0%</td>
+        <td class="todo">⏳ 待排期</td>
+      </tr>
+    </table>
+
+    <div class="warn-box">
+      <p><strong>⚠️ 当前瓶颈</strong>：① 新工站接入需人工标注 ROI + 编写 SOP 状态机逻辑 + 采集训练数据，当前全靠我一人配置，扩展效率低；② 大模型问答的知识库覆盖度需持续迭代，SOP 文档非结构化；③ 产线实际部署涉及网络/光照/摄像头角度适配，Lab 环境和产线环境有差距。</p>
+    </div>
+  </div>
+  <p class="page-num">4/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 5: AI教岗 — 痛点 → 方案 → 大模型问答设计 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">联培单位项目 · GoerTek</div>
+    <h2>业务逻辑 & 大模型问答设计</h2>
+
+    <div class="grid-2">
+      <div class="card" style="border-left:3px solid var(--red);">
+        <h4>❌ 业务痛点（四条）</h4>
+        <ol>
+          <li><strong>人力成本高</strong>：传统"师带徒"需大量专职讲师与助教，无法弹性伸缩</li>
+          <li><strong>培训周期长</strong>：新人从入职到独立上岗周期长，期间不产生业务价值，隐性产能浪费</li>
+          <li><strong>质量难统一</strong>：人工教学受限于讲师经验与状态，SOP 标准动作难以精准传递</li>
+          <li><strong>考核主观</strong>：人工监考评分标准不一致，跨批次学员考核结果不可比</li>
+        </ol>
+      </div>
+      <div class="card" style="border-left:3px solid var(--accent2);">
+        <h4>✅ 方案路线</h4>
+        <ol>
+          <li>AI-Camera 实时捕捉 → 替代人眼盯岗</li>
+          <li>时空动作检测 + SOP 逐帧比对 → 替代人工判断</li>
+          <li>7×24 无人化陪练 → 去掉讲师时间约束</li>
+          <li>机器自动评分 → 消除人为偏差</li>
+          <li>大模型问答兜底 → 减少一对一答疑人力</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h4 style="color:var(--accent2);margin-bottom:6px;">🤖 大模型智能问答 — 设计思路</h4>
+      <table class="table-sm">
+        <tr><th style="width:25%;">环节</th><th>设计</th></tr>
+        <tr><td>知识来源</td><td>SOP 操作手册 + 工艺规范 + 常见问题 FAQ + 工站操作视频字幕 → 结构化入库</td></tr>
+        <tr><td>检索方式</td><td>RAG（检索增强生成）：用户提问 → embedding 检索相关文档片段 → 拼入 prompt → LLM 生成</td></tr>
+        <tr><td>典型问题</td><td>"这一步为什么要先压紧再排线？""导电泡棉贴歪了怎么补救？""扫码失败怎么办？"</td></tr>
+        <tr><td>上下文</td><td>问答时附带当前步骤号 + 学员历史操作记录，使回答更精准</td></tr>
+        <tr><td>边界</td><td>仅回答 SOP 相关问题；超出范围（如设备故障维修）给出转接指引</td></tr>
+        <tr><td>上线目标</td><td><span class="wip">7 月底前完成知识库搭建 + 问答接口联调</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="page-num">5/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 6: 论文 — VCP 概述 + 方法细节 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">会议投稿 · CAIBDA 2026</div>
+    <h2>VCP: 单阶段小样本目标检测</h2>
+    <p style="color:var(--dim);font-size:0.85em;margin-bottom:16px;">
+      <em>VCP: Single-Stage Cosine Classifier and Prototype Learning for Few-Shot Object Detection</em><br>
+      Xiang Fei, Mengru Li, Jinming Huang*, Jacob Liu, Xiaofu Zhang, Xiaojiao Xu &nbsp;|&nbsp; 曲阜师范大学 + GoerTek + Free-Optics + 慧米智能
+    </p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>🔍 研究动机</h4>
+        <ul>
+          <li>FSOD 方法 <strong>100% 基于 Faster R-CNN</strong>（FSCE/DeFRCN/TFA 等），利用 RPN 做前景过滤</li>
+          <li>但工业部署的主力是 <strong>YOLO 单阶段检测器</strong>——"发表的方法不能部署，部署的系统缺乏研究"</li>
+          <li>单阶段 FSOD 的核心难点：<strong>没有 RPN</strong>，dense prediction 产生大量低质量 proposal，分类器面临极端正负样本不平衡</li>
+          <li>首次在 TFA 标准协议下系统研究 YOLO11s 的 FSOD 表现</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🛠️ VCP 方法</h4>
+        <ol>
+          <li><strong>Cosine Classifier</strong>：替换 YOLO11s 线性分类头为余弦相似度分类 sc = cos(f, pc)/τ，f 和 pc 均 L2 归一化</li>
+          <li><strong>Visual Prototype</strong>：从 support set 的 GT bbox 提取 RoIAlign 特征 → 均值 → L2 归一化 → 写入分类器权重</li>
+          <li><strong>Semantic Prototype (Fused)</strong>：Florence-2 对目标 crop 生成 &lt;DETAILED_CAPTION&gt; → BART 文本编码 → 可学习投影 Wf → 与视觉原型加权融合：pc = α·pc_vis + (1-α)·Wf·pc_text，α=0.7</li>
+          <li><strong>关键</strong>：Florence-2 仅在训练时提取语义原型，推理时原型已固化在权重中，<strong>零 VLM 推理开销</strong></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <p><strong>💡 核心发现 — Recall Booster</strong>：余弦分类器的梯度 ∂cos/∂f = pc − cos·f，迫使特征向原型方向对齐。24 组 P-R 分解实验显示：余弦分类器<strong>系统性推高 Recall、拉低 Precision</strong>。这在 VOC 上净收益为正（Recall 提升空间大），COCO 上净收益为负（基线 Recall 已高，Precision 损失超过 Recall 收益）。</p>
+    </div>
+  </div>
+  <p class="page-num">6/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 7: 论文 — 实验数据 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">会议投稿 · CAIBDA 2026</div>
+    <h2>实验数据 & P-R Tradeoff 假说</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>📊 VOC 各 shot 表现（VCP Fused, 3-split）</h4>
+        <table class="table-sm">
+          <tr><th>Shot</th><th>mAP50</th><th>mAP50-95</th><th>vs. Fine-tune</th></tr>
+          <tr><td>1</td><td style="color:var(--warn);">28.3</td><td style="color:var(--dim);">—</td><td style="color:var(--warn);">↓ 远低于</td></tr>
+          <tr><td>3</td><td>53.9</td><td style="color:var(--dim);">—</td><td>≈ 持平</td></tr>
+          <tr><td>5</td><td>69.0</td><td style="color:var(--dim);">—</td><td style="color:var(--accent2);">↑ 超越</td></tr>
+          <tr><td>10</td><td><strong>72.2</strong> (split1=74.7)</td><td><strong>52.22</strong></td><td style="color:var(--accent2);">↑ +2.1 pp</td></tr>
+        </table>
+        <p style="margin-top:6px;font-size:0.78em;color:var(--dim);">
+          参数量 9.5M（SOTA 的 1/6），推理 54.4 FPS（两阶段的 4-5×）
+        </p>
+      </div>
+      <div class="card">
+        <h4>📊 COCO 10-shot（与 VOC 反转）</h4>
+        <table class="table-sm">
+          <tr><th>方法</th><th>mAP</th><th>mAP50</th></tr>
+          <tr><td>Fine-tune (baseline)</td><td>8.4</td><td>16.1</td></tr>
+          <tr><td style="color:var(--warn);">Cosine (ours)</td><td style="color:var(--warn);">7.1</td><td style="color:var(--warn);">13.8</td></tr>
+          <tr><td style="color:var(--warn);">Fused (ours)</td><td style="color:var(--warn);">7.6</td><td style="color:var(--warn);">14.3</td></tr>
+        </table>
+        <p style="margin-top:6px;font-size:0.78em;color:var(--warn);">
+          ⚠️ COCO 上余弦方法全面不如标准微调。仅单 split 评估。
+        </p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:12px;">
+      <div class="card">
+        <h4>🔬 P-R Tradeoff 假说</h4>
+        <p style="font-size:0.84em;color:var(--dim);">
+          24 组 P-R 分解实验（VOC×12 + COCO×12，覆盖 1/3/5/10 shot × 3 方法）一致性结论：
+        </p>
+        <div class="num-row" style="margin-top:8px;">
+          <div class="num-card green" style="flex:1;"><div class="val">↑ R</div><div class="lab">Recall 系统性↑</div></div>
+          <div class="num-card warn" style="flex:1;"><div class="val">↓ P</div><div class="lab">Precision 系统性↓</div></div>
+        </div>
+        <p style="margin-top:8px;font-size:0.82em;color:var(--dim);">
+          <strong>净收益 ≈ 基线 Recall 提升空间 × P-R 权衡比</strong><br>
+          VOC：基线 R 低 → 提升空间大 → <span style="color:var(--accent2);">正收益</span><br>
+          COCO：基线 R 已高 → P↓ 损害 &gt; R↑ 收益 → <span style="color:var(--warn);">负收益</span>
+        </p>
+      </div>
+      <div class="card">
+        <h4>🔗 关联实验：FiLM 调制网络</h4>
+        <p style="font-size:0.82em;color:var(--dim);">VOC 10-shot，在 VCP 框架上对比 MLP vs FiLM 融合：</p>
+        <table class="table-sm">
+          <tr><th>方法</th><th>mAP50</th><th>mAP50-95</th></tr>
+          <tr><td>旧 MLP</td><td>74.50</td><td>51.98</td></tr>
+          <tr><td>FiLM Only</td><td>73.14</td><td>51.45</td></tr>
+          <tr><td style="color:var(--accent2);">FiLM Fused</td><td style="color:var(--accent2);"><strong>74.87</strong></td><td style="color:var(--accent2);"><strong>52.22</strong></td></tr>
+        </table>
+        <p style="margin-top:6px;font-size:0.78em;color:var(--dim);">
+          FiLM Fused 达到此前多模板方法同等水平（52.26），但无需多模板。跨域实验（DIOR 等）待跑。
+        </p>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      <p><strong>⚠️ 诚实列不足</strong>：① 1-shot 弱（28.3%，远低于两阶段 SOTA ~40%）；② COCO 仅单 split，不够稳健；③ VLM 语义原型仅 +0.5pp，提升有限；④ 跨域泛化未验证（CD-FSOD 实验待做）；⑤ CAIBDA 非 CCF-A 类会议，录用率中等。</p>
+    </div>
+  </div>
+  <p class="page-num">7/8</p>
+</div>
+
+<!-- ================================================================ -->
+<!-- SLIDE 8: 总结 + 下一步 -->
+<!-- ================================================================ -->
+<div class="slide">
+  <div class="content-wrap">
+    <div class="section-tag">总结 & 下一步</div>
+    <h2>两周工作汇总 & 后续计划</h2>
+
+    <div class="grid-2">
+      <div class="card" style="border-left:3px solid var(--accent);">
+        <h4>✅ 已完成</h4>
+        <ol>
+          <li>AI 教岗：下盖装配 14 步 SOP 全流程跑通（训练+考试模式），前端 UI 完整</li>
+          <li>AI 教岗：完成 3 个工站的视觉模型适配 + SOP 逻辑</li>
+          <li>AI 教岗：大模型问答方案设计完成，知识库搭建启动</li>
+          <li>论文：VCP 论文英文版定稿并投稿 CAIBDA 2026</li>
+          <li>实验：FiLM 调制网络 VOC 实验跑完，FiLM Fused 达到最优 52.22</li>
+          <li>实验：CDFSOD 六数据集下载完成（含 ArTaxOr 正在下载）</li>
+        </ol>
+      </div>
+      <div class="card" style="border-left:3px solid var(--warn);">
+        <h4>🔜 下一步（2 周内）</h4>
+        <ol>
+          <li>AI 教岗：推进大模型知识库填充 + 问答接口联调</li>
+          <li>AI 教岗：第 4 个工站适配（待确认优先级）</li>
+          <li>实验：FiLM 跨域实验（DIOR/Clipart1k/DeepFish/NEU-DET/UODD/ArTaxOr）</li>
+          <li>论文：如 CAIBDA 返回修改意见，启动 rebuttal</li>
+          <li>论文：如 reject，补充 COCO 多 split + 跨域结果，转投下一会议</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h4>📋 待确认事项</h4>
+      <table class="table-sm">
+        <tr><td style="width:5%;">1</td><td>AI 教岗大模型问答：用内部部署模型还是调用云端 API？预算和延迟要求？</td></tr>
+        <tr><td>2</td><td>AI 教岗工站扩展优先级：产线那边希望下一个适配哪个工站？</td></tr>
+        <tr><td>3</td><td>论文：如果 CAIBDA 不中，下一个目标是哪个会？（ICME? PRCV? ACCV?）</td></tr>
+        <tr><td>4</td><td>跨域实验：是否需要做 multi-domain joint training，还是单域 fine-tune 即可？</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="page-num">8/8</p>
+</div>
+
+</body>
+</html>
