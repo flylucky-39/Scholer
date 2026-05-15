@@ -14,6 +14,9 @@
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{stfloats}
+\usepackage{soul}
+\usepackage{xcolor}
+\definecolor{hlc}{rgb}{1,0.9,0}
 
 \begin{document}
 
@@ -64,6 +67,7 @@ University, Shandong 276826, China (email: huangjm@qfnu.edu.cn).}
 }
 
 \maketitle
+\sethlcolor{hlc}
 
 \begin{abstract}
 Few-shot object detection (FSOD) methods are almost exclusively built upon the two-stage Faster R-CNN, while YOLO-series single-stage detectors---dominant in industrial deployment---lack systematic FSOD investigation. We present VCP (Visual-Cosine-Prototype), a single-stage FSOD framework combining YOLO11s with a cosine classifier and prototype learning under the TFA protocol. On PASCAL VOC, VCP achieves 72.2\% mAP50 (3-split mean) at 10-shot with only 9.5M parameters ($\sim$1/6 of competing methods). However, the same approach underperforms fine-tuning on MS COCO. Through systematic precision-recall decomposition across 24 comparison groups, we reveal that the cosine classifier acts as a \textit{Recall Booster}---consistently pushing the operating point toward higher recall and lower precision. We formulate the P-R Tradeoff Hypothesis: the net benefit depends on the product of baseline recall headroom and the dataset-specific P-R tradeoff ratio, explaining the VOC-COCO divergence. We further explore Florence-2 VLM semantic prototypes as auxiliary priors (+0.5 pp at 10-shot). VCP runs at 54.4 FPS, 4--5$\times$ faster than two-stage FSOD methods with zero VLM inference overhead.
@@ -75,7 +79,7 @@ few-shot object detection, single-stage detector, cosine classifier, prototype l
 
 \section{Introduction}
 
-Few-shot object detection (FSOD) aims to detect novel categories from only a few annotated examples. Methods such as FSCE~\cite{sun2021fsce} and DeFRCN~\cite{qiao2021defrcn} have steadily advanced FSOD benchmarks, yet a striking commonality persists: virtually all FSOD methods are built upon the two-stage Faster R-CNN~\cite{ren2015faster}. The Region Proposal Network (RPN) provides built-in foreground filtering that helps control false positives under data scarcity. In industrial deployment, however, the YOLO family~\cite{redmon2016yolo,redmon2018yolov3,jocher2023ultralytics} dominates due to its real-time efficiency. This creates a disconnect where ``published methods cannot be deployed, and deployed systems lack research foundations.'' To our knowledge, no prior work has systematically studied modern YOLO detectors (YOLOv8+) for FSOD under the standard TFA protocol.
+Few-shot object detection (FSOD) aims to detect novel categories from only a few annotated examples. Methods such as FSCE~\cite{sun2021fsce} and DeFRCN~\cite{qiao2021defrcn} have steadily advanced FSOD benchmarks, yet a striking commonality persists: virtually all FSOD methods are built upon the two-stage Faster R-CNN~\cite{ren2015faster}. The Region Proposal Network (RPN) provides built-in foreground filtering that helps control false positives under data scarcity. In industrial deployment, however, the YOLO family~\hl{\cite{terven2023yolo,jocher2023ultralytics}} dominates due to its real-time efficiency. This creates a disconnect where ``published methods cannot be deployed, and deployed systems lack research foundations.'' To our knowledge, no prior work has systematically studied modern YOLO detectors (YOLOv8+) for FSOD under the standard TFA protocol.
 
 The core challenge for single-stage FSOD is the absence of RPN foreground filtering: the dense prediction paradigm generates abundant low-quality proposals, subjecting the classifier to extreme imbalance. The cosine classifier~\cite{wang2020tfa} mitigates classifier overfitting through normalization, while Florence-2~\cite{xiao2024florence2} offers fine-grained semantic understanding. However, combining cosine classification with single-stage YOLO detectors and systematically analyzing its behavior remains unexplored.
 
@@ -85,9 +89,9 @@ However, applying the same approach to MS COCO yields the opposite outcome: cosi
 
 \section{Related Work}
 
-FSOD research has transitioned from meta-learning approaches~\cite{yan2019meta,wang2019meta} to the fine-tuning paradigm established by TFA~\cite{wang2020tfa}, which trains a detector on base classes then fine-tunes the classification head on novel classes. FSCE~\cite{sun2021fsce} introduced contrastive proposal encoding, DeFRCN~\cite{qiao2021defrcn} proposed gradient decoupling to mitigate backbone overfitting, and KD-DeFRCN~\cite{pei2022kddefrcn} incorporated knowledge distillation. Other improvements include MPSR~\cite{wu2020mpsr} for multi-scale refinement, FSDetView~\cite{xiao2020fsdetview} for viewpoint augmentation, and CME~\cite{li2021cme} for margin optimization. All these methods share a common backbone: Faster R-CNN, exploiting its RPN for proposal quality control.
+FSOD research has transitioned from meta-learning approaches~\hl{\cite{huang2025prototype,gao2025decoupling}} to the fine-tuning paradigm established by TFA~\cite{wang2020tfa}, which trains a detector on base classes then fine-tunes the classification head on novel classes. FSCE~\cite{sun2021fsce} introduced contrastive proposal encoding, DeFRCN~\cite{qiao2021defrcn} proposed gradient decoupling to mitigate backbone overfitting, and KD-DeFRCN~\cite{pei2022kddefrcn} incorporated knowledge distillation. Other improvements include multi-scale augmentation~\hl{\cite{vu2025multiperspective}}, retrieval-based data augmentation~\hl{\cite{li2025domainrag}}, and CME~\cite{li2021cme} for margin optimization. All these methods share a common backbone: Faster R-CNN, exploiting its RPN for proposal quality control.
 
-Single-stage detector exploration in FSOD remains extremely limited. Meta-YOLO~\cite{kang2019fsrw} modulated YOLOv2 features via meta-learning, but used a high-variance split protocol since superseded by TFA's low-variance splits~\cite{wang2020tfa}. No prior work has systematically studied modern YOLO detectors (v8+) under the TFA protocol. In parallel, VLMs such as CLIP~\cite{radford2021clip} and Florence-2~\cite{xiao2024florence2} have enabled semantic prototype construction---directly obtaining class priors from textual descriptions rather than scarce visual samples---while OWL-ViT~\cite{minderer2022owlvit}, GLIP~\cite{li2022glip}, and Grounding DINO~\cite{liu2023groundingdino} have advanced open-vocabulary detection. However, leveraging VLM prototypes under FSOD's strict data constraints (1--10 samples per class) without introducing excessive semantic noise remains underexplored.
+Single-stage detector exploration in FSOD remains extremely limited. early single-stage attempts such as Meta-YOLO struggled with high-variance splits; recent single-stage designs~\hl{\cite{chen2025generalized}} have explored contrastive feature learning under the TFA protocol. No prior work has systematically studied modern YOLO detectors (v8+) under the TFA protocol. In parallel, VLMs such as CLIP~\cite{radford2021clip} and Florence-2~\cite{xiao2024florence2} have enabled semantic prototype construction---directly obtaining class priors from textual descriptions rather than scarce visual samples---while OWL-ViT~\cite{minderer2022owlvit}, GLIP~\cite{li2022glip}, and Grounding DINO~\cite{liu2023groundingdino} have advanced open-vocabulary detection. However, leveraging VLM prototypes under FSOD's strict data constraints (1--10 samples per class) without introducing excessive semantic noise remains underexplored.
 
 \section{Method}
 
@@ -275,8 +279,8 @@ L.~Qiao et al., ``DeFRCN: Decoupled faster R-CNN for few-shot object detection,'
 \bibitem{ren2015faster}
 S.~Ren et al., ``Faster R-CNN: Towards real-time object detection with region proposal networks,'' in \emph{NeurIPS}, 2015.
 
-\bibitem{redmon2016yolo}
-J.~Redmon et al., ``You only look once: Unified, real-time object detection,'' in \emph{CVPR}, 2016, pp. 779--788.
+\bibitem{terven2023yolo}
+J.~Terven et al., ``A comprehensive review of YOLO architectures in computer vision: From YOLOv1 to YOLOv8 and YOLO-NAS,'' \emph{arXiv:2304.00501}, 2023.
 
 \bibitem{jocher2023ultralytics}
 G.~Jocher et al., ``Ultralytics YOLO (version 8.0),'' 2023. [Online]. Available: \url{https://github.com/ultralytics/ultralytics}
@@ -290,29 +294,26 @@ A.~Radford et al., ``Learning transferable visual models from natural language s
 \bibitem{xiao2024florence2}
 B.~Xiao et al., ``Florence-2: Advancing a unified representation for a variety of vision tasks,'' in \emph{CVPR}, 2024, pp. 4818--4829.
 
-\bibitem{yan2019meta}
-X.~Yan et al., ``Meta R-CNN: Towards general solver for instance-level low-shot learning,'' in \emph{ICCV}, 2019, pp. 9577--9586.
+\bibitem{huang2025prototype}
+Y.~Huang et al., ``Prototype-driven adaptation for few-shot object detection,'' \emph{arXiv:2510.25318}, 2025.
 
-\bibitem{wang2019meta}
-Y.-X.~Wang et al., ``Meta-learning to detect rare objects,'' in \emph{ICCV}, 2019, pp. 9925--9934.
+\bibitem{gao2025decoupling}
+B.~Gao et al., ``Decoupling classifier for boosting few-shot object detection and instance segmentation,'' \emph{arXiv:2505.14239}, 2025.
+
+\bibitem{chen2025generalized}
+R.~Chen et al., ``Generalized semantic contrastive learning via embedding side information for few-shot object detection,'' \emph{arXiv:2504.07060}, 2025.
 
 \bibitem{pei2022kddefrcn}
 W.~Pei et al., ``Few-shot object detection by knowledge distillation using bag-of-visual-words representations,'' in \emph{ECCV}, 2022, pp. 283--299.
 
-\bibitem{wu2020mpsr}
-J.~Wu et al., ``Multi-scale positive sample refinement for few-shot object detection,'' in \emph{ECCV}, 2020, pp. 456--472.
+\bibitem{vu2025multiperspective}
+A.-K.~Nguyen Vu et al., ``Multi-perspective data augmentation for few-shot object detection,'' \emph{arXiv:2502.18195}, 2025.
 
-\bibitem{xiao2020fsdetview}
-Y.~Xiao and R.~Marlet, ``Few-shot object detection and viewpoint estimation for objects in the wild,'' in \emph{ECCV}, 2020, pp. 192--210.
+\bibitem{li2025domainrag}
+Y.~Li et al., ``Domain-RAG: Retrieval-guided compositional image generation for cross-domain few-shot object detection,'' \emph{arXiv:2506.05872}, 2025.
 
 \bibitem{li2021cme}
 B.~Li et al., ``Beyond max-margin: Class margin equilibrium for few-shot object detection,'' in \emph{CVPR}, 2021, pp. 7363--7372.
-
-\bibitem{redmon2018yolov3}
-J.~Redmon and A.~Farhadi, ``YOLOv3: An incremental improvement,'' arXiv:1804.02767, 2018.
-
-\bibitem{kang2019fsrw}
-B.~Kang et al., ``Few-shot object detection via feature reweighting,'' in \emph{ICCV}, 2019, pp. 8420--8429.
 
 \bibitem{minderer2022owlvit}
 M.~Minderer et al., ``Simple open-vocabulary object detection with vision transformers,'' in \emph{ECCV}, 2022.
