@@ -14,15 +14,9 @@
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{stfloats}
-\usepackage{soul}
 \usepackage{xcolor}
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd{\SOUL@ulunderline}{\dimen@}{\SOUL@dimen}{}{}
-\makeatother
-\soulregister{\cite}{1}
 \definecolor{hlc}{rgb}{1,0.9,0}
-\sethlcolor{hlc}
+\newcommand{\myhl}[1]{\colorbox{hlc}{\mbox{#1}}}
 
 \begin{document}
 
