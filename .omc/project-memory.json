@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1778468083038,
+  "lastScanned": 1778566236575,
   "projectRoot": "E:\\Study\\FSOD_VLM\\fsod",
   "techStack": {
     "languages": [
@@ -48,7 +48,7 @@
       "path": "base_pretrain",
       "purpose": null,
       "fileCount": 22,
-      "lastAccessed": 1778468082498,
+      "lastAccessed": 1778566235848,
       "keyFiles": [
         "args.yaml",
         "BoxF1_curve.png",
@@ -60,48 +60,48 @@
     "configs": {
       "path": "configs",
       "purpose": null,
-      "fileCount": 32,
-      "lastAccessed": 1778468082506,
+      "fileCount": 42,
+      "lastAccessed": 1778566235850,
       "keyFiles": [
         "ablation_voc_10shot_50ep.yaml",
         "baseline_voc_10shot.yaml",
-        "baseline_voc_1shot.yaml",
-        "baseline_voc_3shot.yaml",
-        "baseline_voc_5shot.yaml"
+        "baseline_voc_10shot_florence2_only.yaml",
+        "baseline_voc_10shot_multitemplate.yaml",
+        "baseline_voc_1shot.yaml"
       ]
     },
     "data": {
       "path": "data",
       "purpose": "Data files",
       "fileCount": 0,
-      "lastAccessed": 1778468082508,
+      "lastAccessed": 1778566235851,
       "keyFiles": []
     },
     "datasets": {
       "path": "datasets",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1778468082509,
+      "lastAccessed": 1778566235852,
       "keyFiles": []
     },
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
-      "fileCount": 13,
-      "lastAccessed": 1778468082510,
+      "fileCount": 31,
+      "lastAccessed": 1778566235854,
       "keyFiles": [
+        "221349391900.doc",
         "baseline_reproduction_plan.md",
         "cdfsod_quickstart.md",
-        "fig1_framework.pdf",
-        "fig1_framework.png",
-        "fig2_shot_map50.pdf"
+        "doc_output.txt",
+        "extract_doc.py"
       ]
     },
     "fsod": {
       "path": "fsod",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1778468082511,
+      "lastAccessed": 1778566235856,
       "keyFiles": [
         "coco.py",
         "florence2.py",
@@ -112,17 +112,15 @@
     "models": {
       "path": "models",
       "purpose": "Data models",
-      "fileCount": 1,
-      "lastAccessed": 1778468082512,
-      "keyFiles": [
-        "clip-vit-base-patch32.tgz"
-      ]
+      "fileCount": 0,
+      "lastAccessed": 1778566235857,
+      "keyFiles": []
     },
     "prompts": {
       "path": "prompts",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1778468082514,
+      "lastAccessed": 1778566235858,
       "keyFiles": [
         "artaxor.json",
         "clipart1k.json",
@@ -135,14 +133,14 @@
       "path": "runs",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1778468082515,
+      "lastAccessed": 1778566235859,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 18,
-      "lastAccessed": 1778468082517,
+      "fileCount": 19,
+      "lastAccessed": 1778566235860,
       "keyFiles": [
         "benchmark_speed.py",
         "download_clip_vitb32_minimal.py",
@@ -155,15 +153,21 @@
       "path": "third_party",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1778468082518,
+      "lastAccessed": 1778566235861,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
+      "path": "docs\\vcp_paper_en.tex",
+      "accessCount": 97,
+      "lastAccessed": 1778630645460,
+      "type": "file"
+    },
+    {
       "path": "docs\\vcp_paper_draft.tex",
-      "accessCount": 56,
-      "lastAccessed": 1778483584756,
+      "accessCount": 60,
+      "lastAccessed": 1778571062998,
       "type": "file"
     },
     {
@@ -212,6 +216,18 @@
       "path": "docs\\fig1_framework.png",
       "accessCount": 1,
       "lastAccessed": 1778477386019,
+      "type": "file"
+    },
+    {
+      "path": "docs\\vcp_paper_en.log",
+      "accessCount": 1,
+      "lastAccessed": 1778567387249,
+      "type": "file"
+    },
+    {
+      "path": "docs\\conference_101719.tex",
+      "accessCount": 1,
+      "lastAccessed": 1778577714239,
       "type": "file"
     }
   ],

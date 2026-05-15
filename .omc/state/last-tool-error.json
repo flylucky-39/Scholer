@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd E:/Study/FSOD_VLM/fsod && git push github FSOD_LLM:main\",\"description\":\"Push FSOD_LLM branch to GitHub main\"}",
+  "error": "Exit code 1\nTo https://github.com/flylucky-39/Scholer.git\n ! [rejected]        FSOD_LLM -> main (non-fast-forward)\nerror: failed to push some refs to 'https://github.com/flylucky-39/Scholer.git'\nhint: Updates were rejected because a pushed branch tip is behind its remote\nhint: counterpart. If you want to integrate the remote changes, use 'git pull'\nhint: before pushing again.\nhint: See the 'Note about fast-forwards' in 'git push --help' for details.",
+  "timestamp": "2026-05-12T06:45:28.042Z",
+  "retry_count": 1
+}
