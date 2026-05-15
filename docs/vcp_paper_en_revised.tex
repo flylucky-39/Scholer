@@ -14,6 +14,9 @@
 \usepackage{multirow}
 \usepackage{hyperref}
 \usepackage{stfloats}
+\usepackage{xcolor}
+\definecolor{hlc}{rgb}{1,0.9,0}
+\newcommand{\myhl}[1]{\colorbox{hlc}{\mbox{#1}}}
 
 \begin{document}
 
@@ -75,7 +78,7 @@ few-shot object detection, single-stage detector, cosine classifier, prototype l
 
 \section{Introduction}
 
-Few-shot object detection (FSOD) aims to detect novel categories from only a few annotated examples. Methods such as FSCE~\cite{sun2021fsce} and DeFRCN~\cite{qiao2021defrcn} have steadily advanced FSOD benchmarks, yet a striking commonality persists: virtually all FSOD methods are built upon the two-stage Faster R-CNN~\cite{ren2015faster}. The Region Proposal Network (RPN) provides built-in foreground filtering that helps control false positives under data scarcity. In industrial deployment, however, the YOLO family~\cite{terven2023yolo,jocher2023ultralytics} dominates due to its real-time efficiency. This creates a disconnect where ``published methods cannot be deployed, and deployed systems lack research foundations.'' To our knowledge, no prior work has systematically studied modern YOLO detectors (YOLOv8+) for FSOD under the standard TFA protocol.
+Few-shot object detection (FSOD) aims to detect novel categories from only a few annotated examples. Methods such as FSCE~\cite{sun2021fsce} and DeFRCN~\cite{qiao2021defrcn} have steadily advanced FSOD benchmarks, yet a striking commonality persists: virtually all FSOD methods are built upon the two-stage Faster R-CNN~\cite{ren2015faster}. The Region Proposal Network (RPN) provides built-in foreground filtering that helps control false positives under data scarcity. In industrial deployment, however, the YOLO family~\myhl{\cite{terven2023yolo,jocher2023ultralytics}} dominates due to its real-time efficiency. This creates a disconnect where ``published methods cannot be deployed, and deployed systems lack research foundations.'' To our knowledge, no prior work has systematically studied modern YOLO detectors (YOLOv8+) for FSOD under the standard TFA protocol.
 
 The core challenge for single-stage FSOD is the absence of RPN foreground filtering: the dense prediction paradigm generates abundant low-quality proposals, subjecting the classifier to extreme imbalance. The cosine classifier~\cite{wang2020tfa} mitigates classifier overfitting through normalization, while Florence-2~\cite{xiao2024florence2} offers fine-grained semantic understanding. However, combining cosine classification with single-stage YOLO detectors and systematically analyzing its behavior remains unexplored.
 
@@ -85,9 +88,9 @@ However, applying the same approach to MS COCO yields the opposite outcome: cosi
 
 \section{Related Work}
 
-meta-learning approaches~\cite{huang2025prototype,gao2025decoupling} to the fine-tuning paradigm established by TFA~\cite{wang2020tfa}, which trains a detector on base classes then fine-tunes the classification head on novel classes. FSCE~\cite{sun2021fsce} introduced contrastive proposal encoding, DeFRCN~\cite{qiao2021defrcn} proposed gradient decoupling to mitigate backbone overfitting, and KD-DeFRCN~\cite{pei2022kddefrcn} incorporated knowledge distillation. Other improvements include multi-scale augmentation~\cite{vu2025multiperspective}, retrieval-based data augmentation~\cite{li2025domainrag}, and CME~\cite{li2021cme} for margin optimization. All these methods share a common backbone: Faster R-CNN, exploiting its RPN for proposal quality control.
+FSOD research has transitioned from meta-learning approaches~\myhl{\cite{huang2025prototype,gao2025decoupling}} to the fine-tuning paradigm established by TFA~\cite{wang2020tfa}, which trains a detector on base classes then fine-tunes the classification head on novel classes. FSCE~\cite{sun2021fsce} introduced contrastive proposal encoding, DeFRCN~\cite{qiao2021defrcn} proposed gradient decoupling to mitigate backbone overfitting, and KD-DeFRCN~\cite{pei2022kddefrcn} incorporated knowledge distillation. Other improvements include multi-scale augmentation~\myhl{\cite{vu2025multiperspective}}, retrieval-based data augmentation~\myhl{\cite{li2025domainrag}}, and CME~\cite{li2021cme} for margin optimization. All these methods share a common backbone: Faster R-CNN, exploiting its RPN for proposal quality control.
 
-Single-stage detector exploration in FSOD remains extremely limited. early single-stage attempts such as Meta-YOLO struggled with high-variance splits; recent single-stage designs~\cite{chen2025generalized} have explored contrastive feature learning under the TFA protocol.
+Single-stage detector exploration in FSOD remains extremely limited. early single-stage attempts such as Meta-YOLO struggled with high-variance splits; recent single-stage designs~\myhl{\cite{chen2025generalized}} have explored contrastive feature learning under the TFA protocol. No prior work has systematically studied modern YOLO detectors (v8+) under the TFA protocol. In parallel, VLMs such as CLIP~\cite{radford2021clip} and Florence-2~\cite{xiao2024florence2} have enabled semantic prototype construction---directly obtaining class priors from textual descriptions rather than scarce visual samples---while OWL-ViT~\cite{minderer2022owlvit}, GLIP~\cite{li2022glip}, and Grounding DINO~\cite{liu2023groundingdino} have advanced open-vocabulary detection. However, leveraging VLM prototypes under FSOD's strict data constraints (1--10 samples per class) without introducing excessive semantic noise remains underexplored.
 
 \section{Method}
 
