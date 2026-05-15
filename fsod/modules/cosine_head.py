@@ -35,8 +35,9 @@ class CosineConv2d(nn.Module):
         self.out_channels = out_channels
         self.weight = nn.Parameter(torch.empty(out_channels, in_channels))
         self.bias = nn.Parameter(torch.zeros(out_channels))
-        # Learnable temperature (log-space for positivity)
-        self.scale = nn.Parameter(torch.tensor(math.log(temperature)))
+        # Per-class learnable temperature (log-space for positivity)
+        # Each class gets its own scale to adaptively control decision boundary
+        self.scale = nn.Parameter(torch.full((out_channels,), math.log(temperature)))
         self.blend_logit = nn.Parameter(torch.tensor(0.0))
         self.register_buffer("weight_prior", torch.zeros(out_channels, in_channels))
         self.register_buffer("weight_prior_mask", torch.zeros(out_channels, dtype=torch.bool))
@@ -117,8 +118,9 @@ class CosineConv2d(nn.Module):
         x_norm = F.normalize(x, dim=1)
         # 1x1 conv with normalized weight → cosine similarity
         cos_sim = F.conv2d(x_norm, w_norm.unsqueeze(-1).unsqueeze(-1))
-        # Scale by temperature and add bias
-        return cos_sim * self.scale.exp() + self.bias.view(1, -1, 1, 1)
+        # Scale by per-class temperature and add bias
+        # Each class has its own temperature to adaptively suppress false positives
+        return cos_sim * self.scale.exp().view(1, -1, 1, 1) + self.bias.view(1, -1, 1, 1)
 
 
 class FSODDetect(Detect):
