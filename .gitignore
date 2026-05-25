@@ -15,3 +15,5 @@ data/coco_fsod_*/
 data
 models
 datasets/cdfsod-benchmark
+runs/
+outputs/
