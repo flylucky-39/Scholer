@@ -1,21 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node *)",
-      "Bash(git commit -m ' *)",
-      "Bash(git push *)",
-      "mcp__filesystem__list_directory",
-      "mcp__filesystem__directory_tree",
-      "mcp__filesystem__read_text_file",
-      "mcp__filesystem__search_files",
-      "mcp__filesystem__edit_file",
-      "mcp__filesystem__write_file",
-      "mcp__filesystem__create_directory",
-      "mcp__plugin_oh-my-claudecode_t__python_repl",
-      "mcp__exa__web_search_exa",
-      "Bash(python generate_figures.py)",
-      "Bash(pandoc \"E:/Study/FSOD_VLM/fsod/docs/221349391900.doc\" -t plain)",
-      "Bash(python *)"
+      "Bash(python:*)",
+      "Bash(nvidia-smi --query-gpu=memory.used,utilization.gpu --format=csv,noheader)",
+      "Bash(conda run *)"
     ]
   }
 }

@@ -1,24 +1,8 @@
-"""Train YOLO-FSOD with Cosine Classifier (± Prototype / Florence-2 Adaptation).
+"""Train YOLO-FSOD with Cosine Classifier and mosaic disabled (cv2 NOT frozen).
 
-This script handles cosine-classifier ablation experiments:
-- Base pretrain: standard YOLO11s (same as baseline)
-- Finetune (Exp 1): cosine head with random init
-- Finetune + Prototype (Exp 2): cosine head initialized with class prototypes
-  extracted from support set using the base-pretrained backbone
-- Finetune + Florence-2 (Exp 3): cosine head initialized via Florence-2 text
-  encoder → adaptation MLP trained on base class pairs
-
-Usage:
-  # Exp 1: Cosine classifier (random init)
-  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune
-
-  # Exp 2: Cosine classifier + Prototype init
-  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --prototype
-
-  # Exp 3: Cosine classifier + Florence-2 adaptation init
-  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --florence2 ~/epfs/07_FSOD_LLM/models/Florence-2-base/
+This is a copy of train_fsod.py with mosaic=0.0 added during finetune
+as a control experiment for the cv2-freeze ablation.
 """
-
 from __future__ import annotations
 
 import argparse
@@ -26,19 +10,61 @@ import sys
 from pathlib import Path
 
 import yaml
-from ultralytics import YOLO
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+_THIRD_PARTY_ULTRALYTICS = str(PROJECT_ROOT / "third_party" / "ultralytics")
+if _THIRD_PARTY_ULTRALYTICS not in sys.path:
+    sys.path.insert(0, _THIRD_PARTY_ULTRALYTICS)
+
+from ultralytics import YOLO
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-# Ensure FSODDetect is importable before model parsing
 import fsod.modules  # noqa: F401
+
+import numpy as np
+import torch
+import cv2 as _cv2
+
+_original_warp_affine = _cv2.warpAffine
+_original_warp_perspective = _cv2.warpPerspective
+
+def _warp_affine_fixed(*args, **kwargs):
+    args = list(args)
+    if len(args) >= 2:
+        if not isinstance(args[1], np.ndarray):
+            args[1] = np.asarray(args[1], dtype=np.float32)
+        if not isinstance(args[0], np.ndarray):
+            args[0] = np.asarray(args[0])
+    elif 'M' in kwargs:
+        if not isinstance(kwargs['M'], np.ndarray):
+            kwargs['M'] = np.asarray(kwargs['M'], dtype=np.float32)
+    if 'src' in kwargs and not isinstance(kwargs['src'], np.ndarray):
+        kwargs['src'] = np.asarray(kwargs['src'])
+    return _original_warp_affine(*args, **kwargs)
+
+def _warp_perspective_fixed(*args, **kwargs):
+    args = list(args)
+    if len(args) >= 2:
+        if not isinstance(args[1], np.ndarray):
+            args[1] = np.asarray(args[1], dtype=np.float32)
+        if not isinstance(args[0], np.ndarray):
+            args[0] = np.asarray(args[0])
+    elif 'M' in kwargs:
+        if not isinstance(kwargs['M'], np.ndarray):
+            kwargs['M'] = np.asarray(kwargs['M'], dtype=np.float32)
+    if 'src' in kwargs and not isinstance(kwargs['src'], np.ndarray):
+        kwargs['src'] = np.asarray(kwargs['src'])
+    return _original_warp_perspective(*args, **kwargs)
+
+_cv2.warpAffine = _warp_affine_fixed
+_cv2.warpPerspective = _warp_perspective_fixed
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train YOLO-FSOD with Cosine Classifier.")
+    parser = argparse.ArgumentParser(description="Train YOLO-FSOD with Cosine Classifier (no mosaic).")
     parser.add_argument("--config", type=str, required=True, help="Path to experiment config yaml.")
     parser.add_argument(
         "--stage",
@@ -62,13 +88,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--prototype",
         action="store_true",
-        help="Initialize cosine head with class prototypes from support set (Exp 2).",
+        help="Initialize cosine head with class prototypes from support set.",
     )
     parser.add_argument(
         "--florence2",
         type=str,
         default="",
-        help="Path to Florence-2 model for adaptation init (Exp 3). Empty = disabled.",
+        help="Path to Florence-2 model for adaptation init. Empty = disabled.",
     )
     parser.add_argument(
         "--epochs",
@@ -92,7 +118,6 @@ def resolve_repo_path(raw_path: str) -> Path:
 
 
 def get_all_classes(config: dict) -> list[str]:
-    """Return the full class list for the dataset specified in config."""
     if "all_classes" in config:
         return config["all_classes"]
     if "coco_root" in config:
@@ -103,7 +128,6 @@ def get_all_classes(config: dict) -> list[str]:
 
 
 def get_yaml_prefix(config: dict) -> str:
-    """Return dataset yaml filename prefix: 'coco_fsod' or 'voc_fsod'."""
     if "yaml_prefix" in config:
         return config["yaml_prefix"]
     if "coco_root" in config:
@@ -112,7 +136,6 @@ def get_yaml_prefix(config: dict) -> str:
 
 
 def run_base_stage(config: dict, output_root: Path) -> Path:
-    """Base pretrain with standard YOLO (same as baseline)."""
     runs_dir = resolve_repo_path(config["runs_dir"])
     data_yaml = output_root / f"{get_yaml_prefix(config)}_base.yaml"
 
@@ -146,16 +169,7 @@ def run_finetune_stage(
     use_prototype: bool = False, florence2_model: str = "",
     epochs_override: int = 0,
 ) -> Path:
-    """Finetune with FSODDetect (cosine classifier) architecture.
-
-    1. Creates model from model_arch YAML (has FSODDetect head)
-    2. Loads base_weights — matching layers transfer, cosine head stays random init
-    3. (Optional) Initialize cosine head with class prototypes from support set
-    4. (Optional) Initialize cosine head via Florence-2 adaptation MLP
-    5. Trains on novel-only data
-    """
     runs_dir = resolve_repo_path(config["runs_dir"])
-    # Cross-domain: allow separate base_data_root (e.g. COCO) from target data_root (e.g. DIOR)
     base_data_root = output_root
     if "base_data_root" in config:
         base_data_root = resolve_repo_path(config["base_data_root"])
@@ -166,13 +180,13 @@ def run_finetune_stage(
     finetune_epochs = epochs_override if epochs_override > 0 else int(config["epochs"]["finetune"])
 
     if florence2_model and use_prototype:
-        run_name = "novel_finetune_cosine_fused"
+        run_name = "novel_finetune_cosine_fused_nomosaic"
     elif florence2_model:
-        run_name = "novel_finetune_cosine_florence2"
+        run_name = "novel_finetune_cosine_florence2_nomosaic"
     elif use_prototype:
-        run_name = "novel_finetune_cosine_proto"
+        run_name = "novel_finetune_cosine_proto_nomosaic"
     else:
-        run_name = "novel_finetune_cosine"
+        run_name = "novel_finetune_cosine_nomosaic"
 
     if epochs_override > 0:
         run_name += f"_ep{epochs_override}"
@@ -183,11 +197,7 @@ def run_finetune_stage(
     print(f"Loading base pretrain weights: {base_weights}")
     model.load(str(base_weights))
 
-    # Prototype / Florence-2 init must happen AFTER model.train() rebuilds
-    # the model internally (via trainer.get_model). We use the
-    # on_pretrain_routine_end callback to inject weights right before the
-    # training loop starts.
-    _proto_init_data = None  # will be set below if needed
+    _proto_init_data = None
     _florence_init_fn = None
     _alpha_log_enabled = False
 
@@ -280,7 +290,6 @@ def run_finetune_stage(
             device=device_str,
         )
 
-        # Capture init data for callback (same issue: model.train rebuilds model)
         blend_alpha = float(fl_cfg.get("alpha", 0.5))
         _alpha_log_enabled = bool(fl_cfg.get("alpha_logging", False))
         if fusion_mode != "learnable":
@@ -300,16 +309,13 @@ def run_finetune_stage(
             fusion_mode=fusion_mode,
         )
 
-    # --- Register callback to inject prototype/florence weights after trainer rebuilds model ---
+    # --- Register callback ---
     def _on_pretrain_routine_end(trainer):
-        """Inject custom CosineConv2d weights after trainer.setup_model() rebuilds the model."""
         if _proto_init_data is not None:
             from fsod.modules.prototype import init_cosine_head_with_prototypes
             protos, n_cls, a_cls = _proto_init_data
             print("Injecting prototype weights into rebuilt model...")
-            # trainer.model is the actual nn.Module
             class _FakeYOLO:
-                """Thin wrapper so init_cosine_head_with_prototypes can access model.model.model[-1]."""
                 def __init__(self, det_model):
                     self.model = det_model
             init_cosine_head_with_prototypes(
@@ -325,9 +331,6 @@ def run_finetune_stage(
                     self.model = det_model
             _florence_init_fn(_FakeYOLO2(trainer.model))
 
-        # Sync injected weights to EMA — critical because EMA is deepcopied
-        # *before* this callback, and bool buffers (weight_prior_mask) are
-        # never updated by ModelEMA.update() which only touches floating-point tensors.
         if (_proto_init_data is not None or _florence_init_fn is not None) and getattr(trainer, "ema", None) is not None:
             model_sd = trainer.model.state_dict()
             for k, v in trainer.ema.ema.state_dict().items():
@@ -369,6 +372,7 @@ def run_finetune_stage(
         name=run_name,
         seed=int(config["seed"]),
         exist_ok=True,
+        mosaic=0.0,
     )
 
     best_path = runs_dir / run_name / "weights" / "best.pt"

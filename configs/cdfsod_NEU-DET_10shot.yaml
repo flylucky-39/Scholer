@@ -13,6 +13,7 @@ include_base_pool: false                                # set true to also write
 # -----------------------------------------------------------------------------
 output_root: ./data/cdfsod_NEU-DET_10shot
 runs_dir: ./runs/cdfsod_NEU-DET_10shot
+base_data_root: ./data/coco_fsod_30shot
 
 # -----------------------------------------------------------------------------
 # Model + training
@@ -65,3 +66,36 @@ cdpc_step: 0.1
 # Leave empty / comment out to disable text branch entirely.
 # -----------------------------------------------------------------------------
 florence2_model: ~/epfs/07_FSOD_LLM/models/Florence-2-base/
+
+# -----------------------------------------------------------------------------
+# Category lists  (override auto-detection)
+# -----------------------------------------------------------------------------
+all_classes:
+  - crazing
+  - inclusion
+  - patches
+  - pitted_surface
+  - rolled-in_scale
+  - scratches
+
+novel_classes:
+  - crazing
+  - inclusion
+  - patches
+  - pitted_surface
+  - rolled-in_scale
+  - scratches
+
+# -----------------------------------------------------------------------------
+# FiLM configuration (same as VOC)
+# -----------------------------------------------------------------------------
+florence2:
+  alpha: 0.7
+  film_hidden_dim: 128
+  film_epochs: 300
+  film_weight_decay: 0.05
+
+# -----------------------------------------------------------------------------
+# YAML prefix override
+# -----------------------------------------------------------------------------
+yaml_prefix: cdfsod_bench
