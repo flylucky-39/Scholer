@@ -373,7 +373,6 @@ def run_finetune_stage(
         name=run_name,
         seed=int(config["seed"]),
         exist_ok=True,
-        reg_weight=reg_weight,  # stored in trainer.args for potential use
     )
 
     best_path = runs_dir / run_name / "weights" / "best.pt"
