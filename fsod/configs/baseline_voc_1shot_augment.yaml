@@ -1,0 +1,51 @@
+seed: 3407
+
+voc_root: ~/epfs/07_FSOD_LLM/datasets/VOCdevkit
+output_root: ./data/voc_fsod_split1_1shot
+
+novel_classes:
+  - bird
+  - bus
+  - cow
+  - motorbike
+  - sofa
+
+shot: 1
+
+model: yolo11s.pt
+image_size: 640
+device: 0
+workers: 16
+runs_dir: ./runs/fsod_1shot
+
+epochs:
+  base: 100
+  finetune: 200
+
+batch_size:
+  base: 64
+  finetune: 4
+
+lr0:
+  base: 0.01
+  finetune: 0.0005
+
+freeze:
+  backbone: 10
+
+patience:
+  finetune: 30
+
+replay:
+  enabled: false
+  base_images: 200
+
+florence2:
+  alpha: 0.7
+  film_hidden_dim: 128
+  film_epochs: 300
+  film_weight_decay: 0.05
+
+# Support set augmentation
+prototype_augment: true
+prototype_augment_k: 4
