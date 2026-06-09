@@ -15,7 +15,7 @@ workers: 16
 project: /root/epfs/07_FSOD_LLM/fsod/runs/voc_fsod_5shot_split2
 name: novel_finetune_cosine_proto
 exist_ok: true
-pretrained: /root/epfs/07_FSOD_LLM/fsod/base_pretrain/weights/best.pt
+pretrained: /root/epfs/07_FSOD_LLM/fsod/runs/fsod_baseline/base_pretrain_cosine/weights/best.pt
 optimizer: auto
 verbose: true
 seed: 3408

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import torch
 import torch.nn.functional as F
+from torchvision import transforms as T
 from torchvision.ops import roi_align
 from pathlib import Path
 from PIL import Image
@@ -102,6 +103,8 @@ def extract_prototypes(
     all_classes: list[str],
     imgsz: int = 640,
     device: str = "cuda:0",
+    augment: bool = False,
+    augment_k: int = 4,
 ) -> dict[str, torch.Tensor]:
     """Extract per-class prototypes from support set.
 
@@ -112,6 +115,8 @@ def extract_prototypes(
         all_classes: List of all class names (for index mapping).
         imgsz: Image size for inference.
         device: Device string.
+        augment: Whether to apply data augmentation to support images.
+        augment_k: Number of augmented variants per image (used only if augment=True).
 
     Returns:
         Dict mapping class_name → prototype tensor of shape (c3,) where c3=256 for yolo11s.
@@ -137,60 +142,79 @@ def extract_prototypes(
     # Collect features per class
     class_features: dict[str, list[torch.Tensor]] = {name: [] for name in novel_classes}
 
+    # Define augmentation transforms
+    if augment:
+        augmentations = [
+            T.RandomHorizontalFlip(p=1.0),
+            T.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3),
+            T.RandomRotation(degrees=15),
+            T.RandomAffine(degrees=0, scale=(0.8, 1.2)),
+        ]
+        augmentations = augmentations[:augment_k]
+        print(f"  Augmentation enabled: {len(augmentations)} variants per image")
+
     for img_path in image_paths:
         # Load and preprocess image
         img_pil = Image.open(img_path).convert("RGB")
         orig_w, orig_h = img_pil.size
 
-        # Resize to imgsz (letterbox-style: resize to fit, then pad)
-        # For simplicity, use direct resize (matches training augmentation at eval)
-        img_resized = img_pil.resize((imgsz, imgsz))
-        img_np = np.array(img_resized, dtype=np.float32) / 255.0
-        img_tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0).to(device)
+        # Generate image variants (original + augmented)
+        variants = [img_pil]
+        if augment:
+            for aug in augmentations:
+                variants.append(aug(img_pil))
 
-        # Load labels
-        label_path = data_root / "labels" / "novel_finetune" / (img_path.stem + ".txt")
-        labels = _load_labels(label_path)
-        if not labels:
-            continue
+        for variant in variants:
+            # Resize to imgsz (letterbox-style: resize to fit, then pad)
+            # For simplicity, use direct resize (matches training augmentation at eval)
+            img_resized = variant.resize((imgsz, imgsz))
+            img_np = np.array(img_resized, dtype=np.float32) / 255.0
+            img_tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0).to(device)
 
-        # Extract multi-scale cv3 features
-        scale_features = _extract_cv3_features(model, img_tensor)
-
-        # For each GT box, RoIAlign crop from the best-matching scale
-        for cls_id, cx, cy, w, h in labels:
-            cls_name = cls_idx_to_name.get(cls_id)
-            if cls_name is None or cls_name not in novel_set:
+            # Load labels
+            label_path = data_root / "labels" / "novel_finetune" / (img_path.stem + ".txt")
+            labels = _load_labels(label_path)
+            if not labels:
                 continue
 
-            x1, y1, x2, y2 = _cxcywh_to_xyxy(cx, cy, w, h, imgsz, imgsz)
-            box_w = x2 - x1
-            box_h = y2 - y1
-            if box_w < 2 or box_h < 2:
-                continue
+            # Extract multi-scale cv3 features
+            scale_features = _extract_cv3_features(model, img_tensor)
 
-            # Pick scale based on box size (small→P3, medium→P4, large→P5)
-            box_area = box_w * box_h
-            if box_area < 96 * 96:
-                scale_idx = 0  # P3/8
-            elif box_area < 192 * 192:
-                scale_idx = 1  # P4/16
-            else:
-                scale_idx = 2  # P5/32
+            # For each GT box, RoIAlign crop from the best-matching scale
+            for cls_id, cx, cy, w, h in labels:
+                cls_name = cls_idx_to_name.get(cls_id)
+                if cls_name is None or cls_name not in novel_set:
+                    continue
 
-            feat_map = scale_features[scale_idx]  # (1, c3, H_s, W_s)
-            stride = imgsz / feat_map.shape[-1]  # 8, 16, or 32
+                x1, y1, x2, y2 = _cxcywh_to_xyxy(cx, cy, w, h, imgsz, imgsz)
+                box_w = x2 - x1
+                box_h = y2 - y1
+                if box_w < 2 or box_h < 2:
+                    continue
 
-            # Scale bbox to feature map coordinates
-            rois = torch.tensor([[0, x1, y1, x2, y2]], dtype=torch.float32, device=device)
+                # Pick scale based on box size (small→P3, medium→P4, large→P5)
+                box_area = box_w * box_h
+                if box_area < 96 * 96:
+                    scale_idx = 0  # P3/8
+                elif box_area < 192 * 192:
+                    scale_idx = 1  # P4/16
+                else:
+                    scale_idx = 2  # P5/32
 
-            # RoIAlign: output 1x1 spatial → (1, c3, 1, 1)
-            pooled = roi_align(feat_map, rois, output_size=(1, 1), spatial_scale=1.0 / stride)
-            feat_vec = pooled.squeeze()  # (c3,)
-            class_features[cls_name].append(feat_vec)
+                feat_map = scale_features[scale_idx]  # (1, c3, H_s, W_s)
+                stride = imgsz / feat_map.shape[-1]  # 8, 16, or 32
+
+                # Scale bbox to feature map coordinates
+                rois = torch.tensor([[0, x1, y1, x2, y2]], dtype=torch.float32, device=device)
+
+                # RoIAlign: output 1x1 spatial → (1, c3, 1, 1)
+                pooled = roi_align(feat_map, rois, output_size=(1, 1), spatial_scale=1.0 / stride)
+                feat_vec = pooled.squeeze()  # (c3,)
+                class_features[cls_name].append(feat_vec)
 
     # Average features per class → prototypes
     prototypes = {}
+    n_images = len(image_paths)
     for cls_name in novel_classes:
         feats = class_features[cls_name]
         if not feats:
@@ -201,7 +225,7 @@ def extract_prototypes(
         else:
             stacked = torch.stack(feats)  # (N, c3)
             prototypes[cls_name] = stacked.mean(dim=0)  # (c3,)
-            print(f"  {cls_name}: {len(feats)} instances → prototype norm={prototypes[cls_name].norm():.3f}")
+            print(f"  {cls_name}: {len(feats)} features ({n_images} images × {len(feats)//max(n_images,1)} variants) → prototype norm={prototypes[cls_name].norm():.3f}")
 
     return prototypes
 

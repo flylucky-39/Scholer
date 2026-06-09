@@ -22,11 +22,12 @@ class CosineConv2d(nn.Module):
     """1x1 convolution that uses cosine similarity instead of dot product.
 
     For each spatial location, computes:
-        score_c = s * cos(feature, weight_c)
-    where s is a learnable temperature (scale) parameter.
+        score_c = exp(temperature_c) * cos(feature, weight_c) + bias_c
 
-    This is equivalent to L2-normalizing both the weight and the input
-    before a standard 1x1 convolution, then scaling by temperature.
+    where bias_c and temperature_c are learnable per-class parameters.
+    The bias is initialised to the standard YOLO logit prior (negative)
+    so that the initial BCE loss stays in the same range as standard
+    Conv2d classifiers.
     """
 
     def __init__(self, in_channels: int, out_channels: int, temperature: float = 5.0) -> None:
@@ -36,7 +37,6 @@ class CosineConv2d(nn.Module):
         self.weight = nn.Parameter(torch.empty(out_channels, in_channels))
         self.bias = nn.Parameter(torch.zeros(out_channels))
         # Per-class learnable temperature (log-space for positivity)
-        # Each class gets its own scale to adaptively control decision boundary
         self.scale = nn.Parameter(torch.full((out_channels,), math.log(temperature)))
         self.blend_logit = nn.Parameter(torch.tensor(0.0))
         self.register_buffer("weight_prior", torch.zeros(out_channels, in_channels))
@@ -100,7 +100,7 @@ class CosineConv2d(nn.Module):
         Args:
             x: (B, C_in, H, W)
         Returns:
-            (B, C_out, H, W) cosine similarity scores scaled by temperature + bias
+            (B, C_out, H, W)  cosine similarity scores scaled by temperature + bias
         """
         # Normalize weight: (C_out, C_in)
         w_norm = F.normalize(self.weight, dim=1)
@@ -118,8 +118,6 @@ class CosineConv2d(nn.Module):
         x_norm = F.normalize(x, dim=1)
         # 1x1 conv with normalized weight → cosine similarity
         cos_sim = F.conv2d(x_norm, w_norm.unsqueeze(-1).unsqueeze(-1))
-        # Scale by per-class temperature and add bias
-        # Each class has its own temperature to adaptively suppress false positives
         return cos_sim * self.scale.exp().view(1, -1, 1, 1) + self.bias.view(1, -1, 1, 1)
 
 
@@ -129,6 +127,10 @@ class FSODDetect(Detect):
     Inherits from Detect and only modifies cv3 (classification branch):
     - The last nn.Conv2d(c3, nc, 1) is replaced with CosineConv2d(c3, nc).
     - Everything else (bbox regression, DFL, anchors, strides) is unchanged.
+
+    During inference, class scores are debiased before sigmoid so that
+    confidence reflects the raw cosine similarity, not the logit-space
+    score that includes a large negative training bias.
     """
 
     def __init__(self, nc: int = 80, ch: tuple = (), temperature: float = 5.0) -> None:
@@ -137,9 +139,7 @@ class FSODDetect(Detect):
         # Replace the last layer of each cv3 branch with CosineConv2d
         for i in range(self.nl):
             old_seq = self.cv3[i]
-            # The last element is nn.Conv2d(c3, nc, 1)
             c3_in = self._get_last_conv_in_channels(old_seq)
-            # Replace last layer
             old_seq[-1] = CosineConv2d(c3_in, self.nc, temperature=temperature)
 
     @staticmethod
@@ -151,14 +151,56 @@ class FSODDetect(Detect):
         raise TypeError(f"Expected last layer to be Conv2d, got {type(last)}")
 
     def bias_init(self) -> None:
-        """Initialize biases.
+        """Initialize biases with standard YOLO logit prior.
 
-        Box branch: same as parent (bias → 1.0).
-        Cls branch: CosineConv2d bias is set to a large negative value so that
-        initial sigmoid(score) ≈ 0, matching the standard Detect initialization
-        and preventing cls_loss explosion from millions of negative anchors.
+        Box branch: bias → 1.0 (same as parent).
+        Cls branch (CosineConv2d): bias uses the standard YOLO formula
+        so training loss starts in the same range as vanilla Detect.
         """
         for a, b, s in zip(self.cv2, self.cv3, self.stride):
             a[-1].bias.data[:] = 1.0  # box
-            # Same formula as standard Detect: log(5 / nc / (640/stride)^2)
-            b[-1].bias.data[:] = math.log(5 / self.nc / (640 / s) ** 2)
+            last_cls = b[-1]
+            if isinstance(last_cls, CosineConv2d):
+                last_cls.bias.data[:] = math.log(5 / self.nc / (640 / s) ** 2)
+            else:
+                last_cls.bias.data[:] = math.log(5 / self.nc / (640 / s) ** 2)
+
+    def _get_cosine_biases(self) -> torch.Tensor:
+        """Collect learnable biases from all CosineConv2d layers.
+
+        Returns a (1, nc, 1) tensor with the mean bias across scales.
+        """
+        biases = []
+        for i in range(self.nl):
+            last_cls = self.cv3[i][-1]
+            if isinstance(last_cls, CosineConv2d):
+                biases.append(last_cls.bias.detach())
+        if not biases:
+            return torch.tensor(0.0)
+        # Average biases across scales (they are per-class, same shape)
+        return torch.stack(biases).mean(dim=0).view(1, -1, 1)
+
+    def _inference(self, x):
+        """Override parent to debias cosine scores before sigmoid.
+
+        Training: standard biased logits (loss behaviour unchanged).
+        Inference: debiased scores so confidence = sigmoid(scale * cos),
+        which maps cos=0 → conf≈0.5, cos>0 → conf>0.5, providing
+        interpretable probability estimates in cosine space.
+        """
+        # Call parent _inference first (does box decoding + sigmoid)
+        shape = x[0].shape  # BCHW
+        x_cat = torch.cat([xi.view(shape[0], self.no, -1) for xi in x], 2)
+        if self.dynamic or self.shape != shape:
+            from ultralytics.utils.tal import make_anchors
+            self.anchors, self.strides = (t.transpose(0, 1) for t in make_anchors(x, self.stride, 0.5))
+            self.shape = shape
+
+        box, cls = x_cat.split((self.reg_max * 4, self.nc), 1)
+        dbox = self.decode_bboxes(self.dfl(box), self.anchors.unsqueeze(0)) * self.strides
+
+        # Debiase: remove per-class bias before sigmoid
+        # cls = scale * cos + bias  →  cls_debiased = scale * cos = cls - bias
+        bias = self._get_cosine_biases().to(device=cls.device, dtype=cls.dtype)
+        cls_debiased = cls - bias
+        return torch.cat((dbox, cls_debiased.sigmoid()), 1)

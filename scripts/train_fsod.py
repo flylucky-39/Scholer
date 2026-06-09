@@ -76,6 +76,16 @@ def parse_args() -> argparse.Namespace:
         default=0,
         help="Override finetune epochs (0 = use config value).",
     )
+    parser.add_argument(
+        "--augment",
+        action="store_true",
+        help="Apply multiple augmentations to support images when extracting prototypes.",
+    )
+    parser.add_argument(
+        "--freeze-head",
+        action="store_true",
+        help="Freeze cosine classifier head after prototype injection (prevent overfitting in 1-shot).",
+    )
     return parser.parse_args()
 
 
@@ -144,7 +154,8 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 def run_finetune_stage(
     config: dict, output_root: Path, base_weights: Path, model_arch: Path,
     use_prototype: bool = False, florence2_model: str = "",
-    epochs_override: int = 0,
+    epochs_override: int = 0, augment_flag: bool = False,
+    freeze_head: bool = False,
 ) -> Path:
     """Finetune with FSODDetect (cosine classifier) architecture.
 
@@ -174,6 +185,12 @@ def run_finetune_stage(
     else:
         run_name = "novel_finetune_cosine"
 
+    if augment_flag:
+        run_name += "_aug"
+
+    if freeze_head:
+        run_name += "_freezehead"
+
     if epochs_override > 0:
         run_name += f"_ep{epochs_override}"
 
@@ -202,6 +219,7 @@ def run_finetune_stage(
             all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
+            augment=augment_flag,
         )
         _proto_init_data = (prototypes, novel_classes, all_classes)
 
@@ -257,6 +275,7 @@ def run_finetune_stage(
             all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=device_str,
+            augment=augment_flag,
         )
 
         print("Step 5/6: Training scale-specific FiLM modulation networks on base classes...")
@@ -335,6 +354,22 @@ def run_finetune_stage(
                     v.copy_(model_sd[k])
             print("Synced injected weights (incl. bool buffers) to EMA model")
 
+        # 3. Optionally freeze entire cosine head to prevent overfitting
+        if freeze_head:
+            detect = trainer.model.model[-1]
+            frozen_layers = 0
+            for i in range(detect.nl):
+                # Freeze CosineConv2d (cls branch) — all params: weight, scale, bias
+                cosine_layer = detect.cv3[i][-1]
+                for p in cosine_layer.parameters():
+                    p.requires_grad_(False)
+                frozen_layers += 1
+                # Also freeze box branch cv2 to be safe
+                for p in detect.cv2[i].parameters():
+                    p.requires_grad_(False)
+                frozen_layers += 1
+            print(f"Frozen {frozen_layers} head submodules ({detect.nl} scales × cv2+CosineConv2d)")
+
     def _on_train_epoch_end(trainer):
         if not _alpha_log_enabled:
             return
@@ -408,7 +443,8 @@ def main() -> None:
         best_path = run_finetune_stage(
             config, output_root, base_weights, model_arch,
             use_prototype=args.prototype, florence2_model=args.florence2,
-            epochs_override=args.epochs,
+            epochs_override=args.epochs, augment_flag=args.augment,
+            freeze_head=args.freeze_head,
         )
         print(f"Finetune stage checkpoint: {best_path}")
         return
@@ -418,7 +454,8 @@ def main() -> None:
     finetune_best = run_finetune_stage(
         config, output_root, base_best, model_arch,
         use_prototype=args.prototype, florence2_model=args.florence2,
-        epochs_override=args.epochs,
+        epochs_override=args.epochs, augment_flag=args.augment,
+        freeze_head=args.freeze_head,
     )
     print(f"Base stage checkpoint: {base_best}")
     print(f"Finetune stage checkpoint: {finetune_best}")
