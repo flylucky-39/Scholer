@@ -1,0 +1,8 @@
+experiment,shot,beta,mAP50,mAP50-95
+fixed_bg_suppress,1-shot,0.5,0.3311,0.2009
+fixed_bg_suppress,3-shot,0.5,0.6372,0.4448
+adaptive_bg_suppress,3-shot,0.184,0.6413,0.4461
+adaptive_bg_suppress,3-shot,0.123,0.6429,0.4475
+adaptive_bg_suppress,5-shot,0.068,0.7308,0.5286
+adaptive_bg_suppress,5-shot,0.045,0.7340,0.5269
+cos_lr,3-shot,,0.6568,0.4571

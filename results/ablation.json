@@ -1,0 +1,43 @@
+{
+  "fixed_bg_suppress": {
+    "1-shot": {
+      "beta": 0.5,
+      "mAP50": 0.33114
+    },
+    "3-shot": {
+      "beta": 0.5,
+      "mAP50": 0.63722
+    }
+  },
+  "adaptive_bg_suppress": {
+    "3-shot_beta_0.18": {
+      "beta": 0.184,
+      "mAP50": 0.64133
+    },
+    "3-shot_beta_0.12": {
+      "beta": 0.123,
+      "mAP50": 0.64288
+    },
+    "5-shot_beta_0.07": {
+      "beta": 0.068,
+      "mAP50": 0.73078
+    },
+    "5-shot_beta_0.05": {
+      "beta": 0.045,
+      "mAP50": 0.73397
+    }
+  },
+  "cos_lr": {
+    "3-shot": {
+      "mAP50": 0.6568
+    }
+  },
+  "failed_methods": {
+    "adapter_untrained": {
+      "mAP50": 0.1345
+    },
+    "adapter_trained": {
+      "mAP50": 0.1345
+    }
+  }
+}
