@@ -1,7 +1,7 @@
 seed: 3408
 
-voc_root: ~/epfs/07_FSOD_LLM/datasets/VOCdevkit
-output_root: ./data/voc_fsod_split2_3shot
+voc_root: /root/epfs/05_Old_FSOD/Baseline_Yolo/datasets/VOCdevkit
+output_root: ./data/voc_fsod_split2_10shot_reviewed
 
 novel_classes:
   - bird
@@ -10,13 +10,13 @@ novel_classes:
   - motorbike
   - sofa
 
-shot: 3
+shot: 10
 
 model: yolo11s.pt
 image_size: 640
 device: 0
 workers: 16
-runs_dir: ./runs/voc_fsod_3shot_split2
+runs_dir: ./runs/voc_fsod_10shot_split2_vlm
 
 epochs:
   base: 100
@@ -33,7 +33,6 @@ lr0:
 freeze:
   backbone: 10
 
-cos_lr: true
 patience:
   finetune: 30
 

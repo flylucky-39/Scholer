@@ -86,6 +86,28 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Freeze cosine classifier head after prototype injection (prevent overfitting in 1-shot).",
     )
+    parser.add_argument(
+        "--background-suppression",
+        action="store_true",
+        help="Extract background prototype from base_train and apply orthogonalisation + inference-time suppression.",
+    )
+    parser.add_argument(
+        "--bg-beta",
+        type=float,
+        default=0.5,
+        help="Prototype refinement strength: p' = p - beta * <p,b̂> * b̂  (default: 0.5).",
+    )
+    parser.add_argument(
+        "--bg-gamma",
+        type=float,
+        default=0.3,
+        help="Inference-time background suppression: score -= gamma * cos(x, bg_proto)  (default: 0.3).",
+    )
+    parser.add_argument(
+        "--learnable-bg-suppression",
+        action="store_true",
+        help="Use learnable background suppression (cross-attention) as a contrast to fixed orthogonalisation.",
+    )
     return parser.parse_args()
 
 
@@ -139,6 +161,7 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
         workers=int(config["workers"]),
         device=config["device"],
         lr0=float(config["lr0"]["base"]),
+        cos_lr=bool(config.get("cos_lr", False)),
         project=str(runs_dir),
         name="base_pretrain",
         seed=int(config["seed"]),
@@ -156,6 +179,10 @@ def run_finetune_stage(
     use_prototype: bool = False, florence2_model: str = "",
     epochs_override: int = 0, augment_flag: bool = False,
     freeze_head: bool = False,
+    background_suppression: bool = False,
+    bg_beta: float = 0.5,
+    bg_gamma: float = 0.3,
+    learnable_bg_suppression: bool = False,
 ) -> Path:
     """Finetune with FSODDetect (cosine classifier) architecture.
 
@@ -191,6 +218,15 @@ def run_finetune_stage(
     if freeze_head:
         run_name += "_freezehead"
 
+    if background_suppression:
+        run_name += f"_bgsuppress_b{str(bg_beta).replace('.', '')}g{str(bg_gamma).replace('.', '')}"
+
+    if learnable_bg_suppression:
+        run_name += "_learnablebg"
+
+    if bool(config.get("cos_lr", False)):
+        run_name += "_coslr"
+
     if epochs_override > 0:
         run_name += f"_ep{epochs_override}"
 
@@ -209,7 +245,13 @@ def run_finetune_stage(
     _alpha_log_enabled = False
 
     if use_prototype and not florence2_model:
-        from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
+        from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes, extract_base_conv_weights
+
+        print("Extracting base classification weights for CosineConv2d init...")
+        base_class_weights = extract_base_conv_weights(
+            base_weights=base_weights,
+            all_classes=all_classes,
+        )
 
         print("Extracting class prototypes from support set...")
         prototypes = extract_prototypes(
@@ -221,7 +263,83 @@ def run_finetune_stage(
             device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
             augment=augment_flag,
         )
-        _proto_init_data = (prototypes, novel_classes, all_classes)
+
+        if background_suppression:
+            from fsod.modules.background_suppression import (
+                extract_background_prototype,
+                refine_prototypes_with_bg_suppression,
+            )
+
+            print("Extracting background prototype from base_train...")
+            bg_proto = extract_background_prototype(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
+            )
+
+            print(f"Refining prototypes with background suppression (beta={bg_beta:.2f})...")
+            prototypes = refine_prototypes_with_bg_suppression(
+                prototypes, bg_proto, beta=bg_beta,
+            )
+
+            # Store bg_proto and gamma for injection into CosineConv2d
+            _bg_proto = bg_proto
+            _bg_gamma = bg_gamma
+        elif learnable_bg_suppression:
+            from fsod.modules.background_suppression import extract_background_prototype
+            from fsod.modules.adaptation import extract_base_prototypes
+            from fsod.modules.learnable_bg_suppression import (
+                LearnableBackgroundSuppression,
+                train_learnable_bg_suppression,
+                apply_learnable_bg_suppression,
+            )
+
+            device_str = f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"]
+
+            print("Extracting background prototype from base_train...")
+            bg_proto = extract_background_prototype(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=device_str,
+            )
+
+            print("Extracting base class prototypes for training learnable module...")
+            base_classes = [c for c in all_classes if c not in novel_classes]
+            base_prototypes = extract_base_prototypes(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                base_classes=base_classes,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=device_str,
+            )
+
+            print("Training learnable background suppression module...")
+            dim = bg_proto.shape[0]
+            # Ensure num_segments divides dim
+            num_segments = 8 if dim % 8 == 0 else (4 if dim % 4 == 0 else 2)
+            lbs = LearnableBackgroundSuppression(dim=dim, num_segments=num_segments, n_heads=4)
+            lbs = train_learnable_bg_suppression(
+                lbs, base_prototypes, bg_proto,
+                lr=1e-3, weight_decay=1e-2, epochs=200,
+                device=device_str,
+            )
+
+            print("Applying learnable background suppression to novel prototypes...")
+            prototypes = apply_learnable_bg_suppression(lbs, prototypes)
+
+            # Store bg_proto and gamma for inference-time suppression in CosineConv2d
+            _bg_proto = bg_proto
+            _bg_gamma = bg_gamma
+        else:
+            _bg_proto = None
+            _bg_gamma = 0.0
+
+        _proto_init_data = (prototypes, novel_classes, all_classes, _bg_proto, _bg_gamma, base_class_weights)
 
     if florence2_model:
         from fsod.modules.adaptation import (
@@ -324,7 +442,10 @@ def run_finetune_stage(
         """Inject custom CosineConv2d weights after trainer.setup_model() rebuilds the model."""
         if _proto_init_data is not None:
             from fsod.modules.prototype import init_cosine_head_with_prototypes
-            protos, n_cls, a_cls = _proto_init_data
+            protos, n_cls, a_cls = _proto_init_data[:3]
+            bg_proto = _proto_init_data[3] if len(_proto_init_data) > 3 else None
+            bg_gamma = _proto_init_data[4] if len(_proto_init_data) > 4 else 0.0
+            base_class_weights = _proto_init_data[5] if len(_proto_init_data) > 5 else None
             print("Injecting prototype weights into rebuilt model...")
             # trainer.model is the actual nn.Module
             class _FakeYOLO:
@@ -336,7 +457,13 @@ def run_finetune_stage(
                 prototypes=protos,
                 novel_classes=n_cls,
                 all_classes=a_cls,
+                base_class_weights=base_class_weights,
             )
+            # Inject background prototype into CosineConv2d layers
+            if bg_proto is not None and bg_gamma > 0:
+                detect = trainer.model.model[-1]
+                if hasattr(detect, "set_background_proto"):
+                    detect.set_background_proto(bg_proto, bg_gamma)
         if _florence_init_fn is not None:
             print("Injecting Florence-2 modulated weights into rebuilt model...")
             class _FakeYOLO2:
@@ -398,6 +525,7 @@ def run_finetune_stage(
         workers=int(config["workers"]),
         device=config["device"],
         lr0=float(config["lr0"]["finetune"]),
+        cos_lr=bool(config.get("cos_lr", False)),
         freeze=int(config.get("freeze", {}).get("backbone", 0)),
         patience=int(config.get("patience", {}).get("finetune", 30)),
         project=str(runs_dir),
@@ -445,6 +573,10 @@ def main() -> None:
             use_prototype=args.prototype, florence2_model=args.florence2,
             epochs_override=args.epochs, augment_flag=args.augment,
             freeze_head=args.freeze_head,
+            background_suppression=args.background_suppression,
+            bg_beta=args.bg_beta,
+            bg_gamma=args.bg_gamma,
+            learnable_bg_suppression=args.learnable_bg_suppression,
         )
         print(f"Finetune stage checkpoint: {best_path}")
         return
@@ -456,6 +588,10 @@ def main() -> None:
         use_prototype=args.prototype, florence2_model=args.florence2,
         epochs_override=args.epochs, augment_flag=args.augment,
         freeze_head=args.freeze_head,
+        background_suppression=args.background_suppression,
+        bg_beta=args.bg_beta,
+        bg_gamma=args.bg_gamma,
+        learnable_bg_suppression=args.learnable_bg_suppression,
     )
     print(f"Base stage checkpoint: {base_best}")
     print(f"Finetune stage checkpoint: {finetune_best}")

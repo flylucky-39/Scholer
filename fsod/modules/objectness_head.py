@@ -99,6 +99,19 @@ class FSODDetectWithObjectness(Detect):
         for cv4_i in self.cv4:
             cv4_i[-1].bias.data.fill_(math.log(0.1 / 0.9))  # obj: sigmoid ≈ 0.1
 
+    def set_background_proto(self, bg_proto, gamma: float = 0.3):
+        """Inject background prototype into all CosineConv2d layers.
+
+        Args:
+            bg_proto: Background prototype tensor of shape (c3,).
+            gamma: Background suppression strength.
+        """
+        for i in range(self.nl):
+            cosine_layer = self.cv3[i][-1]
+            if isinstance(cosine_layer, CosineConv2d):
+                cosine_layer.set_background_proto(bg_proto, gamma)
+        print(f"  Injected background prototype into {self.nl} scales (gamma={gamma})")
+
 
 class FSODObjectnessLoss(v8DetectionLoss):
     """v8DetectionLoss + class-agnostic objectness BCE loss.
@@ -192,3 +205,30 @@ def add_objectness_callback(model):
         trainer.loss_names = ("box_loss", "cls_loss", "dfl_loss", "obj_loss")
 
     model.add_callback("on_pretrain_routine_end", _on_pretrain_routine_end)
+
+
+# ---------------------------------------------------------------------------
+# Monkey-patch: register FSODDetectWithObjectness in ultralytics nn.tasks so
+# parse_model can find it via globals() and handle its channel args correctly.
+# ---------------------------------------------------------------------------
+import ultralytics.nn.tasks as _tasks
+
+_tasks.FSODDetectWithObjectness = FSODDetectWithObjectness
+
+# ---------------------------------------------------------------------------
+# Patch DetectionModel.init_criterion: return FSODObjectnessLoss when the head
+# is FSODDetectWithObjectness. This is needed for both training AND validation
+# (the validator deepcopies the EMA model, which also needs the correct loss).
+# ---------------------------------------------------------------------------
+_original_init_criterion = _tasks.DetectionModel.init_criterion
+
+
+def _patched_init_criterion(self):
+    if hasattr(self, "model") and len(self.model) > 0:
+        head = self.model[-1]
+        if isinstance(head, FSODDetectWithObjectness):
+            return FSODObjectnessLoss(self)
+    return _original_init_criterion(self)
+
+
+_tasks.DetectionModel.init_criterion = _patched_init_criterion

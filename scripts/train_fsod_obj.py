@@ -65,6 +65,23 @@ def parse_args() -> argparse.Namespace:
         "--epochs", type=int, default=0,
         help="Override finetune epochs (0 = use config value).",
     )
+    parser.add_argument(
+        "--background-suppression",
+        action="store_true",
+        help="Extract background prototype from base_train and apply orthogonalisation + inference-time suppression.",
+    )
+    parser.add_argument(
+        "--bg-beta",
+        type=float,
+        default=0.5,
+        help="Prototype refinement strength: p' = p - beta * <p,b̂> * b̂  (default: 0.5).",
+    )
+    parser.add_argument(
+        "--bg-gamma",
+        type=float,
+        default=0.3,
+        help="Inference-time background suppression: score -= gamma * cos(x, bg_proto)  (default: 0.3).",
+    )
     return parser.parse_args()
 
 
@@ -72,6 +89,9 @@ def run_finetune_stage_with_objectness(
     config: dict, output_root: Path, base_weights: Path, model_arch: Path,
     use_prototype: bool = False, florence2_model: str = "",
     epochs_override: int = 0,
+    background_suppression: bool = False,
+    bg_beta: float = 0.5,
+    bg_gamma: float = 0.3,
 ) -> Path:
     """Finetune with FSODDetectWithObjectness (cosine classifier + objectness)."""
     runs_dir = resolve_repo_path(config["runs_dir"])
@@ -104,6 +124,12 @@ def run_finetune_stage_with_objectness(
     if epochs_override > 0:
         run_name += f"_ep{epochs_override}"
 
+    if background_suppression:
+        run_name += f"_bgsuppress_b{str(bg_beta).replace('.', '')}g{str(bg_gamma).replace('.', '')}"
+
+    if bool(config.get("cos_lr", False)):
+        run_name += "_coslr"
+
     print(f"Creating model from architecture: {model_arch}")
     model = YOLO(str(model_arch))
 
@@ -126,7 +152,34 @@ def run_finetune_stage_with_objectness(
             imgsz=int(config["image_size"]),
             device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
         )
-        _proto_init_data = (prototypes, novel_classes, all_classes)
+
+        if background_suppression:
+            from fsod.modules.background_suppression import (
+                extract_background_prototype,
+                refine_prototypes_with_bg_suppression,
+            )
+
+            print("Extracting background prototype from base_train...")
+            bg_proto = extract_background_prototype(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
+            )
+
+            print(f"Refining prototypes with background suppression (beta={bg_beta:.2f})...")
+            prototypes = refine_prototypes_with_bg_suppression(
+                prototypes, bg_proto, beta=bg_beta,
+            )
+
+            _bg_proto = bg_proto
+            _bg_gamma = bg_gamma
+        else:
+            _bg_proto = None
+            _bg_gamma = 0.0
+
+        _proto_init_data = (prototypes, novel_classes, all_classes, _bg_proto, _bg_gamma)
 
     if florence2_model:
         from fsod.modules.adaptation import (
@@ -220,7 +273,9 @@ def run_finetune_stage_with_objectness(
         """Inject custom CosineConv2d weights and set objectness criterion."""
         if _proto_init_data is not None:
             from fsod.modules.prototype import init_cosine_head_with_prototypes
-            protos, n_cls, a_cls = _proto_init_data
+            protos, n_cls, a_cls = _proto_init_data[:3]
+            bg_proto = _proto_init_data[3] if len(_proto_init_data) > 3 else None
+            bg_gamma = _proto_init_data[4] if len(_proto_init_data) > 4 else 0.0
             print("Injecting prototype weights into rebuilt model...")
             class _FakeYOLO:
                 def __init__(self, det_model):
@@ -231,6 +286,11 @@ def run_finetune_stage_with_objectness(
                 novel_classes=n_cls,
                 all_classes=a_cls,
             )
+            # Inject background prototype into CosineConv2d layers
+            if bg_proto is not None and bg_gamma > 0:
+                detect = trainer.model.model[-1]
+                if hasattr(detect, "set_background_proto"):
+                    detect.set_background_proto(bg_proto, bg_gamma)
         if _florence_init_fn is not None:
             print("Injecting Florence-2 modulated weights into rebuilt model...")
             class _FakeYOLO2:
@@ -281,6 +341,7 @@ def run_finetune_stage_with_objectness(
         workers=int(config["workers"]),
         device=config["device"],
         lr0=float(config["lr0"]["finetune"]),
+        cos_lr=bool(config.get("cos_lr", False)),
         freeze=int(config.get("freeze", {}).get("backbone", 0)),
         patience=int(config.get("patience", {}).get("finetune", 30)),
         project=str(runs_dir),
@@ -327,6 +388,9 @@ def main() -> None:
             config, output_root, base_weights, model_arch,
             use_prototype=args.prototype, florence2_model=args.florence2,
             epochs_override=args.epochs,
+            background_suppression=args.background_suppression,
+            bg_beta=args.bg_beta,
+            bg_gamma=args.bg_gamma,
         )
         print(f"Finetune stage checkpoint: {best_path}")
         return
@@ -337,6 +401,9 @@ def main() -> None:
         config, output_root, base_best, model_arch,
         use_prototype=args.prototype, florence2_model=args.florence2,
         epochs_override=args.epochs,
+        background_suppression=args.background_suppression,
+        bg_beta=args.bg_beta,
+        bg_gamma=args.bg_gamma,
     )
     print(f"Base stage checkpoint: {base_best}")
     print(f"Finetune stage checkpoint: {finetune_best}")

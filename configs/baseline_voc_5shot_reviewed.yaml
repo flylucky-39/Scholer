@@ -1,7 +1,7 @@
-seed: 3408
+seed: 3407
 
 voc_root: ~/epfs/07_FSOD_LLM/datasets/VOCdevkit
-output_root: ./data/voc_fsod_split2_3shot
+output_root: ./data/voc_fsod_split1_5shot_reviewed
 
 novel_classes:
   - bird
@@ -10,13 +10,13 @@ novel_classes:
   - motorbike
   - sofa
 
-shot: 3
+shot: 5
 
 model: yolo11s.pt
 image_size: 640
 device: 0
 workers: 16
-runs_dir: ./runs/voc_fsod_3shot_split2
+runs_dir: ./runs/voc_fsod_5shot_vlm
 
 epochs:
   base: 100
@@ -33,10 +33,15 @@ lr0:
 freeze:
   backbone: 10
 
-cos_lr: true
 patience:
   finetune: 30
 
 replay:
   enabled: false
   base_images: 200
+
+florence2:
+  alpha: 0.7
+  film_hidden_dim: 128
+  film_epochs: 300
+  film_weight_decay: 0.05

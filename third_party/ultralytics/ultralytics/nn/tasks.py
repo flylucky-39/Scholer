@@ -64,6 +64,7 @@ from ultralytics.nn.modules import (
 )
 
 FSODDetect = None  # FSOD: lazy-loaded in parse_model to avoid circular import
+FSODDetectWithObjectness = None  # FSOD: lazy-loaded in parse_model to avoid circular import
 
 from ultralytics.utils import DEFAULT_CFG_DICT, DEFAULT_CFG_KEYS, LOGGER, colorstr, emojis, yaml_load
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
@@ -939,11 +940,17 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
     import ast
 
     # FSOD: lazy import to avoid circular dependency
-    global FSODDetect
+    global FSODDetect, FSODDetectWithObjectness
     if FSODDetect is None:
         try:
             from fsod.modules.cosine_head import FSODDetect as _FSODDetect
             FSODDetect = _FSODDetect
+        except ImportError:
+            pass
+    if FSODDetectWithObjectness is None:
+        try:
+            from fsod.modules.objectness_head import FSODDetectWithObjectness as _ObjDetect
+            FSODDetectWithObjectness = _ObjDetect
         except ImportError:
             pass
 
@@ -1057,12 +1064,16 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
         elif m in {Detect, WorldDetect, Segment, Pose, OBB, ImagePoolingAttn, v10Detect} or (
-            FSODDetect is not None and m is FSODDetect
+            (FSODDetect is not None and m is FSODDetect)
+            or (FSODDetectWithObjectness is not None and m is FSODDetectWithObjectness)
         ):
             args.append([ch[x] for x in f])
             if m is Segment:
                 args[2] = make_divisible(min(args[2], max_channels) * width, 8)
-            if m in {Detect, Segment, Pose, OBB} or (FSODDetect is not None and m is FSODDetect):
+            if m in {Detect, Segment, Pose, OBB} or (
+                (FSODDetect is not None and m is FSODDetect)
+                or (FSODDetectWithObjectness is not None and m is FSODDetectWithObjectness)
+            ):
                 m.legacy = legacy
         elif m is RTDETRDecoder:  # special case, channels arg must be passed in index 1
             args.insert(1, [ch[x] for x in f])

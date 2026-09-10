@@ -235,17 +235,26 @@ def init_cosine_head_with_prototypes(
     prototypes: dict[str, torch.Tensor],
     novel_classes: list[str],
     all_classes: list[str],
+    base_class_weights: list[torch.Tensor] | None = None,
 ) -> None:
     """Initialize CosineConv2d weights for novel classes using prototypes.
 
     For novel classes: set weight row = L2-normalized prototype.
-    For base classes: keep the existing (transferred from base pretrain or random) weights.
+    For base classes: if base_class_weights is provided, use L2-normalized
+    Conv2d weights from base pretrain; otherwise keep random init.
+
+    On COCO (60 base + 20 novel), transferring base class weights from the
+    base-pretrained Conv2d head eliminates the noise from 60 random
+    CosineConv2d rows, which is the root cause of Cosine+Proto underperforming
+    Standard Finetune on COCO.
 
     Args:
         model: YOLO model with FSODDetect head (already has weights loaded).
         prototypes: Dict class_name → prototype vector (c3,).
         novel_classes: List of novel class names.
         all_classes: List of all class names.
+        base_class_weights: Optional list of per-scale (nc, c3) L2-normalized
+            weight tensors extracted from base pretrain Conv2d head.
     """
     cls_name_to_idx = {name: i for i, name in enumerate(all_classes)}
     detect = model.model.model[-1]
@@ -253,6 +262,18 @@ def init_cosine_head_with_prototypes(
     for i in range(detect.nl):
         cosine_layer = detect.cv3[i][-1]  # CosineConv2d
         weight = cosine_layer.weight.data  # (nc, c3)
+
+        # Initialize base class weights from base pretrain Conv2d
+        if base_class_weights is not None and i < len(base_class_weights):
+            base_w = base_class_weights[i].to(weight.device)  # (nc, c3)
+            base_set = set(cls_name_to_idx.keys()) - set(novel_classes)
+            n_base_init = 0
+            for cls_name in base_set:
+                idx = cls_name_to_idx.get(cls_name)
+                if idx is not None and idx < base_w.shape[0]:
+                    weight[idx] = base_w[idx]
+                    n_base_init += 1
+            print(f"  Scale {i}: initialized {n_base_init} base class weights from base pretrain")
 
         for cls_name in novel_classes:
             if cls_name not in prototypes:
@@ -265,3 +286,37 @@ def init_cosine_head_with_prototypes(
             weight[idx] = F.normalize(proto.unsqueeze(0), dim=1).squeeze(0)
 
         print(f"  Scale {i}: initialized {len(novel_classes)} novel class weights with prototypes")
+
+
+@torch.no_grad()
+def extract_base_conv_weights(
+    base_weights: str | Path,
+    all_classes: list[str],
+) -> list[torch.Tensor]:
+    """Extract per-scale L2-normalized Conv2d classification weights from base checkpoint.
+
+    The base-pretrained YOLO uses a standard Detect head with Conv2d classification.
+    This function reads the per-scale classification weights, L2-normalizes them
+    (making them compatible with CosineConv2d), and returns them as a list of
+    (nc, c3) tensors — one per FPN scale.
+
+    Args:
+        base_weights: Path to base-pretrained YOLO checkpoint.
+        all_classes: Full class name list (same order as data yaml).
+
+    Returns:
+        List of (nc, c3) tensors, one per scale.  L2-normalized per row.
+    """
+    ckpt = torch.load(base_weights, map_location="cpu", weights_only=False)
+    sd = ckpt["model"].state_dict()
+    base_w: list[torch.Tensor] = []
+    for i in range(3):
+        for k in sd.keys():
+            if f"cv3.{i}.2.weight" in k or k.endswith(f".cv3.{i}.2.weight"):
+                w = sd[k].squeeze(-1).squeeze(-1)  # (nc, c3, 1, 1) → (nc, c3)
+                w = F.normalize(w, dim=1)
+                base_w.append(w)
+                print(f"  Extracted base weights scale {i}: {tuple(w.shape)}")
+                break
+    del ckpt
+    return base_w

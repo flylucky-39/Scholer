@@ -33,6 +33,7 @@ lr0:
 freeze:
   backbone: 10
 
+cos_lr: true
 patience:
   finetune: 30
 
