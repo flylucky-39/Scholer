@@ -1,3 +1,7 @@
+> ⚠️ **已归档 · 旧协议数据（≤2026-05）**
+> 本文件产生于**数据泄漏协议**（base 从 yolo11s.pt——COCO 80 类 600 epoch 官方权重——初始化，VOC novel 类零样本 mAP50=0.93），文中全部数字**不可用于论文或实验对比**。
+> 唯一可信数据源：[`docs/CLEAN_PROTOCOL_RESULTS.md`](../../CLEAN_PROTOCOL_RESULTS.md)（干净协议，2026-09-22）。归档：2026-10-08。
+
 # CD-ViTO DIOR 10-shot 复现结果
 
 ## 环境

@@ -1,79 +1,52 @@
-# 历史方向归档说明
+# 归档索引（2026-10-08 整理）
 
-更新时间：2026-05-07
+本目录与 `runs/archive/` 存放**数据泄漏协议时代（≤2026-05）**的历史资产。
+**所有归档数字不可用于论文或实验对比**；唯一可信数据源：[`docs/CLEAN_PROTOCOL_RESULTS.md`](../CLEAN_PROTOCOL_RESULTS.md)（干净协议，2026-09-22）。
 
-本目录用于说明旧研究方向和历史实验资产。第一轮清理只做文档归档，不删除、不移动任何已有代码或结果文件。
+## 为什么归档
 
-## 1. 已转为历史探索的方向
+原协议的 base 训练从官方 `yolo11s.pt`（COCO 80 类、118K 图、600 epoch）初始化，而 VOC novel 类（bird/bus/cow/motorbike/sofa）在 COCO 中同类同图，构成数据泄漏——官方权重在 VOC novel 上零样本 mAP50=0.9282。2026-09 协议重建后，全部实验改为从零训练 base（`*.yaml` 从零初始化、epoch 50→120/200），主表、消融、敏感性全部重跑。
 
-### YOLO-FSOD / VOC / COCO baseline
+## legacy_2026-05/（旧文档，md/tex 均带弃用横幅）
 
-早期仓库以 YOLO11s 为基础，围绕 VOC / COCO few-shot detection 做 baseline、cosine classifier、prototype、Florence-2 文本融合等探索。
+| 文件 | 说明 |
+|---|---|
+| `legacy_direction_README.md` | 旧版仓库 README（CD-FSOD baseline 复现方向，已废弃） |
+| `HANDOFF.md` | 旧方向交接文档（YOLO-FSOD → DAF / Dual-Path VLM） |
+| `legacy_experiment_plan.md` | 旧期刊扩展实验计划（scale reg / per-class temp / bg loss） |
+| `EXPERIMENT_v0.1.0.md` | v0.1.0 Scale Regularization 实验记录 |
+| `cdfssod_banchmarkRESULT.md` | CD-ViTO DIOR 复现记录 |
+| `coco_all_experiments_summary.md`、`coco_30shot_results_summary.md` | 旧协议 COCO 结果汇总（**数字作废**） |
+| `*.csv`、`FSOD_results.xlsx`、`3shotresult.txt`、`5shotresult.txt` | 旧协议结果数据 |
+| `vcp_paper_*.{md,tex,pdf}`、`conference_101719.tex`、`IEEEtran.cls` | 会议论文稿（含泄漏协议数字） |
+| `221349391900.doc`、`extract_doc.py`、`doc_output.txt` | CAC 2025 投稿模板及提取工具 |
+| `baseline_reproduction_plan.md`、`restart_baseline_cleanup_plan.md` | 2026-05 方向切换与清理计划（已执行完毕并被干净协议超越） |
+| `cdfsod_quickstart.md`、`proposal_cdfsod_realtime.md` | CD-FSOD 方向文档 |
+| `fig1-3`（jpg/pdf/png）、`paper_figures/`、`generate_figures.py` | 旧数字生成的论文图 |
+| `test_*.txt`、`output_log.txt`、`full_output.txt`、`conf_sweep_test_novel_results.json` | 旧训练日志与评测输出 |
+| `create_excel.py`、`plot_experiment_results.py`、`test_adapt.py` | 旧结果处理脚本 |
 
-相关资产仍保留在原路径：
+## runs/archive/（旧协议 runs，31 个目录）
 
-- `scripts/prepare_voc_fewshot.py`
-- `scripts/prepare_coco_fewshot.py`
-- `scripts/train_baseline.py`
-- `scripts/train_fsod.py`
-- `scripts/eval_baseline.py`
-- `scripts/eval_fsod.py`
-- `fsod/voc.py`
-- `fsod/coco.py`
-- `configs/baseline_voc_*.yaml`
-- `configs/coco_*.yaml`
-- `runs/voc_fsod_*`
-- `runs/coco_fsod_*`
+| 目录 | 内容 |
+|---|---|
+| `voc_fsod_*`（含 split2/3、freeze_cv2 变体） | 旧泄漏协议 VOC 实验（旧主表数字来源，作废） |
+| `coco_fsod_*`（exp/OLD/New/Vlm/baseline） | 旧协议 COCO 实验 |
+| `cdfsod_DIOR_{1,5,10}shot` | CD-FSOD / DAF 方向 |
+| `direction_c/` | Dual-Path VLM 融合 |
+| `fsod_{1,3,5}shot`、`fsod_baseline`、`fsod_cap_1shot`、`fsod_scalereg` | v0.1.0 scale-reg 时代 |
+| `base_pretrain/` | 旧 base 训练输出（yolo11s.pt 初始化，2026-04-09） |
 
-这些文件暂不作为新主线入口，但保留作对照和代码参考。
+## 移出仓库的旧检出（2026-10-08）
 
-### DAF / Dual-Path VLM Verifier
+`fsod/` 目录内曾混入一份完整的旧项目检出（嵌套 `.git` 955MB + 旧 runs 297MB，共 1.3GB，未被跟踪），已整体移至 `E:\Study\FSOD_VLM_legacy\fsod_dump\`；`.backup_conflicts\` 移至同目录 `backup_conflicts\`。仓库内 `fsod/` 现仅保留当前 Python 包（`voc.py`、`coco.py`、`florence2.py`、`modules/`、`cdfsod/`）。
 
-之后仓库推进到 CD-FSOD 上的 DAF 和 Dual-Path 推理融合方向。该方向已经在 DIOR 上形成若干结果，但整体增益不够稳定，因此不再作为主线继续推进。
+另清除了误提交的嵌套副本：`fsod/fsod/`、`fsod/configs/baseline_voc_1shot_augment.yaml`、`fsod/scripts/`（git 历史可找回）。
 
-相关资产仍保留在原路径：
+## 仍在原位、未归档的旧资产（超出本次文档整理范围）
 
-- `scripts/train_cdfsod.py`
-- `scripts/eval_fsod_dualpath.py`
-- `scripts/extract_vlm_text_proto.py`
-- `fsod/modules/dual_path_fusion.py`
-- `fsod/modules/vlm_verifier.py`
-- `fsod/modules/tests/test_dual_path_fusion.py`
-- `runs/direction_c/`
-- `HANDOFF.md`
+- `configs/` 中旧方向配置（`baseline_voc_*`、`cdfsod_*`、旧版 `coco_*.yaml` 等）
+- `data/florence2_outputs/`、`prompts/`、`datasets/`、`third_party/ultralytics/`
+- `docs/server_ai_runbook_no_changes.md`、`docs/gitlab_server_workflow.md`（服务器运维文档，仍有效）
 
-其中 `train_cdfsod.py`、`prototype.py`、`calibration.py`、`prompts/*.json` 仍可能被新方向复用，暂不归为删除候选。
-
-## 2. 已有历史结果
-
-重要历史结果文件：
-
-- `runs/direction_c/visualonly_vs_daf_comparison.md`
-- `runs/direction_c/dualpath_results_summary.md`
-- `runs/direction_c/dualpath_results.csv`
-- `coco_all_experiments_summary.md`
-- `coco_30shot_results_summary.md`
-- `coco_all_experiments_results.csv`
-- `coco_30shot_results.csv`
-- `3shotresult.txt`
-- `5shotresult.txt`
-
-这些结果目前不删除，因为它们可以解释为什么主线切换到外部论文 baseline 复现。
-
-## 3. 清理原则
-
-后续清理按以下顺序进行：
-
-1. 先确认新 baseline 复现能跑通。
-2. 再移动旧结果到 `docs/archive` 或专门的 `archive/legacy_results`。
-3. 最后才考虑删除旧代码。
-
-删除任何文件前都需要单独确认。
-
-## 4. 当前主线入口
-
-新方向入口见：
-
-- `README.md`
-- `docs/baseline_reproduction_plan.md`
-- `docs/restart_baseline_cleanup_plan.md`
+如需进一步清理，逐项确认后再动。
