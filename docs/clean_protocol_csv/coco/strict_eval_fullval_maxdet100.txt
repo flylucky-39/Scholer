@@ -1,0 +1,10 @@
+eval_1shot_strict.log:STRICT 1shot-方法: nAP50=0.1067 nAP50-95=0.0709
+eval_1shot_strict.log:STRICT 1shot-Cos: nAP50=0.0559 nAP50-95=0.0436
+eval_coco_strict.log:STRICT 10shot-方法: nAP50=0.1874 nAP50-95=0.1199 (20类)
+eval_coco_strict.log:STRICT 10shot-Cos: nAP50=0.1917 nAP50-95=0.1164 (20类)
+eval_coco_strict.log:STRICT 10shot-Std冻: nAP50=0.0000 nAP50-95=0.0000 (20类)
+eval_coco_strict.log:STRICT 10shot-Std解: nAP50=0.0000 nAP50-95=0.0000 (20类)
+eval_coco_strict.log:STRICT 30shot-方法: nAP50=0.2318 nAP50-95=0.1471 (20类)
+eval_coco_strict.log:STRICT 30shot-Cos: nAP50=0.2388 nAP50-95=0.1476 (20类)
+eval_coco_strict.log:STRICT 30shot-Std冻: nAP50=0.0235 nAP50-95=0.0149 (20类)
+eval_coco_strict.log:STRICT 30shot-Std解: nAP50=0.0238 nAP50-95=0.0152 (20类)

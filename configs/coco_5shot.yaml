@@ -1,7 +1,7 @@
 seed: 3407
 
 coco_root: ~/epfs/07_FSOD_LLM/datasets/coco
-output_root: ./data/coco_fsod_30shot
+output_root: ./data/coco_fsod_5shot
 
 novel_classes:
   - person
@@ -25,13 +25,13 @@ novel_classes:
   - dining table
   - tv
 
-shot: 30
+shot: 5
 
 model: configs/yolo11s.yaml
 image_size: 640
 device: 0
 workers: 16
-runs_dir: ./runs/coco_fsod_30shot_vlm_fixed
+runs_dir: ./runs/coco_fsod_5shot
 
 epochs:
   base: 50
@@ -54,11 +54,3 @@ patience:
 replay:
   enabled: false
   base_images: 200
-
-florence2:
-  alpha: 0.15
-  fusion_mode: fixed
-  alpha_logging: true
-  film_hidden_dim: 128
-  film_epochs: 300
-  film_weight_decay: 0.05

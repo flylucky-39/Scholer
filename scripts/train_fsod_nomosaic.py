@@ -1,8 +1,24 @@
-"""Train YOLO-FSOD with Cosine Classifier and mosaic disabled (cv2 NOT frozen).
+"""Train YOLO-FSOD with Cosine Classifier (± Prototype / Florence-2 Adaptation).
 
-This is a copy of train_fsod.py with mosaic=0.0 added during finetune
-as a control experiment for the cv2-freeze ablation.
+This script handles cosine-classifier ablation experiments:
+- Base pretrain: standard YOLO11s (same as baseline)
+- Finetune (Exp 1): cosine head with random init
+- Finetune + Prototype (Exp 2): cosine head initialized with class prototypes
+  extracted from support set using the base-pretrained backbone
+- Finetune + Florence-2 (Exp 3): cosine head initialized via Florence-2 text
+  encoder → adaptation MLP trained on base class pairs
+
+Usage:
+  # Exp 1: Cosine classifier (random init)
+  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune
+
+  # Exp 2: Cosine classifier + Prototype init
+  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --prototype
+
+  # Exp 3: Cosine classifier + Florence-2 adaptation init
+  python scripts/train_fsod.py --config configs/baseline_voc_10shot.yaml --stage finetune --florence2 ~/epfs/07_FSOD_LLM/models/Florence-2-base/
 """
+
 from __future__ import annotations
 
 import argparse
@@ -10,61 +26,19 @@ import sys
 from pathlib import Path
 
 import yaml
+from ultralytics import YOLO
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-
-_THIRD_PARTY_ULTRALYTICS = str(PROJECT_ROOT / "third_party" / "ultralytics")
-if _THIRD_PARTY_ULTRALYTICS not in sys.path:
-    sys.path.insert(0, _THIRD_PARTY_ULTRALYTICS)
-
-from ultralytics import YOLO
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Ensure FSODDetect is importable before model parsing
 import fsod.modules  # noqa: F401
-
-import numpy as np
-import torch
-import cv2 as _cv2
-
-_original_warp_affine = _cv2.warpAffine
-_original_warp_perspective = _cv2.warpPerspective
-
-def _warp_affine_fixed(*args, **kwargs):
-    args = list(args)
-    if len(args) >= 2:
-        if not isinstance(args[1], np.ndarray):
-            args[1] = np.asarray(args[1], dtype=np.float32)
-        if not isinstance(args[0], np.ndarray):
-            args[0] = np.asarray(args[0])
-    elif 'M' in kwargs:
-        if not isinstance(kwargs['M'], np.ndarray):
-            kwargs['M'] = np.asarray(kwargs['M'], dtype=np.float32)
-    if 'src' in kwargs and not isinstance(kwargs['src'], np.ndarray):
-        kwargs['src'] = np.asarray(kwargs['src'])
-    return _original_warp_affine(*args, **kwargs)
-
-def _warp_perspective_fixed(*args, **kwargs):
-    args = list(args)
-    if len(args) >= 2:
-        if not isinstance(args[1], np.ndarray):
-            args[1] = np.asarray(args[1], dtype=np.float32)
-        if not isinstance(args[0], np.ndarray):
-            args[0] = np.asarray(args[0])
-    elif 'M' in kwargs:
-        if not isinstance(kwargs['M'], np.ndarray):
-            kwargs['M'] = np.asarray(kwargs['M'], dtype=np.float32)
-    if 'src' in kwargs and not isinstance(kwargs['src'], np.ndarray):
-        kwargs['src'] = np.asarray(kwargs['src'])
-    return _original_warp_perspective(*args, **kwargs)
-
-_cv2.warpAffine = _warp_affine_fixed
-_cv2.warpPerspective = _warp_perspective_fixed
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train YOLO-FSOD with Cosine Classifier (no mosaic).")
+    parser = argparse.ArgumentParser(description="Train YOLO-FSOD with Cosine Classifier.")
     parser.add_argument("--config", type=str, required=True, help="Path to experiment config yaml.")
     parser.add_argument(
         "--stage",
@@ -88,19 +62,51 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--prototype",
         action="store_true",
-        help="Initialize cosine head with class prototypes from support set.",
+        help="Initialize cosine head with class prototypes from support set (Exp 2).",
     )
     parser.add_argument(
         "--florence2",
         type=str,
         default="",
-        help="Path to Florence-2 model for adaptation init. Empty = disabled.",
+        help="Path to Florence-2 model for adaptation init (Exp 3). Empty = disabled.",
     )
     parser.add_argument(
         "--epochs",
         type=int,
         default=0,
         help="Override finetune epochs (0 = use config value).",
+    )
+    parser.add_argument(
+        "--augment",
+        action="store_true",
+        help="Apply multiple augmentations to support images when extracting prototypes.",
+    )
+    parser.add_argument(
+        "--freeze-head",
+        action="store_true",
+        help="Freeze cosine classifier head after prototype injection (prevent overfitting in 1-shot).",
+    )
+    parser.add_argument(
+        "--background-suppression",
+        action="store_true",
+        help="Extract background prototype from base_train and apply orthogonalisation + inference-time suppression.",
+    )
+    parser.add_argument(
+        "--bg-beta",
+        type=float,
+        default=0.5,
+        help="Prototype refinement strength: p' = p - beta * <p,b̂> * b̂  (default: 0.5).",
+    )
+    parser.add_argument(
+        "--bg-gamma",
+        type=float,
+        default=0.3,
+        help="Inference-time background suppression: score -= gamma * cos(x, bg_proto)  (default: 0.3).",
+    )
+    parser.add_argument(
+        "--learnable-bg-suppression",
+        action="store_true",
+        help="Use learnable background suppression (cross-attention) as a contrast to fixed orthogonalisation.",
     )
     return parser.parse_args()
 
@@ -118,6 +124,7 @@ def resolve_repo_path(raw_path: str) -> Path:
 
 
 def get_all_classes(config: dict) -> list[str]:
+    """Return the full class list for the dataset specified in config."""
     if "all_classes" in config:
         return config["all_classes"]
     if "coco_root" in config:
@@ -128,6 +135,7 @@ def get_all_classes(config: dict) -> list[str]:
 
 
 def get_yaml_prefix(config: dict) -> str:
+    """Return dataset yaml filename prefix: 'coco_fsod' or 'voc_fsod'."""
     if "yaml_prefix" in config:
         return config["yaml_prefix"]
     if "coco_root" in config:
@@ -136,6 +144,7 @@ def get_yaml_prefix(config: dict) -> str:
 
 
 def run_base_stage(config: dict, output_root: Path) -> Path:
+    """Base pretrain with standard YOLO (same as baseline)."""
     runs_dir = resolve_repo_path(config["runs_dir"])
     data_yaml = output_root / f"{get_yaml_prefix(config)}_base.yaml"
 
@@ -152,6 +161,7 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
         workers=int(config["workers"]),
         device=config["device"],
         lr0=float(config["lr0"]["base"]),
+        cos_lr=bool(config.get("cos_lr", False)),
         project=str(runs_dir),
         name="base_pretrain",
         seed=int(config["seed"]),
@@ -167,9 +177,23 @@ def run_base_stage(config: dict, output_root: Path) -> Path:
 def run_finetune_stage(
     config: dict, output_root: Path, base_weights: Path, model_arch: Path,
     use_prototype: bool = False, florence2_model: str = "",
-    epochs_override: int = 0,
+    epochs_override: int = 0, augment_flag: bool = False,
+    freeze_head: bool = False,
+    background_suppression: bool = False,
+    bg_beta: float = 0.5,
+    bg_gamma: float = 0.3,
+    learnable_bg_suppression: bool = False,
 ) -> Path:
+    """Finetune with FSODDetect (cosine classifier) architecture.
+
+    1. Creates model from model_arch YAML (has FSODDetect head)
+    2. Loads base_weights — matching layers transfer, cosine head stays random init
+    3. (Optional) Initialize cosine head with class prototypes from support set
+    4. (Optional) Initialize cosine head via Florence-2 adaptation MLP
+    5. Trains on novel-only data
+    """
     runs_dir = resolve_repo_path(config["runs_dir"])
+    # Cross-domain: allow separate base_data_root (e.g. COCO) from target data_root (e.g. DIOR)
     base_data_root = output_root
     if "base_data_root" in config:
         base_data_root = resolve_repo_path(config["base_data_root"])
@@ -180,13 +204,28 @@ def run_finetune_stage(
     finetune_epochs = epochs_override if epochs_override > 0 else int(config["epochs"]["finetune"])
 
     if florence2_model and use_prototype:
-        run_name = "novel_finetune_cosine_fused_nomosaic"
+        run_name = "novel_finetune_cosine_fused"
     elif florence2_model:
-        run_name = "novel_finetune_cosine_florence2_nomosaic"
+        run_name = "novel_finetune_cosine_florence2"
     elif use_prototype:
-        run_name = "novel_finetune_cosine_proto_nomosaic"
+        run_name = "novel_finetune_cosine_proto"
     else:
-        run_name = "novel_finetune_cosine_nomosaic"
+        run_name = "novel_finetune_cosine"
+
+    if augment_flag:
+        run_name += "_aug"
+
+    if freeze_head:
+        run_name += "_freezehead"
+
+    if background_suppression:
+        run_name += f"_bgsuppress_b{str(bg_beta).replace('.', '')}g{str(bg_gamma).replace('.', '')}"
+
+    if learnable_bg_suppression:
+        run_name += "_learnablebg"
+
+    if bool(config.get("cos_lr", False)):
+        run_name += "_coslr"
 
     if epochs_override > 0:
         run_name += f"_ep{epochs_override}"
@@ -197,12 +236,22 @@ def run_finetune_stage(
     print(f"Loading base pretrain weights: {base_weights}")
     model.load(str(base_weights))
 
-    _proto_init_data = None
+    # Prototype / Florence-2 init must happen AFTER model.train() rebuilds
+    # the model internally (via trainer.get_model). We use the
+    # on_pretrain_routine_end callback to inject weights right before the
+    # training loop starts.
+    _proto_init_data = None  # will be set below if needed
     _florence_init_fn = None
     _alpha_log_enabled = False
 
     if use_prototype and not florence2_model:
-        from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes
+        from fsod.modules.prototype import extract_prototypes, init_cosine_head_with_prototypes, extract_base_conv_weights
+
+        print("Extracting base classification weights for CosineConv2d init...")
+        base_class_weights = extract_base_conv_weights(
+            base_weights=base_weights,
+            all_classes=all_classes,
+        )
 
         print("Extracting class prototypes from support set...")
         prototypes = extract_prototypes(
@@ -212,8 +261,85 @@ def run_finetune_stage(
             all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
+            augment=augment_flag,
         )
-        _proto_init_data = (prototypes, novel_classes, all_classes)
+
+        if background_suppression:
+            from fsod.modules.background_suppression import (
+                extract_background_prototype,
+                refine_prototypes_with_bg_suppression,
+            )
+
+            print("Extracting background prototype from base_train...")
+            bg_proto = extract_background_prototype(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"],
+            )
+
+            print(f"Refining prototypes with background suppression (beta={bg_beta:.2f})...")
+            prototypes = refine_prototypes_with_bg_suppression(
+                prototypes, bg_proto, beta=bg_beta,
+            )
+
+            # Store bg_proto and gamma for injection into CosineConv2d
+            _bg_proto = bg_proto
+            _bg_gamma = bg_gamma
+        elif learnable_bg_suppression:
+            from fsod.modules.background_suppression import extract_background_prototype
+            from fsod.modules.adaptation import extract_base_prototypes
+            from fsod.modules.learnable_bg_suppression import (
+                LearnableBackgroundSuppression,
+                train_learnable_bg_suppression,
+                apply_learnable_bg_suppression,
+            )
+
+            device_str = f"cuda:{config['device']}" if str(config["device"]).isdigit() else config["device"]
+
+            print("Extracting background prototype from base_train...")
+            bg_proto = extract_background_prototype(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=device_str,
+            )
+
+            print("Extracting base class prototypes for training learnable module...")
+            base_classes = [c for c in all_classes if c not in novel_classes]
+            base_prototypes = extract_base_prototypes(
+                base_weights=base_weights,
+                data_root=base_data_root,
+                base_classes=base_classes,
+                all_classes=all_classes,
+                imgsz=int(config["image_size"]),
+                device=device_str,
+            )
+
+            print("Training learnable background suppression module...")
+            dim = bg_proto.shape[0]
+            # Ensure num_segments divides dim
+            num_segments = 8 if dim % 8 == 0 else (4 if dim % 4 == 0 else 2)
+            lbs = LearnableBackgroundSuppression(dim=dim, num_segments=num_segments, n_heads=4)
+            lbs = train_learnable_bg_suppression(
+                lbs, base_prototypes, bg_proto,
+                lr=1e-3, weight_decay=1e-2, epochs=200,
+                device=device_str,
+            )
+
+            print("Applying learnable background suppression to novel prototypes...")
+            prototypes = apply_learnable_bg_suppression(lbs, prototypes)
+
+            # Store bg_proto and gamma for inference-time suppression in CosineConv2d
+            _bg_proto = bg_proto
+            _bg_gamma = bg_gamma
+        else:
+            _bg_proto = None
+            _bg_gamma = 0.0
+
+        _proto_init_data = (prototypes, novel_classes, all_classes, _bg_proto, _bg_gamma, base_class_weights)
 
     if florence2_model:
         from fsod.modules.adaptation import (
@@ -267,6 +393,7 @@ def run_finetune_stage(
             all_classes=all_classes,
             imgsz=int(config["image_size"]),
             device=device_str,
+            augment=augment_flag,
         )
 
         print("Step 5/6: Training scale-specific FiLM modulation networks on base classes...")
@@ -290,6 +417,7 @@ def run_finetune_stage(
             device=device_str,
         )
 
+        # Capture init data for callback (same issue: model.train rebuilds model)
         blend_alpha = float(fl_cfg.get("alpha", 0.5))
         _alpha_log_enabled = bool(fl_cfg.get("alpha_logging", False))
         if fusion_mode != "learnable":
@@ -309,13 +437,19 @@ def run_finetune_stage(
             fusion_mode=fusion_mode,
         )
 
-    # --- Register callback ---
+    # --- Register callback to inject prototype/florence weights after trainer rebuilds model ---
     def _on_pretrain_routine_end(trainer):
+        """Inject custom CosineConv2d weights after trainer.setup_model() rebuilds the model."""
         if _proto_init_data is not None:
             from fsod.modules.prototype import init_cosine_head_with_prototypes
-            protos, n_cls, a_cls = _proto_init_data
+            protos, n_cls, a_cls = _proto_init_data[:3]
+            bg_proto = _proto_init_data[3] if len(_proto_init_data) > 3 else None
+            bg_gamma = _proto_init_data[4] if len(_proto_init_data) > 4 else 0.0
+            base_class_weights = _proto_init_data[5] if len(_proto_init_data) > 5 else None
             print("Injecting prototype weights into rebuilt model...")
+            # trainer.model is the actual nn.Module
             class _FakeYOLO:
+                """Thin wrapper so init_cosine_head_with_prototypes can access model.model.model[-1]."""
                 def __init__(self, det_model):
                     self.model = det_model
             init_cosine_head_with_prototypes(
@@ -323,7 +457,13 @@ def run_finetune_stage(
                 prototypes=protos,
                 novel_classes=n_cls,
                 all_classes=a_cls,
+                base_class_weights=base_class_weights,
             )
+            # Inject background prototype into CosineConv2d layers
+            if bg_proto is not None and bg_gamma > 0:
+                detect = trainer.model.model[-1]
+                if hasattr(detect, "set_background_proto"):
+                    detect.set_background_proto(bg_proto, bg_gamma)
         if _florence_init_fn is not None:
             print("Injecting Florence-2 modulated weights into rebuilt model...")
             class _FakeYOLO2:
@@ -331,12 +471,31 @@ def run_finetune_stage(
                     self.model = det_model
             _florence_init_fn(_FakeYOLO2(trainer.model))
 
+        # Sync injected weights to EMA — critical because EMA is deepcopied
+        # *before* this callback, and bool buffers (weight_prior_mask) are
+        # never updated by ModelEMA.update() which only touches floating-point tensors.
         if (_proto_init_data is not None or _florence_init_fn is not None) and getattr(trainer, "ema", None) is not None:
             model_sd = trainer.model.state_dict()
             for k, v in trainer.ema.ema.state_dict().items():
                 if k in model_sd:
                     v.copy_(model_sd[k])
             print("Synced injected weights (incl. bool buffers) to EMA model")
+
+        # 3. Optionally freeze entire cosine head to prevent overfitting
+        if freeze_head:
+            detect = trainer.model.model[-1]
+            frozen_layers = 0
+            for i in range(detect.nl):
+                # Freeze CosineConv2d (cls branch) — all params: weight, scale, bias
+                cosine_layer = detect.cv3[i][-1]
+                for p in cosine_layer.parameters():
+                    p.requires_grad_(False)
+                frozen_layers += 1
+                # Also freeze box branch cv2 to be safe
+                for p in detect.cv2[i].parameters():
+                    p.requires_grad_(False)
+                frozen_layers += 1
+            print(f"Frozen {frozen_layers} head submodules ({detect.nl} scales × cv2+CosineConv2d)")
 
     def _on_train_epoch_end(trainer):
         if not _alpha_log_enabled:
@@ -366,13 +525,14 @@ def run_finetune_stage(
         workers=int(config["workers"]),
         device=config["device"],
         lr0=float(config["lr0"]["finetune"]),
+        cos_lr=bool(config.get("cos_lr", False)),
         freeze=int(config.get("freeze", {}).get("backbone", 0)),
         patience=int(config.get("patience", {}).get("finetune", 30)),
+        mosaic=0.0,  # no-mosaic variant: disable 4-image collage in few-shot finetune
         project=str(runs_dir),
         name=run_name,
         seed=int(config["seed"]),
         exist_ok=True,
-        mosaic=0.0,
     )
 
     best_path = runs_dir / run_name / "weights" / "best.pt"
@@ -412,7 +572,12 @@ def main() -> None:
         best_path = run_finetune_stage(
             config, output_root, base_weights, model_arch,
             use_prototype=args.prototype, florence2_model=args.florence2,
-            epochs_override=args.epochs,
+            epochs_override=args.epochs, augment_flag=args.augment,
+            freeze_head=args.freeze_head,
+            background_suppression=args.background_suppression,
+            bg_beta=args.bg_beta,
+            bg_gamma=args.bg_gamma,
+            learnable_bg_suppression=args.learnable_bg_suppression,
         )
         print(f"Finetune stage checkpoint: {best_path}")
         return
@@ -422,7 +587,12 @@ def main() -> None:
     finetune_best = run_finetune_stage(
         config, output_root, base_best, model_arch,
         use_prototype=args.prototype, florence2_model=args.florence2,
-        epochs_override=args.epochs,
+        epochs_override=args.epochs, augment_flag=args.augment,
+        freeze_head=args.freeze_head,
+        background_suppression=args.background_suppression,
+        bg_beta=args.bg_beta,
+        bg_gamma=args.bg_gamma,
+        learnable_bg_suppression=args.learnable_bg_suppression,
     )
     print(f"Base stage checkpoint: {base_best}")
     print(f"Finetune stage checkpoint: {finetune_best}")

@@ -30,11 +30,11 @@ shot: 30
 model: configs/yolo11s.yaml
 image_size: 640
 device: 0
-workers: 16
-runs_dir: ./runs/coco_fsod_30shot_vlm_fixed
+workers: 48
+runs_dir: ./runs/coco_fsod_30shot_clean_std
 
 epochs:
-  base: 50
+  base: 120
   finetune: 200
 
 batch_size:
@@ -46,7 +46,7 @@ lr0:
   finetune: 0.0005
 
 freeze:
-  backbone: 10
+  backbone: 0
 
 patience:
   finetune: 80
@@ -54,11 +54,3 @@ patience:
 replay:
   enabled: false
   base_images: 200
-
-florence2:
-  alpha: 0.15
-  fusion_mode: fixed
-  alpha_logging: true
-  film_hidden_dim: 128
-  film_epochs: 300
-  film_weight_decay: 0.05

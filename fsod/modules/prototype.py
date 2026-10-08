@@ -308,7 +308,8 @@ def extract_base_conv_weights(
         List of (nc, c3) tensors, one per scale.  L2-normalized per row.
     """
     ckpt = torch.load(base_weights, map_location="cpu", weights_only=False)
-    sd = ckpt["model"].state_dict()
+    model_obj = ckpt.get("ema") or ckpt["model"]  # ultralytics best.pt: mid-training saves put weights in 'ema'
+    sd = model_obj.state_dict()
     base_w: list[torch.Tensor] = []
     for i in range(3):
         for k in sd.keys():

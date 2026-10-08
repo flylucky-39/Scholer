@@ -27,14 +27,14 @@ novel_classes:
 
 shot: 10
 
-model: ../yolo11s.pt
+model: configs/yolo11s.yaml
 image_size: 640
 device: 0
-workers: 16
+workers: 48
 runs_dir: ./runs/coco_fsod_10shot_New
 
 epochs:
-  base: 50
+  base: 120
   finetune: 200
 
 batch_size:
